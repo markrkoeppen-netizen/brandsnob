@@ -2,308 +2,64 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload } from 'lucide-react';
 
 // REAL CURATED DEALS - Updated regularly
+import React, { useState, useEffect } from 'react';
+import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload } from 'lucide-react';
+
+// REAL CURATED DEALS - Updated February 2025
 const REAL_DEALS = [
-  // Yeti Deals
+  // Abercrombie & Fitch
   {
     id: 1,
-    brand: 'Yeti',
-    product: 'Tundra 45 Cooler',
-    originalPrice: 325,
-    salePrice: 259,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&h=400&fit=crop',
-    retailer: 'Amazon',
-    link: 'https://www.amazon.com/s?k=yeti+tundra+45',
+    brand: 'Abercrombie & Fitch',
+    product: 'YPB Seamless Fabric Leggings',
+    originalPrice: 70,
+    salePrice: 49,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    retailer: 'Abercrombie',
+    link: 'https://www.abercrombie.com/shop/us/womens-clearance',
     lastUpdated: '2025-02-05'
   },
   {
     id: 2,
-    brand: 'Yeti',
-    product: 'Rambler 30oz Tumbler',
-    originalPrice: 38,
-    salePrice: 30,
-    discount: '21%',
-    image: 'https://images.unsplash.com/photo-1602143407946-726bfae97b0e?w=400&h=400&fit=crop',
-    retailer: 'REI',
-    link: 'https://www.rei.com/search?q=yeti+rambler',
+    brand: 'Abercrombie & Fitch',
+    product: 'Heavyweight Icon Crew Sweatshirt',
+    originalPrice: 70,
+    salePrice: 42,
+    discount: '40%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Abercrombie',
+    link: 'https://www.abercrombie.com/shop/us/mens-clearance',
     lastUpdated: '2025-02-05'
   },
+  // Adidas
   {
     id: 3,
-    brand: 'Yeti',
-    product: 'Hopper Flip 12 Soft Cooler',
-    originalPrice: 250,
-    salePrice: 199,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1526947425960-945c6e72858f?w=400&h=400&fit=crop',
-    retailer: 'Dick\'s Sporting Goods',
-    link: 'https://www.dickssportinggoods.com/s/yeti+hopper',
+    brand: 'Adidas',
+    product: 'Ultraboost 22 Running Shoes',
+    originalPrice: 190,
+    salePrice: 114,
+    discount: '40%',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
+    retailer: 'Adidas',
+    link: 'https://www.adidas.com/us/outlet',
     lastUpdated: '2025-02-05'
   },
-  // Patagonia Deals
   {
     id: 4,
-    brand: 'Patagonia',
-    product: 'Better Sweater Fleece Jacket',
-    originalPrice: 139,
-    salePrice: 97,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop',
-    retailer: 'Patagonia.com',
-    link: 'https://www.patagonia.com/shop/web-specials',
+    brand: 'Adidas',
+    product: 'Tiro 23 Training Pants',
+    originalPrice: 55,
+    salePrice: 33,
+    discount: '40%',
+    image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=400&h=400&fit=crop',
+    retailer: 'Dick\'s Sporting Goods',
+    link: 'https://www.dickssportinggoods.com/s/adidas',
     lastUpdated: '2025-02-05'
   },
+  // Allbirds
   {
     id: 5,
-    brand: 'Patagonia',
-    product: 'Nano Puff Jacket',
-    originalPrice: 249,
-    salePrice: 174,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1578932750294-f5075e85f44a?w=400&h=400&fit=crop',
-    retailer: 'Backcountry',
-    link: 'https://www.backcountry.com/patagonia-nano-puff-jacket',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 6,
-    brand: 'Patagonia',
-    product: 'Down Sweater Hoody',
-    originalPrice: 279,
-    salePrice: 195,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1614251055880-28a31e2addb6?w=400&h=400&fit=crop',
-    retailer: 'REI',
-    link: 'https://www.rei.com/b/patagonia/c/mens-clothing',
-    lastUpdated: '2025-02-05'
-  },
-  // North Face Deals
-  {
-    id: 7,
-    brand: 'North Face',
-    product: 'Thermoball Eco Jacket',
-    originalPrice: 199,
-    salePrice: 139,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1544923408-75c5cef46f14?w=400&h=400&fit=crop',
-    retailer: 'The North Face',
-    link: 'https://www.thenorthface.com/en-us/sale',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 8,
-    brand: 'North Face',
-    product: 'Borealis Backpack',
-    originalPrice: 99,
-    salePrice: 69,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
-    retailer: 'Dick\'s Sporting Goods',
-    link: 'https://www.dickssportinggoods.com/s/north+face+backpack',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 9,
-    brand: 'North Face',
-    product: 'Recon Backpack',
-    originalPrice: 119,
-    salePrice: 95,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=400&h=400&fit=crop',
-    retailer: 'Amazon',
-    link: 'https://www.amazon.com/s?k=north+face+recon+backpack',
-    lastUpdated: '2025-02-05'
-  },
-  // Nike Deals
-  {
-    id: 10,
-    brand: 'Nike',
-    product: 'Air Max 270',
-    originalPrice: 150,
-    salePrice: 99,
-    discount: '34%',
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
-    retailer: 'Nike.com',
-    link: 'https://www.nike.com/w/sale-3yaep',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 11,
-    brand: 'Nike',
-    product: 'React Infinity Run',
-    originalPrice: 160,
-    salePrice: 112,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400&h=400&fit=crop',
-    retailer: 'Finish Line',
-    link: 'https://www.finishline.com/store/men/nike',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 12,
-    brand: 'Nike',
-    product: 'Dri-FIT Training Shirt',
-    originalPrice: 35,
-    salePrice: 24,
-    discount: '31%',
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
-    retailer: 'Dick\'s Sporting Goods',
-    link: 'https://www.dickssportinggoods.com/s/nike+dri+fit',
-    lastUpdated: '2025-02-05'
-  },
-  // Arc'teryx Deals
-  {
-    id: 13,
-    brand: 'Arc\'teryx',
-    product: 'Atom LT Hoody',
-    originalPrice: 299,
-    salePrice: 224,
-    discount: '25%',
-    image: 'https://images.unsplash.com/photo-1606932832374-acd3b48ede08?w=400&h=400&fit=crop',
-    retailer: 'Backcountry',
-    link: 'https://www.backcountry.com/arcteryx-atom-lt-hoody',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 14,
-    brand: 'Arc\'teryx',
-    product: 'Beta AR Jacket',
-    originalPrice: 575,
-    salePrice: 431,
-    discount: '25%',
-    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
-    retailer: 'REI',
-    link: 'https://www.rei.com/b/arcteryx',
-    lastUpdated: '2025-02-05'
-  },
-  // Lululemon Deals
-  {
-    id: 15,
-    brand: 'Lululemon',
-    product: 'Align High-Rise Pant 25"',
-    originalPrice: 98,
-    salePrice: 69,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
-    retailer: 'Lululemon',
-    link: 'https://shop.lululemon.com/c/women-we-made-too-much/_/N-8s6',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 16,
-    brand: 'Lululemon',
-    product: 'Metal Vent Tech Short Sleeve',
-    originalPrice: 68,
-    salePrice: 49,
-    discount: '28%',
-    image: 'https://images.unsplash.com/photo-1571731956672-f2b94d7dd0cb?w=400&h=400&fit=crop',
-    retailer: 'Lululemon',
-    link: 'https://shop.lululemon.com/c/men-we-made-too-much/_/N-8a7',
-    lastUpdated: '2025-02-05'
-  },
-  // Tumi Deals
-  {
-    id: 17,
-    brand: 'Tumi',
-    product: 'Alpha Bravo Backpack',
-    originalPrice: 395,
-    salePrice: 276,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
-    retailer: 'Nordstrom',
-    link: 'https://www.nordstrom.com/brands/tumi--2668',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 18,
-    brand: 'Tumi',
-    product: 'Continental Carry-On',
-    originalPrice: 625,
-    salePrice: 468,
-    discount: '25%',
-    image: 'https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400&h=400&fit=crop',
-    retailer: 'Bloomingdales',
-    link: 'https://www.bloomingdales.com/shop/tumi',
-    lastUpdated: '2025-02-05'
-  },
-  // Samsonite Deals
-  {
-    id: 19,
-    brand: 'Samsonite',
-    product: 'Omni PC Hardside Spinner',
-    originalPrice: 180,
-    salePrice: 108,
-    discount: '40%',
-    image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400&h=400&fit=crop',
-    retailer: 'Amazon',
-    link: 'https://www.amazon.com/s?k=samsonite+omni',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 20,
-    brand: 'Samsonite',
-    product: 'Centric Hardside Expandable',
-    originalPrice: 150,
-    salePrice: 97,
-    discount: '35%',
-    image: 'https://images.unsplash.com/photo-1546135954-c7e30d1e2769?w=400&h=400&fit=crop',
-    retailer: 'Target',
-    link: 'https://www.target.com/s?searchTerm=samsonite',
-    lastUpdated: '2025-02-05'
-  },
-  // On Running Deals
-  {
-    id: 21,
-    brand: 'On Running',
-    product: 'Cloudstratus',
-    originalPrice: 169,
-    salePrice: 127,
-    discount: '25%',
-    image: 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=400&h=400&fit=crop',
-    retailer: 'On Running',
-    link: 'https://www.on-running.com/en-us/products/cloudstratus',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 22,
-    brand: 'On Running',
-    product: 'Cloud X',
-    originalPrice: 140,
-    salePrice: 98,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop',
-    retailer: 'Zappos',
-    link: 'https://www.zappos.com/on-running',
-    lastUpdated: '2025-02-05'
-  },
-  // Hoka Deals
-  {
-    id: 23,
-    brand: 'Hoka',
-    product: 'Clifton 9',
-    originalPrice: 145,
-    salePrice: 108,
-    discount: '26%',
-    image: 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop',
-    retailer: 'Hoka.com',
-    link: 'https://www.hoka.com/en/us/sale/',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 24,
-    brand: 'Hoka',
-    product: 'Bondi 8',
-    originalPrice: 165,
-    salePrice: 132,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?w=400&h=400&fit=crop',
-    retailer: 'Road Runner Sports',
-    link: 'https://www.roadrunnersports.com/hoka',
-    lastUpdated: '2025-02-05'
-  },
-  // Allbirds Deals
-  {
-    id: 25,
     brand: 'Allbirds',
     product: 'Tree Runners',
     originalPrice: 98,
@@ -315,7 +71,7 @@ const REAL_DEALS = [
     lastUpdated: '2025-02-05'
   },
   {
-    id: 26,
+    id: 6,
     brand: 'Allbirds',
     product: 'Wool Loungers',
     originalPrice: 95,
@@ -326,84 +82,109 @@ const REAL_DEALS = [
     link: 'https://www.allbirds.com/collections/sale',
     lastUpdated: '2025-02-05'
   },
-  // RTIC Deals
+  // Alo
   {
-    id: 27,
-    brand: 'RTIC',
-    product: '45 QT Ultra-Light Cooler',
-    originalPrice: 200,
-    salePrice: 160,
+    id: 7,
+    brand: 'Alo',
+    product: 'High-Waist Airlift Legging',
+    originalPrice: 118,
+    salePrice: 82,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    retailer: 'Alo Yoga',
+    link: 'https://www.aloyoga.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 8,
+    brand: 'Alo',
+    product: 'Airlift Intrigue Bra',
+    originalPrice: 68,
+    salePrice: 47,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1571731956672-f2b94d7dd0cb?w=400&h=400&fit=crop',
+    retailer: 'Alo Yoga',
+    link: 'https://www.aloyoga.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  // Apple
+  {
+    id: 9,
+    brand: 'Apple',
+    product: 'AirPods Pro (2nd Gen)',
+    originalPrice: 249,
+    salePrice: 199,
     discount: '20%',
-    image: 'https://images.unsplash.com/photo-1530359728-fa4eb28247f8?w=400&h=400&fit=crop',
-    retailer: 'RTIC',
-    link: 'https://www.rticoutdoors.com/45-QT-Ultra-Light',
+    image: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400&h=400&fit=crop',
+    retailer: 'Amazon',
+    link: 'https://www.amazon.com/s?k=airpods+pro',
     lastUpdated: '2025-02-05'
   },
   {
-    id: 28,
-    brand: 'RTIC',
-    product: '30 oz Tumbler',
-    originalPrice: 30,
-    salePrice: 22,
-    discount: '27%',
-    image: 'https://images.unsplash.com/photo-1585828793331-c04ac01c2e2a?w=400&h=400&fit=crop',
-    retailer: 'RTIC',
-    link: 'https://www.rticoutdoors.com/30-oz-Tumbler',
+    id: 10,
+    brand: 'Apple',
+    product: 'Apple Watch SE (2nd Gen)',
+    originalPrice: 249,
+    salePrice: 199,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=400&h=400&fit=crop',
+    retailer: 'Best Buy',
+    link: 'https://www.bestbuy.com/site/apple-watch/apple-watch-se/pcmcat1599084106515.c',
     lastUpdated: '2025-02-05'
   },
-  // Oakley Deals
+  // Birkenstock
   {
-    id: 29,
-    brand: 'Oakley',
-    product: 'Flak 2.0 XL Sunglasses',
-    originalPrice: 193,
-    salePrice: 135,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=400&fit=crop',
-    retailer: 'Sunglass Hut',
-    link: 'https://www.sunglasshut.com/us/oakley',
-    lastUpdated: '2025-02-05'
-  },
-  {
-    id: 30,
-    brand: 'Oakley',
-    product: 'Holbrook Sunglasses',
-    originalPrice: 173,
-    salePrice: 121,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=400&h=400&fit=crop',
-    retailer: 'Oakley',
-    link: 'https://www.oakley.com/en-us/category/sale',
-    lastUpdated: '2025-02-05'
-  },
-  // Ray-Ban Deals
-  {
-    id: 31,
-    brand: 'Ray-Ban',
-    product: 'Aviator Classic',
-    originalPrice: 163,
-    salePrice: 114,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop',
-    retailer: 'Ray-Ban',
-    link: 'https://www.ray-ban.com/usa/sale',
+    id: 11,
+    brand: 'Birkenstock',
+    product: 'Arizona Soft Footbed Sandal',
+    originalPrice: 135,
+    salePrice: 108,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=400&h=400&fit=crop',
+    retailer: 'Zappos',
+    link: 'https://www.zappos.com/birkenstock',
     lastUpdated: '2025-02-05'
   },
   {
-    id: 32,
-    brand: 'Ray-Ban',
-    product: 'Wayfarer',
-    originalPrice: 153,
-    salePrice: 107,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=400&h=400&fit=crop',
-    retailer: 'Sunglass Hut',
-    link: 'https://www.sunglasshut.com/us/ray-ban',
+    id: 12,
+    brand: 'Birkenstock',
+    product: 'Boston Soft Footbed Clog',
+    originalPrice: 155,
+    salePrice: 124,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/birkenstock--388',
     lastUpdated: '2025-02-05'
   },
-  // Brooks Brothers Deals
+  // Bombas
   {
-    id: 33,
+    id: 13,
+    brand: 'Bombas',
+    product: 'Ankle Socks 4-Pack',
+    originalPrice: 52,
+    salePrice: 39,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=400&h=400&fit=crop',
+    retailer: 'Bombas',
+    link: 'https://bombas.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 14,
+    brand: 'Bombas',
+    product: 'Performance Running Socks',
+    originalPrice: 18,
+    salePrice: 13,
+    discount: '28%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Bombas',
+    link: 'https://bombas.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  // Brooks Brothers
+  {
+    id: 15,
     brand: 'Brooks Brothers',
     product: 'Non-Iron Dress Shirt',
     originalPrice: 98,
@@ -415,7 +196,7 @@ const REAL_DEALS = [
     lastUpdated: '2025-02-05'
   },
   {
-    id: 34,
+    id: 16,
     brand: 'Brooks Brothers',
     product: 'Regent Fit Suit',
     originalPrice: 898,
@@ -426,9 +207,109 @@ const REAL_DEALS = [
     link: 'https://www.brooksbrothers.com/sale',
     lastUpdated: '2025-02-05'
   },
-  // Cole Haan Deals
+  // Burberry
   {
-    id: 35,
+    id: 17,
+    brand: 'Burberry',
+    product: 'Cotton Gabardine Trench Coat',
+    originalPrice: 1890,
+    salePrice: 1323,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop',
+    retailer: 'Saks Fifth Avenue',
+    link: 'https://www.saksfifthavenue.com/c/designers/burberry',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 18,
+    brand: 'Burberry',
+    product: 'Check Cashmere Scarf',
+    originalPrice: 490,
+    salePrice: 343,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1520903920243-00d872a2d1c9?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/burberry--283',
+    lastUpdated: '2025-02-05'
+  },
+  // Burlebo
+  {
+    id: 19,
+    brand: 'Burlebo',
+    product: 'Performance Fishing Shirt',
+    originalPrice: 65,
+    salePrice: 45,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+    retailer: 'Burlebo',
+    link: 'https://www.burlebo.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 20,
+    brand: 'Burlebo',
+    product: 'Outfitter Shorts',
+    originalPrice: 60,
+    salePrice: 42,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop',
+    retailer: 'Burlebo',
+    link: 'https://www.burlebo.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  // Chubbies
+  {
+    id: 21,
+    brand: 'Chubbies',
+    product: 'The Staples 5.5" Shorts',
+    originalPrice: 59,
+    salePrice: 41,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop',
+    retailer: 'Chubbies',
+    link: 'https://www.chubbiesshorts.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 22,
+    brand: 'Chubbies',
+    product: 'The Swim Trunks',
+    originalPrice: 69,
+    salePrice: 48,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Chubbies',
+    link: 'https://www.chubbiesshorts.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  // Columbia
+  {
+    id: 23,
+    brand: 'Columbia',
+    product: 'Newton Ridge Plus Hiking Boot',
+    originalPrice: 90,
+    salePrice: 63,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&h=400&fit=crop',
+    retailer: 'Columbia',
+    link: 'https://www.columbia.com/c/sale/',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 24,
+    brand: 'Columbia',
+    product: 'Challenger Windbreaker',
+    originalPrice: 50,
+    salePrice: 35,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400&h=400&fit=crop',
+    retailer: 'Dick\'s Sporting Goods',
+    link: 'https://www.dickssportinggoods.com/s/columbia',
+    lastUpdated: '2025-02-05'
+  },
+  // Cole Haan
+  {
+    id: 25,
     brand: 'Cole Haan',
     product: 'Grand Crosscourt Sneaker',
     originalPrice: 120,
@@ -440,7 +321,7 @@ const REAL_DEALS = [
     lastUpdated: '2025-02-05'
   },
   {
-    id: 36,
+    id: 26,
     brand: 'Cole Haan',
     product: 'Original Grand Wingtip Oxford',
     originalPrice: 150,
@@ -451,109 +332,709 @@ const REAL_DEALS = [
     link: 'https://www.nordstrom.com/brands/cole-haan--262',
     lastUpdated: '2025-02-05'
   },
-  // Uniqlo Deals
+  // Costa
+  {
+    id: 27,
+    brand: 'Costa',
+    product: 'Fantail Polarized Sunglasses',
+    originalPrice: 219,
+    salePrice: 153,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=400&fit=crop',
+    retailer: 'Costa',
+    link: 'https://www.costadelmar.com/en-us/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 28,
+    brand: 'Costa',
+    product: 'Blackfin Sunglasses',
+    originalPrice: 239,
+    salePrice: 167,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=400&h=400&fit=crop',
+    retailer: 'Bass Pro Shops',
+    link: 'https://www.basspro.com/shop/en/costa',
+    lastUpdated: '2025-02-05'
+  },
+  // Crocs
+  {
+    id: 29,
+    brand: 'Crocs',
+    product: 'Classic Clog',
+    originalPrice: 50,
+    salePrice: 35,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?w=400&h=400&fit=crop',
+    retailer: 'Crocs',
+    link: 'https://www.crocs.com/sale.html',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 30,
+    brand: 'Crocs',
+    product: 'LiteRide Pacer',
+    originalPrice: 60,
+    salePrice: 42,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=400&h=400&fit=crop',
+    retailer: 'Amazon',
+    link: 'https://www.amazon.com/s?k=crocs',
+    lastUpdated: '2025-02-05'
+  },
+  // Dolce & Gabbana
+  {
+    id: 31,
+    brand: 'Dolce & Gabbana',
+    product: 'Logo Print T-Shirt',
+    originalPrice: 495,
+    salePrice: 346,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+    retailer: 'Saks Fifth Avenue',
+    link: 'https://www.saksfifthavenue.com/c/designers/dolce-gabbana',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 32,
+    brand: 'Dolce & Gabbana',
+    product: 'Leather Belt',
+    originalPrice: 395,
+    salePrice: 276,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1624823183493-ed5832f48f18?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/dolce-gabbana--463',
+    lastUpdated: '2025-02-05'
+  },
+  // Gap
+  {
+    id: 33,
+    brand: 'Gap',
+    product: 'Vintage Soft Hoodie',
+    originalPrice: 60,
+    salePrice: 36,
+    discount: '40%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Gap',
+    link: 'https://www.gap.com/browse/category.do?cid=1159613',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 34,
+    brand: 'Gap',
+    product: 'High Rise Cheeky Jeans',
+    originalPrice: 80,
+    salePrice: 48,
+    discount: '40%',
+    image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop',
+    retailer: 'Gap',
+    link: 'https://www.gap.com/browse/category.do?cid=1159613',
+    lastUpdated: '2025-02-05'
+  },
+  // Kendra Scott
+  {
+    id: 35,
+    brand: 'Kendra Scott',
+    product: 'Elisa Pendant Necklace',
+    originalPrice: 68,
+    salePrice: 47,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&h=400&fit=crop',
+    retailer: 'Kendra Scott',
+    link: 'https://www.kendrascott.com/sale/',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 36,
+    brand: 'Kendra Scott',
+    product: 'Dani Earrings',
+    originalPrice: 58,
+    salePrice: 40,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/kendra-scott--7388',
+    lastUpdated: '2025-02-05'
+  },
+  // Lush
   {
     id: 37,
-    brand: 'Uniqlo',
-    product: 'Ultra Light Down Jacket',
-    originalPrice: 70,
-    salePrice: 49,
-    discount: '30%',
-    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop',
-    retailer: 'Uniqlo',
-    link: 'https://www.uniqlo.com/us/en/sale',
+    brand: 'Lush',
+    product: 'Sleepy Body Lotion',
+    originalPrice: 28,
+    salePrice: 22,
+    discount: '21%',
+    image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop',
+    retailer: 'Lush',
+    link: 'https://www.lush.com/us/en_us',
     lastUpdated: '2025-02-05'
   },
   {
     id: 38,
-    brand: 'Uniqlo',
-    product: 'Heattech Turtleneck',
-    originalPrice: 30,
-    salePrice: 19,
-    discount: '37%',
-    image: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&h=400&fit=crop',
-    retailer: 'Uniqlo',
-    link: 'https://www.uniqlo.com/us/en/sale',
+    brand: 'Lush',
+    product: 'Big Shampoo Bar',
+    originalPrice: 16,
+    salePrice: 13,
+    discount: '19%',
+    image: 'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=400&h=400&fit=crop',
+    retailer: 'Lush',
+    link: 'https://www.lush.com/us/en_us',
     lastUpdated: '2025-02-05'
   },
-  // Away Deals
+  // Nike
   {
     id: 39,
-    brand: 'Away',
-    product: 'The Carry-On',
-    originalPrice: 275,
-    salePrice: 220,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1548613053-22087dd8edb8?w=400&h=400&fit=crop',
-    retailer: 'Away',
-    link: 'https://www.awaytravel.com/travel-bags',
+    brand: 'Nike',
+    product: 'Air Max 270',
+    originalPrice: 150,
+    salePrice: 99,
+    discount: '34%',
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop',
+    retailer: 'Nike',
+    link: 'https://www.nike.com/w/sale-3yaep',
     lastUpdated: '2025-02-05'
   },
   {
     id: 40,
-    brand: 'Away',
-    product: 'The Bigger Carry-On',
-    originalPrice: 295,
-    salePrice: 236,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1591299519460-e55e6e4acd6e?w=400&h=400&fit=crop',
-    retailer: 'Away',
-    link: 'https://www.awaytravel.com/travel-bags',
+    brand: 'Nike',
+    product: 'Dri-FIT Training Shirt',
+    originalPrice: 35,
+    salePrice: 24,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+    retailer: 'Dick\'s Sporting Goods',
+    link: 'https://www.dickssportinggoods.com/s/nike',
     lastUpdated: '2025-02-05'
   },
-  // Rimowa Deals
+  // Oakley
   {
     id: 41,
-    brand: 'Rimowa',
-    product: 'Original Cabin S',
-    originalPrice: 1050,
-    salePrice: 892,
-    discount: '15%',
-    image: 'https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400&h=400&fit=crop',
-    retailer: 'Nordstrom',
-    link: 'https://www.nordstrom.com/brands/rimowa--3534',
+    brand: 'Oakley',
+    product: 'Flak 2.0 XL Sunglasses',
+    originalPrice: 193,
+    salePrice: 135,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400&h=400&fit=crop',
+    retailer: 'Sunglass Hut',
+    link: 'https://www.sunglasshut.com/us/oakley',
     lastUpdated: '2025-02-05'
   },
   {
     id: 42,
-    brand: 'Rimowa',
-    product: 'Essential Check-In L',
-    originalPrice: 750,
-    salePrice: 637,
-    discount: '15%',
-    image: 'https://images.unsplash.com/photo-1591293785975-c4c23c9d2e97?w=400&h=400&fit=crop',
-    retailer: 'Bloomingdales',
-    link: 'https://www.bloomingdales.com/shop/rimowa',
+    brand: 'Oakley',
+    product: 'Holbrook Sunglasses',
+    originalPrice: 173,
+    salePrice: 121,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1508296695146-257a814070b4?w=400&h=400&fit=crop',
+    retailer: 'Oakley',
+    link: 'https://www.oakley.com/en-us/category/sale',
     lastUpdated: '2025-02-05'
   },
-  // Therabody Deals
+  // Omega
   {
     id: 43,
-    brand: 'Therabody',
-    product: 'Theragun Prime',
-    originalPrice: 299,
-    salePrice: 224,
-    discount: '25%',
-    image: 'https://images.unsplash.com/photo-1606889464198-fcb18894cf50?w=400&h=400&fit=crop',
-    retailer: 'Therabody',
-    link: 'https://www.therabody.com/us/en-us/sale.html',
+    brand: 'Omega',
+    product: 'Seamaster Aqua Terra',
+    originalPrice: 5900,
+    salePrice: 5310,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1587836374228-4c589c87e8f1?w=400&h=400&fit=crop',
+    retailer: 'Jomashop',
+    link: 'https://www.jomashop.com/omega-watches.html',
     lastUpdated: '2025-02-05'
   },
   {
     id: 44,
-    brand: 'Therabody',
-    product: 'RecoveryAir Jet Boots',
+    brand: 'Omega',
+    product: 'Speedmaster Professional',
+    originalPrice: 6800,
+    salePrice: 6120,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&fit=crop',
+    retailer: 'Chrono24',
+    link: 'https://www.chrono24.com/omega/index.htm',
+    lastUpdated: '2025-02-05'
+  },
+  // On Running
+  {
+    id: 45,
+    brand: 'On Running',
+    product: 'Cloudstratus',
+    originalPrice: 169,
+    salePrice: 127,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1539185441755-769473a23570?w=400&h=400&fit=crop',
+    retailer: 'On Running',
+    link: 'https://www.on-running.com/en-us/products/cloudstratus',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 46,
+    brand: 'On Running',
+    product: 'Cloud X',
+    originalPrice: 140,
+    salePrice: 98,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop',
+    retailer: 'Zappos',
+    link: 'https://www.zappos.com/on-running',
+    lastUpdated: '2025-02-05'
+  },
+  // Poncho
+  {
+    id: 47,
+    brand: 'Poncho',
+    product: 'Beach Poncho Towel',
+    originalPrice: 75,
+    salePrice: 56,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1519823551278-64ac92734fb1?w=400&h=400&fit=crop',
+    retailer: 'Poncho',
+    link: 'https://www.poncho.com',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 48,
+    brand: 'Poncho',
+    product: 'Surf Poncho',
+    originalPrice: 85,
+    salePrice: 63,
+    discount: '26%',
+    image: 'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400&h=400&fit=crop',
+    retailer: 'Poncho',
+    link: 'https://www.poncho.com',
+    lastUpdated: '2025-02-05'
+  },
+  // Ray-Ban
+  {
+    id: 49,
+    brand: 'Ray-Ban',
+    product: 'Aviator Classic',
+    originalPrice: 163,
+    salePrice: 114,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=400&fit=crop',
+    retailer: 'Ray-Ban',
+    link: 'https://www.ray-ban.com/usa/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 50,
+    brand: 'Ray-Ban',
+    product: 'Wayfarer',
+    originalPrice: 153,
+    salePrice: 107,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1577803645773-f96470509666?w=400&h=400&fit=crop',
+    retailer: 'Sunglass Hut',
+    link: 'https://www.sunglasshut.com/us/ray-ban',
+    lastUpdated: '2025-02-05'
+  },
+  // Restoration Hardware
+  {
+    id: 51,
+    brand: 'Restoration Hardware',
+    product: 'Cloud Modular Sofa',
+    originalPrice: 4995,
+    salePrice: 3746,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop',
+    retailer: 'RH',
+    link: 'https://rh.com/catalog/category/products.jsp?categoryId=cat3520009',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 52,
+    brand: 'Restoration Hardware',
+    product: 'Maxwell Leather Sofa',
+    originalPrice: 3795,
+    salePrice: 2846,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&h=400&fit=crop',
+    retailer: 'RH',
+    link: 'https://rh.com/catalog/category/products.jsp?categoryId=cat3520009',
+    lastUpdated: '2025-02-05'
+  },
+  // Rhone
+  {
+    id: 53,
+    brand: 'Rhone',
+    product: 'Commuter Pant',
+    originalPrice: 128,
+    salePrice: 89,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=400&fit=crop',
+    retailer: 'Rhone',
+    link: 'https://www.rhone.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 54,
+    brand: 'Rhone',
+    product: 'Delta Pique Polo',
+    originalPrice: 88,
+    salePrice: 61,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+    retailer: 'Rhone',
+    link: 'https://www.rhone.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  // Rolex
+  {
+    id: 55,
+    brand: 'Rolex',
+    product: 'Submariner Date',
+    originalPrice: 10250,
+    salePrice: 9225,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1587836374228-4c589c87e8f1?w=400&h=400&fit=crop',
+    retailer: 'Chrono24',
+    link: 'https://www.chrono24.com/rolex/submariner--mod45.htm',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 56,
+    brand: 'Rolex',
+    product: 'Datejust 41',
+    originalPrice: 9150,
+    salePrice: 8235,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&fit=crop',
+    retailer: 'Jomashop',
+    link: 'https://www.jomashop.com/rolex-watches.html',
+    lastUpdated: '2025-02-05'
+  },
+  // Samsung
+  {
+    id: 57,
+    brand: 'Samsung',
+    product: 'Galaxy S24 Ultra',
+    originalPrice: 1299,
+    salePrice: 1039,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400&h=400&fit=crop',
+    retailer: 'Samsung',
+    link: 'https://www.samsung.com/us/smartphones/galaxy-s24/',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 58,
+    brand: 'Samsung',
+    product: '65" Frame TV',
+    originalPrice: 1999,
+    salePrice: 1599,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=400&h=400&fit=crop',
+    retailer: 'Best Buy',
+    link: 'https://www.bestbuy.com/site/samsung-tvs/samsung-the-frame/pcmcat1516820995721.c',
+    lastUpdated: '2025-02-05'
+  },
+  // Sony
+  {
+    id: 59,
+    brand: 'Sony',
+    product: 'WH-1000XM5 Headphones',
     originalPrice: 399,
     salePrice: 319,
     discount: '20%',
-    image: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?w=400&h=400&fit=crop',
+    image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400&h=400&fit=crop',
     retailer: 'Best Buy',
-    link: 'https://www.bestbuy.com/site/searchpage.jsp?st=therabody',
+    link: 'https://www.bestbuy.com/site/sony-wh-1000xm5-wireless-noise-canceling-over-the-ear-headphones-black/6505727.p',
     lastUpdated: '2025-02-05'
   },
-  // Montblanc Deals
   {
-    id: 45,
+    id: 60,
+    brand: 'Sony',
+    product: 'PlayStation 5',
+    originalPrice: 499,
+    salePrice: 449,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=400&h=400&fit=crop',
+    retailer: 'Amazon',
+    link: 'https://www.amazon.com/s?k=playstation+5',
+    lastUpdated: '2025-02-05'
+  },
+  // Sun Bum
+  {
+    id: 61,
+    brand: 'Sun Bum',
+    product: 'Original SPF 50 Sunscreen',
+    originalPrice: 18,
+    salePrice: 14,
+    discount: '22%',
+    image: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=400&h=400&fit=crop',
+    retailer: 'Target',
+    link: 'https://www.target.com/s?searchTerm=sun+bum',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 62,
+    brand: 'Sun Bum',
+    product: 'Face Stick SPF 45',
+    originalPrice: 12,
+    salePrice: 9,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=400&fit=crop',
+    retailer: 'Amazon',
+    link: 'https://www.amazon.com/s?k=sun+bum',
+    lastUpdated: '2025-02-05'
+  },
+  // Tag Heuer
+  {
+    id: 63,
+    brand: 'Tag Heuer',
+    product: 'Carrera Calibre 5',
+    originalPrice: 3250,
+    salePrice: 2925,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1587836374228-4c589c87e8f1?w=400&h=400&fit=crop',
+    retailer: 'Jomashop',
+    link: 'https://www.jomashop.com/tag-heuer-watches.html',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 64,
+    brand: 'Tag Heuer',
+    product: 'Aquaracer Professional 300',
+    originalPrice: 3100,
+    salePrice: 2790,
+    discount: '10%',
+    image: 'https://images.unsplash.com/photo-1523170335258-f5ed11844a49?w=400&h=400&fit=crop',
+    retailer: 'Chrono24',
+    link: 'https://www.chrono24.com/tagheuer/index.htm',
+    lastUpdated: '2025-02-05'
+  },
+  // The North Face
+  {
+    id: 65,
+    brand: 'The North Face',
+    product: 'Thermoball Eco Jacket',
+    originalPrice: 199,
+    salePrice: 139,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1544923408-75c5cef46f14?w=400&h=400&fit=crop',
+    retailer: 'The North Face',
+    link: 'https://www.thenorthface.com/en-us/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 66,
+    brand: 'The North Face',
+    product: 'Borealis Backpack',
+    originalPrice: 99,
+    salePrice: 69,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
+    retailer: 'Dick\'s Sporting Goods',
+    link: 'https://www.dickssportinggoods.com/s/north+face',
+    lastUpdated: '2025-02-05'
+  },
+  // TravisMatthew
+  {
+    id: 67,
+    brand: 'TravisMatthew',
+    product: 'The Zinna Performance Polo',
+    originalPrice: 89,
+    salePrice: 62,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+    retailer: 'TravisMatthew',
+    link: 'https://www.travismathew.com/sale/',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 68,
+    brand: 'TravisMatthew',
+    product: 'Beck Shorts',
+    originalPrice: 79,
+    salePrice: 55,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop',
+    retailer: 'TravisMatthew',
+    link: 'https://www.travismathew.com/sale/',
+    lastUpdated: '2025-02-05'
+  },
+  // Tommy Bahama
+  {
+    id: 69,
+    brand: 'Tommy Bahama',
+    product: 'Catalina Twill Shirt',
+    originalPrice: 128,
+    salePrice: 89,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
+    retailer: 'Tommy Bahama',
+    link: 'https://www.tommybahama.com/en/Sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 70,
+    brand: 'Tommy Bahama',
+    product: 'Baja Poolside Swim Trunk',
+    originalPrice: 98,
+    salePrice: 68,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/tommy-bahama--3862',
+    lastUpdated: '2025-02-05'
+  },
+  // Tumi
+  {
+    id: 71,
+    brand: 'Tumi',
+    product: 'Alpha Bravo Backpack',
+    originalPrice: 395,
+    salePrice: 276,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/tumi--2668',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 72,
+    brand: 'Tumi',
+    product: 'Continental Carry-On',
+    originalPrice: 625,
+    salePrice: 468,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400&h=400&fit=crop',
+    retailer: 'Bloomingdales',
+    link: 'https://www.bloomingdales.com/shop/tumi',
+    lastUpdated: '2025-02-05'
+  },
+  // Ugg
+  {
+    id: 73,
+    brand: 'Ugg',
+    product: 'Classic Ultra Mini Boot',
+    originalPrice: 170,
+    salePrice: 119,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/ugg--2717',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 74,
+    brand: 'Ugg',
+    product: 'Tasman Slipper',
+    originalPrice: 110,
+    salePrice: 77,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?w=400&h=400&fit=crop',
+    retailer: 'Zappos',
+    link: 'https://www.zappos.com/ugg',
+    lastUpdated: '2025-02-05'
+  },
+  // Vera Wang
+  {
+    id: 75,
+    brand: 'Vera Wang',
+    product: 'Princess Eau de Toilette',
+    originalPrice: 88,
+    salePrice: 61,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop',
+    retailer: 'Macy\'s',
+    link: 'https://www.macys.com/shop/makeup-and-perfume/vera-wang-fragrance',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 76,
+    brand: 'Vera Wang',
+    product: 'Wedding Dress Collection',
+    originalPrice: 3500,
+    salePrice: 2450,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1519657337289-077653f724ed?w=400&h=400&fit=crop',
+    retailer: 'David\'s Bridal',
+    link: 'https://www.davidsbridal.com/vera-wang-wedding-dresses',
+    lastUpdated: '2025-02-05'
+  },
+  // Vineyard Vines
+  {
+    id: 77,
+    brand: 'Vineyard Vines',
+    product: 'Shep Shirt Quarter-Zip',
+    originalPrice: 125,
+    salePrice: 87,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Vineyard Vines',
+    link: 'https://www.vineyardvines.com/sale/',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 78,
+    brand: 'Vineyard Vines',
+    product: 'Breaker Pants',
+    originalPrice: 98,
+    salePrice: 68,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=400&fit=crop',
+    retailer: 'Vineyard Vines',
+    link: 'https://www.vineyardvines.com/sale/',
+    lastUpdated: '2025-02-05'
+  },
+  // Vuori
+  {
+    id: 79,
+    brand: 'Vuori',
+    product: 'Strato Tech Tee',
+    originalPrice: 64,
+    salePrice: 44,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+    retailer: 'Vuori',
+    link: 'https://vuoriclothing.com/collections/sale',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 80,
+    brand: 'Vuori',
+    product: 'Performance Jogger',
+    originalPrice: 94,
+    salePrice: 65,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/vuori--18103',
+    lastUpdated: '2025-02-05'
+  },
+  // Yeti
+  {
+    id: 81,
+    brand: 'Yeti',
+    product: 'Tundra 45 Cooler',
+    originalPrice: 325,
+    salePrice: 259,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?w=400&h=400&fit=crop',
+    retailer: 'Amazon',
+    link: 'https://www.amazon.com/s?k=yeti+tundra+45',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 82,
+    brand: 'Yeti',
+    product: 'Rambler 30oz Tumbler',
+    originalPrice: 38,
+    salePrice: 30,
+    discount: '21%',
+    image: 'https://images.unsplash.com/photo-1602143407946-726bfae97b0e?w=400&h=400&fit=crop',
+    retailer: 'REI',
+    link: 'https://www.rei.com/search?q=yeti+rambler',
+    lastUpdated: '2025-02-05'
+  },
+  // Montblanc
+  {
+    id: 83,
     brand: 'Montblanc',
     product: 'Meisterstück Classique Pen',
     originalPrice: 540,
@@ -565,7 +1046,7 @@ const REAL_DEALS = [
     lastUpdated: '2025-02-05'
   },
   {
-    id: 46,
+    id: 84,
     brand: 'Montblanc',
     product: 'Sartorial Leather Wallet',
     originalPrice: 390,
@@ -576,144 +1057,88 @@ const REAL_DEALS = [
     link: 'https://www.nordstrom.com/brands/montblanc--3053',
     lastUpdated: '2025-02-05'
   },
-  // Bellroy Deals
+  // Madewell
   {
-    id: 47,
-    brand: 'Bellroy',
-    product: 'Slim Sleeve Wallet',
-    originalPrice: 89,
-    salePrice: 71,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1624823183493-ed5832f48f18?w=400&h=400&fit=crop',
-    retailer: 'Bellroy',
-    link: 'https://bellroy.com/collections/wallets',
+    id: 85,
+    brand: 'Madewell',
+    product: 'Perfect Vintage Jean',
+    originalPrice: 138,
+    salePrice: 96,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?w=400&h=400&fit=crop',
+    retailer: 'Madewell',
+    link: 'https://www.madewell.com/sale/',
     lastUpdated: '2025-02-05'
   },
   {
-    id: 48,
-    brand: 'Bellroy',
-    product: 'Tokyo Totepack',
-    originalPrice: 179,
-    salePrice: 143,
-    discount: '20%',
-    image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop',
-    retailer: 'Bellroy',
-    link: 'https://bellroy.com/collections/bags',
-    lastUpdated: '2025-02-05'
-  },
-  // Ted Baker Deals
-  {
-    id: 49,
-    brand: 'Ted Baker',
-    product: 'Slim Fit Suit Jacket',
-    originalPrice: 595,
-    salePrice: 357,
-    discount: '40%',
-    image: 'https://images.unsplash.com/photo-1593030761757-71fae45fa0e7?w=400&h=400&fit=crop',
+    id: 86,
+    brand: 'Madewell',
+    product: 'Ex-Boyfriend Shirt',
+    originalPrice: 88,
+    salePrice: 61,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1620012253295-c15cc3e65df4?w=400&h=400&fit=crop',
     retailer: 'Nordstrom',
-    link: 'https://www.nordstrom.com/brands/ted-baker-london--3779',
+    link: 'https://www.nordstrom.com/brands/madewell--6417',
+    lastUpdated: '2025-02-05'
+  },
+  // J.Crew
+  {
+    id: 87,
+    brand: 'J.Crew',
+    product: '484 Slim-Fit Chino',
+    originalPrice: 89,
+    salePrice: 62,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=400&fit=crop',
+    retailer: 'J.Crew',
+    link: 'https://www.jcrew.com/r/sale',
     lastUpdated: '2025-02-05'
   },
   {
-    id: 50,
-    brand: 'Ted Baker',
-    product: 'Oxford Dress Shirt',
-    originalPrice: 135,
-    salePrice: 81,
-    discount: '40%',
-    image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
-    retailer: 'Bloomingdales',
-    link: 'https://www.bloomingdales.com/shop/ted-baker',
+    id: 88,
+    brand: 'J.Crew',
+    product: 'Cotton-Cashmere Sweater',
+    originalPrice: 128,
+    salePrice: 89,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'J.Crew',
+    link: 'https://www.jcrew.com/r/sale',
+    lastUpdated: '2025-02-05'
+  },
+  // Spanx
+  {
+    id: 89,
+    brand: 'Spanx',
+    product: 'Faux Leather Leggings',
+    originalPrice: 98,
+    salePrice: 68,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/spanx--2617',
+    lastUpdated: '2025-02-05'
+  },
+  {
+    id: 90,
+    brand: 'Spanx',
+    product: 'AirEssentials High-Waisted Legging',
+    originalPrice: 88,
+    salePrice: 61,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    retailer: 'Spanx',
+    link: 'https://spanx.com/collections/sale',
     lastUpdated: '2025-02-05'
   }
 ];
 
 const SAMPLE_BRANDS = [
-  { id: 1, name: 'Yeti', category: 'Coolers' },
-  { id: 2, name: 'Patagonia', category: 'Apparel' },
-  { id: 3, name: 'North Face', category: 'Apparel' },
+  { id: 1, name: 'Nike', category: 'Shoes' },
+  { id: 2, name: 'Yeti', category: 'Coolers' },
+  { id: 3, name: 'The North Face', category: 'Apparel' },
 ];
-
-const RECOMMENDATIONS = [
-  {
-    id: 1,
-    brand: 'Rolex',
-    reason: 'Luxury outdoor enthusiast',
-    product: 'Submariner Dive Watch',
-    price: 9550,
-    image: 'https://images.unsplash.com/photo-1587836374228-4c589c87e8f1?w=400&h=400&fit=crop',
-    category: 'Watches'
-  },
-  {
-    id: 2,
-    brand: 'Arc\'teryx',
-    reason: 'Premium outdoor gear',
-    product: 'Alpha SV Jacket',
-    price: 825,
-    image: 'https://images.unsplash.com/photo-1606932832374-acd3b48ede08?w=400&h=400&fit=crop',
-    category: 'Apparel'
-  },
-  {
-    id: 3,
-    brand: 'Rimowa',
-    reason: 'Premium travel gear',
-    product: 'Original Cabin Luggage',
-    price: 1050,
-    image: 'https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=400&h=400&fit=crop',
-    category: 'Luggage'
-  },
-];
-
-const BRAND_COLLECTIONS = [
-  {
-    id: 1,
-    name: 'Luxury Outdoor Enthusiast',
-    description: 'Premium brands for the discerning adventurer',
-    brands: [
-      { name: 'Yeti', category: 'Coolers' },
-      { name: 'Patagonia', category: 'Apparel' },
-      { name: 'Arc\'teryx', category: 'Apparel' },
-      { name: 'Hoka', category: 'Shoes' }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Minimalist Traveler',
-    description: 'Sleek, functional brands for modern nomads',
-    brands: [
-      { name: 'Rimowa', category: 'Luggage' },
-      { name: 'Away', category: 'Luggage' },
-      { name: 'Uniqlo', category: 'Apparel' },
-      { name: 'Allbirds', category: 'Shoes' },
-      { name: 'Bellroy', category: 'Accessories' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Athletic Elite',
-    description: 'Top-tier performance brands for serious athletes',
-    brands: [
-      { name: 'Lululemon', category: 'Apparel' },
-      { name: 'Nike', category: 'Shoes' },
-      { name: 'On Running', category: 'Shoes' },
-      { name: 'Therabody', category: 'Accessories' },
-      { name: 'Oakley', category: 'Accessories' }
-    ]
-  },
-  {
-    id: 4,
-    name: 'Urban Professional',
-    description: 'Sophisticated brands for the modern professional',
-    brands: [
-      { name: 'Tumi', category: 'Luggage' },
-      { name: 'Brooks Brothers', category: 'Apparel' },
-      { name: 'Cole Haan', category: 'Shoes' },
-      { name: 'Montblanc', category: 'Accessories' },
-      { name: 'Ted Baker', category: 'Apparel' }
-    ]
-  }
-];
-
 const CATEGORIES = ['Apparel', 'Shoes', 'Luggage', 'Coolers', 'Accessories', 'Outdoor Gear', 'Watches'];
 
 export default function BrandDealsApp() {
