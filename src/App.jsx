@@ -238,7 +238,7 @@ const REAL_DEALS = [
     discount: '31%',
     image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
     retailer: 'Burlebo',
-    link: 'https://www.burlebo.com/collections/sale',
+    link: 'https://www.burlebo.com/collections/warehouse-sale',
     lastUpdated: '2025-02-05'
   },
   {
@@ -250,7 +250,7 @@ const REAL_DEALS = [
     discount: '30%',
     image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop',
     retailer: 'Burlebo',
-    link: 'https://www.burlebo.com/collections/sale',
+    link: 'https://www.burlebo.com/collections/warehouse-sale',
     lastUpdated: '2025-02-05'
   },
   // Chubbies
