@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload } from 'lucide-react';
 
-// REAL CURATED DEALS - Updated regularly
-import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload } from 'lucide-react';
-
 // REAL CURATED DEALS - Updated February 2025
 const REAL_DEALS = [
   // Abercrombie & Fitch
