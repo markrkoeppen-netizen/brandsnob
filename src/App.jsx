@@ -1407,7 +1407,7 @@ export default function BrandDealsApp() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-800">BrandSnob</h1>
+                <h1 className="text-3xl font-bold text-gray-800">Brandsnobs</h1>
                 <p className="text-xs text-gray-500">v1.5 • {REAL_DEALS.length} curated deals</p>
               </div>
             </div>
