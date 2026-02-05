@@ -1135,6 +1135,108 @@ const SAMPLE_BRANDS = [
   { id: 2, name: 'Yeti', category: 'Coolers' },
   { id: 3, name: 'The North Face', category: 'Apparel' },
 ];
+
+const RECOMMENDATIONS = [
+  {
+    id: 1,
+    brand: 'Rolex',
+    reason: 'Luxury timepiece enthusiast',
+    product: 'Submariner Dive Watch',
+    price: 9550,
+    image: 'https://images.unsplash.com/photo-1587836374228-4c589c87e8f1?w=400&h=400&fit=crop',
+    category: 'Watches'
+  },
+  {
+    id: 2,
+    brand: 'Burberry',
+    reason: 'Luxury fashion lover',
+    product: 'Classic Trench Coat',
+    price: 1890,
+    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop',
+    category: 'Apparel'
+  },
+  {
+    id: 3,
+    brand: 'Apple',
+    reason: 'Tech enthusiast',
+    product: 'AirPods Max',
+    price: 549,
+    image: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400&h=400&fit=crop',
+    category: 'Accessories'
+  },
+];
+
+const BRAND_COLLECTIONS = [
+  {
+    id: 1,
+    name: 'Luxury Essentials',
+    description: 'Premium brands for the discerning shopper',
+    brands: [
+      { name: 'Burberry', category: 'Apparel' },
+      { name: 'Tumi', category: 'Luggage' },
+      { name: 'Rolex', category: 'Watches' },
+      { name: 'Montblanc', category: 'Accessories' }
+    ]
+  },
+  {
+    id: 2,
+    name: 'Athletic Performance',
+    description: 'Top-tier brands for serious athletes',
+    brands: [
+      { name: 'Nike', category: 'Shoes' },
+      { name: 'Adidas', category: 'Shoes' },
+      { name: 'Alo', category: 'Apparel' },
+      { name: 'Vuori', category: 'Apparel' },
+      { name: 'On Running', category: 'Shoes' }
+    ]
+  },
+  {
+    id: 3,
+    name: 'Outdoor Adventure',
+    description: 'Gear for outdoor enthusiasts',
+    brands: [
+      { name: 'Yeti', category: 'Coolers' },
+      { name: 'The North Face', category: 'Apparel' },
+      { name: 'Columbia', category: 'Apparel' },
+      { name: 'Costa', category: 'Accessories' }
+    ]
+  },
+  {
+    id: 4,
+    name: 'Casual Comfort',
+    description: 'Everyday brands for relaxed style',
+    brands: [
+      { name: 'Gap', category: 'Apparel' },
+      { name: 'Abercrombie & Fitch', category: 'Apparel' },
+      { name: 'Crocs', category: 'Shoes' },
+      { name: 'Ugg', category: 'Shoes' },
+      { name: 'Chubbies', category: 'Apparel' }
+    ]
+  },
+  {
+    id: 5,
+    name: 'Tech & Innovation',
+    description: 'Latest gadgets and electronics',
+    brands: [
+      { name: 'Apple', category: 'Accessories' },
+      { name: 'Samsung', category: 'Accessories' },
+      { name: 'Sony', category: 'Accessories' }
+    ]
+  },
+  {
+    id: 6,
+    name: 'Southern Coastal',
+    description: 'Preppy beach and resort style',
+    brands: [
+      { name: 'Vineyard Vines', category: 'Apparel' },
+      { name: 'Tommy Bahama', category: 'Apparel' },
+      { name: 'Chubbies', category: 'Apparel' },
+      { name: 'Costa', category: 'Accessories' },
+      { name: 'Yeti', category: 'Coolers' }
+    ]
+  }
+];
+
 const CATEGORIES = ['Apparel', 'Shoes', 'Luggage', 'Coolers', 'Accessories', 'Outdoor Gear', 'Watches'];
 
 export default function BrandDealsApp() {
