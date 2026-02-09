@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload } from 'lucide-react';
+import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff } from 'lucide-react';
+import { auth, googleProvider, db } from './firebase';
+import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 // REAL CURATED DEALS - Updated February 2025
 const REAL_DEALS = [
@@ -238,7 +241,7 @@ const REAL_DEALS = [
     discount: '31%',
     image: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&h=400&fit=crop',
     retailer: 'Burlebo',
-    link: 'https://www.burlebo.com/collections/warehouse-sale',
+    link: 'https://www.burlebo.com/collections/sale',
     lastUpdated: '2025-02-05'
   },
   {
@@ -250,7 +253,7 @@ const REAL_DEALS = [
     discount: '30%',
     image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop',
     retailer: 'Burlebo',
-    link: 'https://www.burlebo.com/collections/warehouse-sale',
+    link: 'https://www.burlebo.com/collections/sale',
     lastUpdated: '2025-02-05'
   },
   // Chubbies
@@ -1127,6 +1130,191 @@ const REAL_DEALS = [
     retailer: 'Spanx',
     link: 'https://spanx.com/collections/sale',
     lastUpdated: '2025-02-05'
+  },
+  // Lululemon
+  {
+    id: 91,
+    brand: 'Lululemon',
+    product: 'Align High-Rise Pant 25"',
+    originalPrice: 98,
+    salePrice: 69,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    retailer: 'Lululemon',
+    link: 'https://shop.lululemon.com/c/women-we-made-too-much/_/N-8s6',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 92,
+    brand: 'Lululemon',
+    product: 'Scuba Oversized Half-Zip Hoodie',
+    originalPrice: 118,
+    salePrice: 89,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=400&h=400&fit=crop',
+    retailer: 'Lululemon',
+    link: 'https://shop.lululemon.com/c/women-we-made-too-much/_/N-8s6',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 93,
+    brand: 'Lululemon',
+    product: 'Fast and Free High-Rise Tight',
+    originalPrice: 128,
+    salePrice: 89,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    retailer: 'Lululemon',
+    link: 'https://shop.lululemon.com/c/women-we-made-too-much/_/N-8s6',
+    lastUpdated: '2025-02-09'
+  },
+  // Coach
+  {
+    id: 94,
+    brand: 'Coach',
+    product: 'Tabby Shoulder Bag',
+    originalPrice: 395,
+    salePrice: 276,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=400&h=400&fit=crop',
+    retailer: 'Coach Outlet',
+    link: 'https://www.coachoutlet.com/shop/women-handbags',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 95,
+    brand: 'Coach',
+    product: 'Leather Crossbody',
+    originalPrice: 298,
+    salePrice: 149,
+    discount: '50%',
+    image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=400&h=400&fit=crop',
+    retailer: 'Coach Outlet',
+    link: 'https://www.coachoutlet.com/shop/women-handbags',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 96,
+    brand: 'Coach',
+    product: 'Signature Canvas Tote',
+    originalPrice: 350,
+    salePrice: 175,
+    discount: '50%',
+    image: 'https://images.unsplash.com/photo-1564422167509-4f701a538f5c?w=400&h=400&fit=crop',
+    retailer: 'Nordstrom',
+    link: 'https://www.nordstrom.com/brands/coach--235',
+    lastUpdated: '2025-02-09'
+  },
+  // Lucchese
+  {
+    id: 97,
+    brand: 'Lucchese',
+    product: 'Classic Western Boots',
+    originalPrice: 595,
+    salePrice: 476,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1520639888713-7851133b1ed0?w=400&h=400&fit=crop',
+    retailer: 'Lucchese',
+    link: 'https://www.lucchese.com/collections/sale',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 98,
+    brand: 'Lucchese',
+    product: 'Handcrafted Leather Belt',
+    originalPrice: 195,
+    salePrice: 146,
+    discount: '25%',
+    image: 'https://images.unsplash.com/photo-1624823183493-ed5832f48f18?w=400&h=400&fit=crop',
+    retailer: 'Lucchese',
+    link: 'https://www.lucchese.com/collections/sale',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 99,
+    brand: 'Lucchese',
+    product: 'Exotic Skin Cowboy Boots',
+    originalPrice: 895,
+    salePrice: 716,
+    discount: '20%',
+    image: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=400&h=400&fit=crop',
+    retailer: 'Boot Barn',
+    link: 'https://www.bootbarn.com/brands/lucchese/',
+    lastUpdated: '2025-02-09'
+  },
+  // Young LA
+  {
+    id: 100,
+    brand: 'Young LA',
+    product: 'Essential Joggers',
+    originalPrice: 50,
+    salePrice: 35,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=400&h=400&fit=crop',
+    retailer: 'Young LA',
+    link: 'https://www.youngla.com/collections/sale',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 101,
+    brand: 'Young LA',
+    product: 'Performance T-Shirt',
+    originalPrice: 35,
+    salePrice: 24,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=400&h=400&fit=crop',
+    retailer: 'Young LA',
+    link: 'https://www.youngla.com/collections/sale',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 102,
+    brand: 'Young LA',
+    product: 'Essential Shorts',
+    originalPrice: 45,
+    salePrice: 31,
+    discount: '31%',
+    image: 'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=400&h=400&fit=crop',
+    retailer: 'Young LA',
+    link: 'https://www.youngla.com/collections/sale',
+    lastUpdated: '2025-02-09'
+  },
+  // Baseball 101
+  {
+    id: 103,
+    brand: 'Baseball 101',
+    product: 'Performance Baseball Cleats',
+    originalPrice: 120,
+    salePrice: 84,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=400&h=400&fit=crop',
+    retailer: 'Baseball 101',
+    link: 'https://www.baseball101.com',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 104,
+    brand: 'Baseball 101',
+    product: 'Training Bat',
+    originalPrice: 80,
+    salePrice: 56,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1566577739112-5180d4bf9390?w=400&h=400&fit=crop',
+    retailer: 'Baseball 101',
+    link: 'https://www.baseball101.com',
+    lastUpdated: '2025-02-09'
+  },
+  {
+    id: 105,
+    brand: 'Baseball 101',
+    product: 'Practice Glove',
+    originalPrice: 150,
+    salePrice: 105,
+    discount: '30%',
+    image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?w=400&h=400&fit=crop',
+    retailer: 'Baseball 101',
+    link: 'https://www.baseball101.com',
+    lastUpdated: '2025-02-09'
   }
 ];
 
@@ -1240,6 +1428,10 @@ const BRAND_COLLECTIONS = [
 const CATEGORIES = ['Apparel', 'Shoes', 'Luggage', 'Coolers', 'Accessories', 'Outdoor Gear', 'Watches'];
 
 export default function BrandDealsApp() {
+  // Auth state
+  const [user, setUser] = useState(null);
+  const [syncStatus, setSyncStatus] = useState(''); // 'syncing', 'synced', 'error', ''
+  
   // Load from localStorage or use defaults
   const [myBrands, setMyBrands] = useState(() => {
     const saved = localStorage.getItem('brandsnob_brands');
@@ -1270,6 +1462,14 @@ export default function BrandDealsApp() {
   const [showSizeProfile, setShowSizeProfile] = useState(false);
   const [showShareWishlist, setShowShareWishlist] = useState(false);
 
+  // Listen for auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
   // Save to localStorage whenever data changes
   useEffect(() => {
     localStorage.setItem('brandsnob_brands', JSON.stringify(myBrands));
@@ -1282,6 +1482,84 @@ export default function BrandDealsApp() {
   useEffect(() => {
     localStorage.setItem('brandsnob_sizeProfile', JSON.stringify(sizeProfile));
   }, [sizeProfile]);
+
+  // Google Sign In
+  const handleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      // User state will be updated by onAuthStateChanged
+    } catch (error) {
+      console.error('Sign in error:', error);
+      alert('Failed to sign in. Please try again.');
+    }
+  };
+
+  // Sign Out
+  const handleSignOut = async () => {
+    try {
+      await firebaseSignOut(auth);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
+  // Sync to Cloud
+  const syncToCloud = async () => {
+    if (!user) {
+      alert('Please sign in first to sync your data.');
+      return;
+    }
+
+    setSyncStatus('syncing');
+    try {
+      const userDoc = doc(db, 'users', user.uid);
+      await setDoc(userDoc, {
+        brands: myBrands,
+        wishlist: wishlist,
+        sizeProfile: sizeProfile,
+        lastUpdated: new Date().toISOString()
+      });
+      setSyncStatus('synced');
+      setTimeout(() => setSyncStatus(''), 3000);
+    } catch (error) {
+      console.error('Sync error:', error);
+      setSyncStatus('error');
+      alert('Failed to sync data. Please try again.');
+      setTimeout(() => setSyncStatus(''), 3000);
+    }
+  };
+
+  // Restore from Cloud
+  const restoreFromCloud = async () => {
+    if (!user) {
+      alert('Please sign in first to restore your data.');
+      return;
+    }
+
+    setSyncStatus('syncing');
+    try {
+      const userDoc = doc(db, 'users', user.uid);
+      const docSnap = await getDoc(userDoc);
+      
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (data.brands) setMyBrands(data.brands);
+        if (data.wishlist) setWishlist(data.wishlist);
+        if (data.sizeProfile) setSizeProfile(data.sizeProfile);
+        setSyncStatus('synced');
+        alert('Data restored successfully!');
+        setTimeout(() => setSyncStatus(''), 3000);
+      } else {
+        alert('No cloud data found. Sync your data first.');
+        setSyncStatus('');
+      }
+    } catch (error) {
+      console.error('Restore error:', error);
+      setSyncStatus('error');
+      alert('Failed to restore data. Please try again.');
+      setTimeout(() => setSyncStatus(''), 3000);
+    }
+  };
 
   const addBrand = () => {
     if (newBrandName.trim()) {
@@ -1385,6 +1663,8 @@ export default function BrandDealsApp() {
         return b.salePrice - a.salePrice;
       case 'savings':
         return (b.originalPrice - b.salePrice) - (a.originalPrice - a.salePrice);
+      case 'brand':
+        return a.brand.localeCompare(b.brand);
       default:
         return 0;
     }
@@ -1408,14 +1688,39 @@ export default function BrandDealsApp() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-800">Brandsnobs</h1>
-                <p className="text-xs text-gray-500">v1.5 • {REAL_DEALS.length} curated deals</p>
+                <p className="text-xs text-gray-500">v1.6 • {REAL_DEALS.length} curated deals</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
+              {user && (
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <User className="w-4 h-4" />
+                  <span>{user.displayName || user.email}</span>
+                </div>
+              )}
               <div className="text-sm text-gray-600">
                 {myBrands.length} brands tracked
               </div>
               <div className="flex gap-2">
+                {user ? (
+                  <button
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-800 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    title="Sign out"
+                  >
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm hidden md:inline">Sign Out</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleSignIn}
+                    className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+                    title="Sign in with Google"
+                  >
+                    <LogIn className="w-5 h-5" />
+                    <span className="text-sm">Sign In</span>
+                  </button>
+                )}
                 <button
                   onClick={exportBrands}
                   className="text-gray-600 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100 transition-colors"
@@ -1446,15 +1751,6 @@ export default function BrandDealsApp() {
             Deals
           </button>
           <button
-            onClick={() => setActiveTab('wishlist')}
-            className={`flex-1 py-3 px-4 rounded-md font-medium transition-all whitespace-nowrap ${
-              activeTab === 'wishlist' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <ShoppingBag className="w-4 h-4 inline mr-2" />
-            Wishlist ({wishlist.length})
-          </button>
-          <button
             onClick={() => setActiveTab('brands')}
             className={`flex-1 py-3 px-4 rounded-md font-medium transition-all whitespace-nowrap ${
               activeTab === 'brands' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
@@ -1462,6 +1758,15 @@ export default function BrandDealsApp() {
           >
             <ShoppingBag className="w-4 h-4 inline mr-2" />
             My Brands
+          </button>
+          <button
+            onClick={() => setActiveTab('wishlist')}
+            className={`flex-1 py-3 px-4 rounded-md font-medium transition-all whitespace-nowrap ${
+              activeTab === 'wishlist' ? 'bg-indigo-600 text-white' : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <ShoppingBag className="w-4 h-4 inline mr-2" />
+            Wishlist ({wishlist.length})
           </button>
           <button
             onClick={() => setActiveTab('collections')}
@@ -1591,6 +1896,7 @@ export default function BrandDealsApp() {
                     <option value="savings">Most Savings $</option>
                     <option value="price-low">Lowest Price</option>
                     <option value="price-high">Highest Price</option>
+                    <option value="brand">Brand (A-Z)</option>
                   </select>
                 </div>
               </div>
@@ -1744,19 +2050,51 @@ export default function BrandDealsApp() {
         {/* My Brands Tab */}
         {activeTab === 'brands' && (
           <div>
-            <div className="mb-6 flex justify-between items-center">
+            <div className="mb-6 flex justify-between items-start flex-wrap gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">My Brands</h2>
                 <p className="text-gray-600">Manage your favorite brands • Saved automatically</p>
               </div>
-              <button
-                onClick={() => setShowAddBrand(!showAddBrand)}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
-              >
-                <Plus className="w-5 h-5" />
-                Add Brand
-              </button>
+              <div className="flex gap-2 flex-wrap">
+                {user && (
+                  <>
+                    <button
+                      onClick={syncToCloud}
+                      disabled={syncStatus === 'syncing'}
+                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                      title="Save to cloud"
+                    >
+                      <Cloud className="w-5 h-5" />
+                      {syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'synced' ? 'Synced!' : 'Sync to Cloud'}
+                    </button>
+                    <button
+                      onClick={restoreFromCloud}
+                      disabled={syncStatus === 'syncing'}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
+                      title="Restore from cloud"
+                    >
+                      <CloudOff className="w-5 h-5" />
+                      Restore from Cloud
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setShowAddBrand(!showAddBrand)}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Add Brand
+                </button>
+              </div>
             </div>
+
+            {!user && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-blue-800">
+                  <strong>💡 Pro tip:</strong> Sign in to sync your brands across all your devices! Click "Sign In" in the header.
+                </p>
+              </div>
+            )}
 
             {showAddBrand && (
               <div className="bg-white rounded-lg shadow-md p-6 mb-6">
