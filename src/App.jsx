@@ -127,6 +127,11 @@ function LuxuryDealCard({ deal }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
 
+  // Luxury Deal Card Component
+function LuxuryDealCard({ deal }) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+
   const handleFavorite = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -143,42 +148,31 @@ function LuxuryDealCard({ deal }) {
       rel="noopener noreferrer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group block bg-white rounded-2xl overflow-hidden border border-neutral-200 
-                 hover:border-neutral-300 transition-all duration-300 hover:shadow-luxury"
+      className="group block bg-white rounded-2xl overflow-hidden border border-neutral-200 hover:border-neutral-300 transition-all duration-300 hover:shadow-luxury"
     >
       <div className="relative aspect-square overflow-hidden bg-neutral-50">
         <img
           src={deal.image}
           alt={deal.product}
-          className="w-full h-full object-cover transition-transform duration-500 
-                     group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
         
         {discountPercent >= 30 && (
-          <div className="absolute top-4 left-4 bg-neutral-900 text-white px-3 py-1.5 
-                          rounded-full text-sm font-semibold tracking-wide">
+          <div className="absolute top-4 left-4 bg-neutral-900 text-white px-3 py-1.5 rounded-full text-sm font-semibold tracking-wide">
             {deal.discount} OFF
           </div>
         )}
 
         <button
           onClick={handleFavorite}
-          className={`absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm
-                     flex items-center justify-center transition-all duration-200
-                     hover:bg-white hover:scale-110 ${isFavorited ? 'text-rose-500' : 'text-neutral-400'}`}
+          className={`absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isFavorited ? 'text-rose-500' : 'text-neutral-400'}`}
         >
-          <Heart
-            className="w-5 h-5"
-            fill={isFavorited ? 'currentColor' : 'none'}
-          />
+          <Heart className="w-5 h-5" fill={isFavorited ? 'currentColor' : 'none'} />
         </button>
 
-        <div className={`absolute inset-0 bg-neutral-900/80 backdrop-blur-sm 
-                        flex items-center justify-center transition-opacity duration-300
-                        ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-          <div className="bg-white px-6 py-3 rounded-full flex items-center gap-2 
-                         text-neutral-900 font-medium">
+        <div className={`absolute inset-0 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <div className="bg-white px-6 py-3 rounded-full flex items-center gap-2 text-neutral-900 font-medium">
             <span>View Deal</span>
             <ExternalLink className="w-4 h-4" />
           </div>
@@ -195,8 +189,7 @@ function LuxuryDealCard({ deal }) {
           </span>
         </div>
 
-        <h3 className="font-display text-lg font-medium text-neutral-900 mb-3 
-                       line-clamp-2 leading-snug min-h-[3.5rem]">
+        <h3 className="font-display text-lg font-medium text-neutral-900 mb-3 line-clamp-2 leading-snug min-h-[3.5rem]">
           {deal.product}
         </h3>
 
@@ -220,8 +213,7 @@ function LuxuryDealCard({ deal }) {
           </div>
 
           {discountPercent < 30 && discountPercent > 0 && (
-            <div className="bg-neutral-100 text-neutral-700 px-2.5 py-1 
-                           rounded-lg text-xs font-semibold">
+            <div className="bg-neutral-100 text-neutral-700 px-2.5 py-1 rounded-lg text-xs font-semibold">
               {deal.discount}
             </div>
           )}
@@ -230,16 +222,6 @@ function LuxuryDealCard({ deal }) {
     </a>
   );
 }
-
-// Gender Preference Component
-function GenderPreference({ selectedGenders, onGenderChange }) {
-  const toggleGender = (genderId) => {
-    const newSelection = selectedGenders.includes(genderId)
-      ? selectedGenders.filter(g => g !== genderId)
-      : [...selectedGenders, genderId];
-    onGenderChange(newSelection);
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 mb-6">
       <div className="flex items-center gap-3 mb-6">
@@ -255,7 +237,6 @@ function GenderPreference({ selectedGenders, onGenderChange }) {
           </p>
         </div>
       </div>
-
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {GENDER_OPTIONS.map((option) => {
           const isSelected = selectedGenders.includes(option.id);
