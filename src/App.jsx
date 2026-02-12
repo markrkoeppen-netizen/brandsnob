@@ -4,13 +4,11 @@ import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
-// Categories for organizing brands
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
   'Watches', 'Cosmetics', 'Jewelry', 'Travel'
 ];
 
-// Gender preference options
 const GENDER_OPTIONS = [
   { id: 'women', label: "Women's", icon: '👗' },
   { id: 'men', label: "Men's", icon: '👔' },
@@ -19,7 +17,6 @@ const GENDER_OPTIONS = [
   { id: 'unisex', label: 'Unisex', icon: '✨' }
 ];
 
-// Brand Collections
 const BRAND_COLLECTIONS = [
   {
     id: 1,
@@ -91,7 +88,6 @@ const BRAND_COLLECTIONS = [
   }
 ];
 
-// Recommendations
 const RECOMMENDATIONS = [
   {
     id: 1,
@@ -119,15 +115,9 @@ const RECOMMENDATIONS = [
     price: 549,
     image: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400&h=400&fit=crop',
     category: 'Tech'
-  },
+  }
 ];
 
-// Luxury Deal Card Component
-function LuxuryDealCard({ deal }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
-
-  // Luxury Deal Card Component
 function LuxuryDealCard({ deal }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
@@ -142,7 +132,7 @@ function LuxuryDealCard({ deal }) {
   const savings = deal.originalPrice - deal.salePrice;
 
   return (
-    
+    <a
       href={deal.link}
       target="_blank"
       rel="noopener noreferrer"
@@ -222,6 +212,15 @@ function LuxuryDealCard({ deal }) {
     </a>
   );
 }
+
+function GenderPreference({ selectedGenders, onGenderChange }) {
+  const toggleGender = (genderId) => {
+    const newSelection = selectedGenders.includes(genderId)
+      ? selectedGenders.filter(g => g !== genderId)
+      : [...selectedGenders, genderId];
+    onGenderChange(newSelection);
+  };
+
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 mb-6">
       <div className="flex items-center gap-3 mb-6">
@@ -229,14 +228,11 @@ function LuxuryDealCard({ deal }) {
           <User className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-neutral-900">
-            Shopping Preferences
-          </h3>
-          <p className="text-sm text-neutral-500">
-            Select categories to personalize your deals
-          </p>
+          <h3 className="text-lg font-semibold text-neutral-900">Shopping Preferences</h3>
+          <p className="text-sm text-neutral-500">Select categories to personalize your deals</p>
         </div>
       </div>
+
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {GENDER_OPTIONS.map((option) => {
           const isSelected = selectedGenders.includes(option.id);
@@ -245,13 +241,7 @@ function LuxuryDealCard({ deal }) {
             <button
               key={option.id}
               onClick={() => toggleGender(option.id)}
-              className={`
-                relative p-4 rounded-xl border-2 transition-all duration-200
-                ${isSelected 
-                  ? 'border-neutral-900 bg-neutral-50' 
-                  : 'border-neutral-200 bg-white hover:border-neutral-300'
-                }
-              `}
+              className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${isSelected ? 'border-neutral-900 bg-neutral-50' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}
             >
               {isSelected && (
                 <div className="absolute top-2 right-2 w-5 h-5 bg-neutral-900 rounded-full flex items-center justify-center">
@@ -275,8 +265,9 @@ function LuxuryDealCard({ deal }) {
       )}
     </div>
   );
-}export default function App() {
-  // State
+}
+
+export default function App() {
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
@@ -284,18 +275,13 @@ function LuxuryDealCard({ deal }) {
   const [activeTab, setActiveTab] = useState('deals');
   const [user, setUser] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle');
-  
-  // Firestore deals state
   const [deals, setDeals] = useState([]);
   const [dealsLoading, setDealsLoading] = useState(true);
   const [dealsError, setDealsError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
-  
-  // Gender preferences state
   const [selectedGenders, setSelectedGenders] = useState([]);
 
-  // Auth listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -306,7 +292,6 @@ function LuxuryDealCard({ deal }) {
     return () => unsubscribe();
   }, []);
 
-  // Load brands from localStorage
   useEffect(() => {
     const savedBrands = localStorage.getItem('myBrands');
     if (savedBrands) {
@@ -314,7 +299,6 @@ function LuxuryDealCard({ deal }) {
     }
   }, []);
 
-  // Save brands to localStorage and cloud
   useEffect(() => {
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
     if (user) {
@@ -322,7 +306,6 @@ function LuxuryDealCard({ deal }) {
     }
   }, [myBrands, user]);
 
-  // Load gender preferences from localStorage
   useEffect(() => {
     const savedGenders = localStorage.getItem('selectedGenders');
     if (savedGenders) {
@@ -330,7 +313,6 @@ function LuxuryDealCard({ deal }) {
     }
   }, []);
 
-  // Save gender preferences
   useEffect(() => {
     localStorage.setItem('selectedGenders', JSON.stringify(selectedGenders));
     if (user) {
@@ -338,7 +320,6 @@ function LuxuryDealCard({ deal }) {
     }
   }, [selectedGenders, user]);
 
-  // Fetch deals from Firestore when brands change
   useEffect(() => {
     if (myBrands.length > 0) {
       fetchDealsFromFirestore();
@@ -348,7 +329,6 @@ function LuxuryDealCard({ deal }) {
     }
   }, [myBrands]);
 
-  // Fetch deals from Firestore
   const fetchDealsFromFirestore = async () => {
     if (myBrands.length === 0) {
       setDeals([]);
@@ -362,42 +342,24 @@ function LuxuryDealCard({ deal }) {
 
       const brandNames = myBrands.map(b => b.name);
       const dealsRef = collection(db, 'deals');
-      
       const batchSize = 30;
       let allDeals = [];
 
       for (let i = 0; i < brandNames.length; i += batchSize) {
         const batch = brandNames.slice(i, i + batchSize);
-        
-        const q = query(
-          dealsRef,
-          where('brand', 'in', batch),
-          orderBy('fetchedAt', 'desc')
-        );
-
+        const q = query(dealsRef, where('brand', 'in', batch), orderBy('fetchedAt', 'desc'));
         const querySnapshot = await getDocs(q);
-        const batchDeals = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        }));
-
+        const batchDeals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         allDeals = [...allDeals, ...batchDeals];
       }
 
-      const uniqueDeals = Array.from(
-        new Map(allDeals.map(deal => [deal.id, deal])).values()
-      );
-
-      const sortedDeals = uniqueDeals.sort((a, b) => 
-        parseInt(b.discount) - parseInt(a.discount)
-      );
+      const uniqueDeals = Array.from(new Map(allDeals.map(deal => [deal.id, deal])).values());
+      const sortedDeals = uniqueDeals.sort((a, b) => parseInt(b.discount) - parseInt(a.discount));
 
       setDeals(sortedDeals);
-      
       if (sortedDeals.length > 0 && sortedDeals[0].lastUpdated) {
         setLastUpdated(sortedDeals[0].lastUpdated);
       }
-
       setDealsLoading(false);
     } catch (error) {
       console.error('Error fetching deals:', error);
@@ -414,7 +376,6 @@ function LuxuryDealCard({ deal }) {
 
   const getTimeAgo = (timestamp) => {
     if (!timestamp) return '';
-    
     const now = new Date();
     const updated = new Date(timestamp);
     const diffMs = now - updated;
@@ -436,12 +397,8 @@ function LuxuryDealCard({ deal }) {
       const userDoc = await getDoc(doc(db, 'users', userId));
       if (userDoc.exists()) {
         const data = userDoc.data();
-        if (data.brands) {
-          setMyBrands(data.brands);
-        }
-        if (data.genderPreferences) {
-          setSelectedGenders(data.genderPreferences);
-        }
+        if (data.brands) setMyBrands(data.brands);
+        if (data.genderPreferences) setSelectedGenders(data.genderPreferences);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -532,7 +489,6 @@ function LuxuryDealCard({ deal }) {
       name: brand.name,
       category: brand.category
     }));
-    
     setMyBrands([...myBrands, ...newBrands]);
     setActiveTab('brands');
   };
@@ -549,12 +505,9 @@ function LuxuryDealCard({ deal }) {
   const stats = {
     totalBrands: myBrands.length,
     totalDeals: filteredDeals.length,
-    totalSavings: filteredDeals.reduce((sum, deal) => 
-      sum + (deal.originalPrice - deal.salePrice), 0
-    ),
+    totalSavings: filteredDeals.reduce((sum, deal) => sum + (deal.originalPrice - deal.salePrice), 0),
     avgDiscount: filteredDeals.length > 0
-      ? Math.round(filteredDeals.reduce((sum, deal) => 
-          sum + parseInt(deal.discount), 0) / filteredDeals.length)
+      ? Math.round(filteredDeals.reduce((sum, deal) => sum + parseInt(deal.discount), 0) / filteredDeals.length)
       : 0
   };
 
@@ -589,22 +542,14 @@ function LuxuryDealCard({ deal }) {
                     <p className="text-sm font-medium text-neutral-900">{user.displayName}</p>
                     <p className="text-xs text-neutral-500">{user.email}</p>
                   </div>
-                  {user.photoURL && (
-                    <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full" />
-                  )}
-                  <button
-                    onClick={signOut}
-                    className="bg-neutral-100 text-neutral-900 px-4 py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2"
-                  >
+                  {user.photoURL && <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full" />}
+                  <button onClick={signOut} className="bg-neutral-100 text-neutral-900 px-4 py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">
                     <LogOut className="w-4 h-4" />
                     Sign Out
                   </button>
                 </div>
               ) : (
-                <button
-                  onClick={signIn}
-                  className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2"
-                >
+                <button onClick={signIn} className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2">
                   <LogIn className="w-4 h-4" />
                   Sign In with Google
                 </button>
@@ -621,11 +566,7 @@ function LuxuryDealCard({ deal }) {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 px-2 border-b-2 transition-colors font-medium capitalize ${
-                  activeTab === tab
-                    ? 'border-neutral-900 text-neutral-900'
-                    : 'border-transparent text-neutral-500 hover:text-neutral-700'
-                }`}
+                className={`py-4 px-2 border-b-2 transition-colors font-medium capitalize ${activeTab === tab ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-500 hover:text-neutral-700'}`}
               >
                 {tab}
                 {tab === 'deals' && filteredDeals.length > 0 && ` (${filteredDeals.length})`}
@@ -636,14 +577,10 @@ function LuxuryDealCard({ deal }) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">{activeTab === 'deals' && (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {activeTab === 'deals' && (
           <div>
-            {myBrands.length > 0 && (
-              <GenderPreference
-                selectedGenders={selectedGenders}
-                onGenderChange={setSelectedGenders}
-              />
-            )}
+            {myBrands.length > 0 && <GenderPreference selectedGenders={selectedGenders} onGenderChange={setSelectedGenders} />}
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
@@ -656,9 +593,7 @@ function LuxuryDealCard({ deal }) {
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Total Savings</div>
-                <div className="font-display text-3xl font-bold text-neutral-900">
-                  ${stats.totalSavings.toLocaleString()}
-                </div>
+                <div className="font-display text-3xl font-bold text-neutral-900">${stats.totalSavings.toLocaleString()}</div>
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Avg Discount</div>
@@ -674,11 +609,7 @@ function LuxuryDealCard({ deal }) {
                   <span className="text-neutral-400">•</span>
                   <span className="text-neutral-500">Deals refresh every 6 hours</span>
                 </div>
-                <button
-                  onClick={refreshDeals}
-                  disabled={refreshing}
-                  className="flex items-center gap-2 text-neutral-900 hover:text-neutral-700 font-medium disabled:opacity-50"
-                >
+                <button onClick={refreshDeals} disabled={refreshing} className="flex items-center gap-2 text-neutral-900 hover:text-neutral-700 font-medium disabled:opacity-50">
                   <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                   {refreshing ? 'Refreshing...' : 'Refresh'}
                 </button>
@@ -697,12 +628,7 @@ function LuxuryDealCard({ deal }) {
               <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
                 <h3 className="font-semibold text-red-800 mb-2">Error Loading Deals</h3>
                 <p className="text-red-600 mb-4">{dealsError}</p>
-                <button
-                  onClick={refreshDeals}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                >
-                  Try Again
-                </button>
+                <button onClick={refreshDeals} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">Try Again</button>
               </div>
             )}
 
@@ -711,10 +637,7 @@ function LuxuryDealCard({ deal }) {
                 <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
                 <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No brands yet</h3>
                 <p className="text-neutral-500 mb-4">Add some brands to start seeing deals!</p>
-                <button
-                  onClick={() => setActiveTab('brands')}
-                  className="bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition-colors inline-flex items-center gap-2"
-                >
+                <button onClick={() => setActiveTab('brands')} className="bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition-colors inline-flex items-center gap-2">
                   <Plus className="w-5 h-5" />
                   Add Brands
                 </button>
@@ -723,9 +646,7 @@ function LuxuryDealCard({ deal }) {
 
             {!dealsLoading && !dealsError && filteredDeals.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredDeals.map(deal => (
-                  <LuxuryDealCard key={deal.id} deal={deal} />
-                ))}
+                {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} />)}
               </div>
             )}
 
@@ -733,12 +654,8 @@ function LuxuryDealCard({ deal }) {
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
                 <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
                 <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No deals found</h3>
-                <p className="text-neutral-500 mb-4">
-                  We couldn't find any current deals for your selected preferences.
-                </p>
-                <p className="text-sm text-neutral-400">
-                  Try adjusting your gender preferences or check back soon!
-                </p>
+                <p className="text-neutral-500 mb-4">We couldn't find any current deals for your selected preferences.</p>
+                <p className="text-sm text-neutral-400">Try adjusting your gender preferences or check back soon!</p>
               </div>
             )}
           </div>
@@ -754,28 +671,17 @@ function LuxuryDealCard({ deal }) {
               <div className="flex gap-2">
                 {user && (
                   <>
-                    <button
-                      onClick={saveToCloud}
-                      disabled={syncStatus === 'syncing'}
-                      className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-                    >
+                    <button onClick={saveToCloud} disabled={syncStatus === 'syncing'} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50">
                       <Cloud className="w-5 h-5" />
                       Save
                     </button>
-                    <button
-                      onClick={restoreFromCloud}
-                      disabled={syncStatus === 'syncing'}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50"
-                    >
+                    <button onClick={restoreFromCloud} disabled={syncStatus === 'syncing'} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50">
                       <CloudOff className="w-5 h-5" />
                       Restore
                     </button>
                   </>
                 )}
-                <button
-                  onClick={() => setShowAddBrand(!showAddBrand)}
-                  className="bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2"
-                >
+                <button onClick={() => setShowAddBrand(!showAddBrand)} className="bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2">
                   <Plus className="w-5 h-5" />
                   Add Brand
                 </button>
@@ -784,9 +690,7 @@ function LuxuryDealCard({ deal }) {
 
             {!user && (
               <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
-                <p className="text-blue-800">
-                  <strong>💡 Pro tip:</strong> Sign in to sync your brands across all your devices!
-                </p>
+                <p className="text-blue-800"><strong>💡 Pro tip:</strong> Sign in to sync your brands across all your devices!</p>
               </div>
             )}
 
@@ -812,25 +716,13 @@ function LuxuryDealCard({ deal }) {
                       onChange={(e) => setNewBrandCategory(e.target.value)}
                       className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                     >
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
+                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={addBrand}
-                    className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors"
-                  >
-                    Add Brand
-                  </button>
-                  <button
-                    onClick={() => setShowAddBrand(false)}
-                    className="bg-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
-                  >
-                    Cancel
-                  </button>
+                  <button onClick={addBrand} className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Add Brand</button>
+                  <button onClick={() => setShowAddBrand(false)} className="bg-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-300 transition-colors">Cancel</button>
                 </div>
               </div>
             )}
@@ -846,21 +738,14 @@ function LuxuryDealCard({ deal }) {
                 {CATEGORIES.map(category => {
                   const brandsInCategory = myBrands.filter(b => b.category === category);
                   if (brandsInCategory.length === 0) return null;
-                  
                   return (
                     <div key={category} className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                       <h3 className="font-semibold text-lg text-neutral-800 mb-4">{category}</h3>
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
                         {brandsInCategory.map(brand => (
-                          <div
-                            key={brand.id}
-                            className="flex items-center justify-between bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200"
-                          >
+                          <div key={brand.id} className="flex items-center justify-between bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200">
                             <span className="font-medium text-neutral-800">{brand.name}</span>
-                            <button
-                              onClick={() => removeBrand(brand.id)}
-                              className="text-red-500 hover:text-red-700 transition-colors"
-                            >
+                            <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
                               <X className="w-5 h-5" />
                             </button>
                           </div>
@@ -880,7 +765,6 @@ function LuxuryDealCard({ deal }) {
               <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">Brand Collections</h2>
               <p className="text-neutral-600">Curated brand lists for different lifestyles</p>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {BRAND_COLLECTIONS.map(collection => (
                 <div key={collection.id} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
@@ -900,10 +784,7 @@ function LuxuryDealCard({ deal }) {
                         ))}
                       </div>
                     </div>
-                    <button
-                      onClick={() => loadCollection(collection)}
-                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-semibold"
-                    >
+                    <button onClick={() => loadCollection(collection)} className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-semibold">
                       Add All to My Brands
                     </button>
                   </div>
@@ -919,15 +800,12 @@ function LuxuryDealCard({ deal }) {
               <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">Discover New Brands</h2>
               <p className="text-neutral-600">Based on your preferences for premium products</p>
             </div>
-            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {RECOMMENDATIONS.map(rec => (
                 <div key={rec.id} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
                   <div className="relative">
                     <img src={rec.image} alt={rec.product} className="w-full h-48 object-cover" />
-                    <div className="absolute top-2 left-2 bg-neutral-900 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                      Recommended
-                    </div>
+                    <div className="absolute top-2 left-2 bg-neutral-900 text-white px-3 py-1 rounded-full text-xs font-semibold">Recommended</div>
                   </div>
                   <div className="p-4">
                     <div className="text-sm text-neutral-900 font-semibold mb-1">{rec.brand}</div>
@@ -937,20 +815,14 @@ function LuxuryDealCard({ deal }) {
                     <div className="flex gap-2">
                       <button
                         onClick={() => {
-                          setMyBrands([...myBrands, {
-                            id: Date.now(),
-                            name: rec.brand,
-                            category: rec.category
-                          }]);
+                          setMyBrands([...myBrands, { id: Date.now(), name: rec.brand, category: rec.category }]);
                           setActiveTab('brands');
                         }}
                         className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm"
                       >
                         Add to My Brands
                       </button>
-                      <button className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors text-sm">
-                        Learn More
-                      </button>
+                      <button className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors text-sm">Learn More</button>
                     </div>
                   </div>
                 </div>
