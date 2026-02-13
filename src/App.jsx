@@ -20,70 +20,114 @@ const GENDER_OPTIONS = [
 const BRAND_COLLECTIONS = [
   {
     id: 1,
-    name: 'Luxury Essentials',
-    description: 'Premium brands for the discerning shopper',
+    name: 'Luxury Fashion Icons',
+    description: 'The most prestigious names in high fashion',
     brands: [
-      { name: 'Burberry', category: 'Fashion' },
-      { name: 'Tumi', category: 'Travel' },
-      { name: 'Rolex', category: 'Watches' },
-      { name: 'Montblanc', category: 'Accessories' }
+      { name: 'Gucci', category: 'Fashion' },
+      { name: 'Prada', category: 'Fashion' },
+      { name: 'Louis Vuitton', category: 'Fashion' },
+      { name: 'Hermès', category: 'Fashion' },
+      { name: 'Fendi', category: 'Fashion' },
+      { name: 'Saint Laurent', category: 'Fashion' },
+      { name: 'Chloé', category: 'Fashion' },
+      { name: 'The Row', category: 'Fashion' }
     ]
   },
   {
     id: 2,
-    name: 'Athletic Performance',
-    description: 'Top-tier brands for serious athletes',
+    name: 'Designer Shoes & Accessories',
+    description: 'Premium footwear and luxury accessories',
     brands: [
-      { name: 'Nike', category: 'Footwear' },
-      { name: 'Adidas', category: 'Footwear' },
-      { name: 'Alo', category: 'Fashion' },
-      { name: 'Vuori', category: 'Fashion' },
-      { name: 'On Running', category: 'Footwear' }
+      { name: 'Christian Louboutin', category: 'Footwear' },
+      { name: 'Jimmy Choo', category: 'Footwear' },
+      { name: 'Stuart Weitzman', category: 'Footwear' },
+      { name: 'Cole Haan', category: 'Footwear' },
+      { name: 'Feragamo', category: 'Footwear' },
+      { name: 'Lucchese', category: 'Footwear' },
+      { name: 'Tumi', category: 'Accessories' },
+      { name: 'Coach', category: 'Accessories' }
     ]
   },
   {
     id: 3,
-    name: 'Outdoor Adventure',
-    description: 'Gear for outdoor enthusiasts',
+    name: 'Athletic & Athleisure',
+    description: 'Performance meets style',
     brands: [
-      { name: 'Yeti', category: 'Outdoor' },
-      { name: 'The North Face', category: 'Fashion' },
-      { name: 'Columbia', category: 'Fashion' },
-      { name: 'Costa', category: 'Accessories' }
+      { name: 'Nike', category: 'Footwear' },
+      { name: 'Adidas', category: 'Footwear' },
+      { name: 'Lululemon', category: 'Fashion' },
+      { name: 'Alo', category: 'Fashion' },
+      { name: 'Vuori', category: 'Fashion' },
+      { name: 'On Running', category: 'Footwear' },
+      { name: 'Athleta', category: 'Fashion' }
     ]
   },
   {
     id: 4,
-    name: 'Casual Comfort',
-    description: 'Everyday brands for relaxed style',
+    name: 'Contemporary American',
+    description: 'Modern American designers and lifestyle brands',
     brands: [
-      { name: 'Gap', category: 'Fashion' },
-      { name: 'Abercrombie & Fitch', category: 'Fashion' },
-      { name: 'Crocs', category: 'Footwear' },
-      { name: 'UGG', category: 'Footwear' },
-      { name: 'Chubbies', category: 'Fashion' }
+      { name: 'Michael Kors', category: 'Fashion' },
+      { name: 'Tory Burch', category: 'Fashion' },
+      { name: 'Kate Spade', category: 'Accessories' },
+      { name: 'Marc Jacobs', category: 'Fashion' },
+      { name: 'Donna Karan', category: 'Fashion' },
+      { name: 'Vera Wang', category: 'Fashion' },
+      { name: 'Oscar de la Renta', category: 'Fashion' },
+      { name: 'Tom Ford', category: 'Fashion' }
     ]
   },
   {
     id: 5,
-    name: 'Tech & Innovation',
-    description: 'Latest gadgets and electronics',
+    name: 'Casual & Lifestyle',
+    description: 'Everyday luxury and comfort',
     brands: [
-      { name: 'Apple', category: 'Tech' },
-      { name: 'Samsung', category: 'Tech' },
-      { name: 'Sony', category: 'Tech' }
+      { name: 'Polo Ralph Lauren', category: 'Fashion' },
+      { name: 'Tommy Bahama', category: 'Fashion' },
+      { name: 'Vineyard Vines', category: 'Fashion' },
+      { name: 'Lacoste', category: 'Fashion' },
+      { name: 'Abercrombie & Fitch', category: 'Fashion' },
+      { name: 'Madewell', category: 'Fashion' },
+      { name: 'Kith', category: 'Fashion' }
     ]
   },
   {
     id: 6,
-    name: 'Southern Coastal',
-    description: 'Preppy beach and resort style',
+    name: 'Footwear Favorites',
+    description: 'Comfort meets style',
     brands: [
-      { name: 'Vineyard Vines', category: 'Fashion' },
-      { name: 'Tommy Bahama', category: 'Fashion' },
-      { name: 'Chubbies', category: 'Fashion' },
-      { name: 'Costa', category: 'Accessories' },
+      { name: 'UGG', category: 'Footwear' },
+      { name: 'BIRKENSTOCK', category: 'Footwear' },
+      { name: 'Crocs', category: 'Footwear' }
+    ]
+  },
+  {
+    id: 7,
+    name: 'Outdoor & Technical',
+    description: 'Performance gear for adventure',
+    brands: [
+      { name: 'The North Face', category: 'Outdoor' },
+      { name: 'Columbia', category: 'Outdoor' },
       { name: 'Yeti', category: 'Outdoor' }
+    ]
+  },
+  {
+    id: 8,
+    name: 'Avant-Garde & Modern',
+    description: 'Cutting-edge contemporary fashion',
+    brands: [
+      { name: 'Thom Browne', category: 'Fashion' },
+      { name: 'Cult Gaia', category: 'Accessories' },
+      { name: 'Burlebo', category: 'Fashion' }
+    ]
+  },
+  {
+    id: 9,
+    name: 'Beauty & Home',
+    description: 'Luxury beauty and home essentials',
+    brands: [
+      { name: 'Estée Lauder', category: 'Cosmetics' },
+      { name: 'Dacor', category: 'Home' }
     ]
   }
 ];
@@ -91,31 +135,62 @@ const BRAND_COLLECTIONS = [
 const RECOMMENDATIONS = [
   {
     id: 1,
-    brand: 'Rolex',
-    reason: 'Luxury timepiece enthusiast',
-    product: 'Submariner Dive Watch',
-    price: 9550,
-    image: 'https://images.unsplash.com/photo-1587836374228-4c589c87e8f1?w=400&h=400&fit=crop',
-    category: 'Watches'
-  },
-  {
-    id: 2,
-    brand: 'Burberry',
+    brand: 'Gucci',
     reason: 'Luxury fashion lover',
-    product: 'Classic Trench Coat',
-    price: 1890,
-    image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=400&h=400&fit=crop',
+    product: 'GG Marmont Handbag',
+    price: 2350,
+    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop',
     category: 'Fashion'
   },
   {
+    id: 2,
+    brand: 'Christian Louboutin',
+    reason: 'Designer shoe collector',
+    product: 'Pigalle Follies Pumps',
+    price: 775,
+    image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=400&fit=crop',
+    category: 'Footwear'
+  },
+  {
     id: 3,
-    brand: 'Apple',
-    reason: 'Tech enthusiast',
-    product: 'AirPods Max',
-    price: 549,
-    image: 'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=400&h=400&fit=crop',
-    category: 'Tech'
+    brand: 'Lululemon',
+    reason: 'Athleisure enthusiast',
+    product: 'Align High-Rise Leggings',
+    price: 98,
+    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
+    category: 'Fashion'
+  },
+  {
+    id: 4,
+    brand: 'Tory Burch',
+    reason: 'Contemporary style lover',
+    product: 'Miller Sandals',
+    price: 228,
+    image: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=400&h=400&fit=crop',
+    category: 'Footwear'
+  },
+  {
+    id: 5,
+    brand: 'The North Face',
+    reason: 'Outdoor adventurer',
+    product: 'Nuptse Puffer Jacket',
+    price: 329,
+    image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400&h=400&fit=crop',
+    category: 'Outdoor'
   }
+];
+
+// All available brands for autocomplete
+const ALL_AVAILABLE_BRANDS = [
+  'Abercrombie & Fitch', 'Adidas', 'Alo', 'Athleta', 'BIRKENSTOCK', 'Burlebo',
+  'Chloé', 'Christian Louboutin', 'Coach', 'Cole Haan', 'Columbia', 'Crocs',
+  'Cult Gaia', 'Dacor', 'Donna Karan', 'Estée Lauder', 'Fendi', 'Feragamo',
+  'Gucci', 'Hermès', 'Jimmy Choo', 'Kate Spade', 'Kith', 'Lacoste',
+  'Louis Vuitton', 'Lucchese', 'Lululemon', 'Madewell', 'Marc Jacobs',
+  'Michael Kors', 'Nike', 'On Running', 'Oscar de la Renta', 'Polo Ralph Lauren',
+  'Prada', 'Saint Laurent', 'Stuart Weitzman', 'The North Face', 'The Row',
+  'Thom Browne', 'Tom Ford', 'Tommy Bahama', 'Tory Burch', 'Tumi', 'UGG',
+  'Vera Wang', 'Vineyard Vines', 'Vuori', 'Yeti'
 ];
 
 function LuxuryDealCard({ deal }) {
@@ -272,6 +347,8 @@ export default function App() {
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
   const [newBrandCategory, setNewBrandCategory] = useState('Fashion');
+  const [brandSuggestions, setBrandSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeTab, setActiveTab] = useState('deals');
   const [user, setUser] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle');
@@ -479,7 +556,29 @@ export default function App() {
       }]);
       setNewBrandName('');
       setShowAddBrand(false);
+      setShowSuggestions(false);
     }
+  };
+
+  const handleBrandInputChange = (value) => {
+    setNewBrandName(value);
+    
+    if (value.trim().length > 0) {
+      const filtered = ALL_AVAILABLE_BRANDS.filter(brand =>
+        brand.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5);
+      setBrandSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0);
+    } else {
+      setBrandSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectBrandSuggestion = (brand) => {
+    setNewBrandName(brand);
+    setShowSuggestions(false);
+    setBrandSuggestions([]);
   };
 
   const removeBrand = (id) => {
@@ -797,16 +896,32 @@ export default function App() {
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 mb-6">
                 <h3 className="font-semibold text-lg mb-4">Add New Brand</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
+                  <div className="relative">
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Brand Name</label>
                     <input
                       type="text"
                       value={newBrandName}
-                      onChange={(e) => setNewBrandName(e.target.value)}
-                      placeholder="e.g., Nike, Apple, Yeti"
+                      onChange={(e) => handleBrandInputChange(e.target.value)}
+                      placeholder="Start typing to see suggestions..."
                       className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                       onKeyPress={(e) => e.key === 'Enter' && addBrand()}
+                      onFocus={() => newBrandName && setShowSuggestions(brandSuggestions.length > 0)}
                     />
+                    
+                    {/* Autocomplete Dropdown */}
+                    {showSuggestions && brandSuggestions.length > 0 && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {brandSuggestions.map((brand, index) => (
+                          <button
+                            key={index}
+                            onClick={() => selectBrandSuggestion(brand)}
+                            className="w-full text-left px-4 py-2 hover:bg-neutral-100 transition-colors border-b border-neutral-100 last:border-b-0"
+                          >
+                            <div className="font-medium text-neutral-900">{brand}</div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-neutral-700 mb-2">Category</label>
