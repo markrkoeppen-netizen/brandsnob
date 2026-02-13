@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check } from 'lucide-react';
+import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search } from 'lucide-react';
 import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
@@ -138,7 +138,7 @@ function LuxuryDealCard({ deal }) {
       rel="noopener noreferrer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="group block bg-white rounded-2xl overflow-hidden border border-neutral-200 hover:border-neutral-300 transition-all duration-300 hover:shadow-luxury"
+      className="group block bg-white rounded-xl md:rounded-2xl overflow-hidden border border-neutral-200 hover:border-neutral-300 transition-all duration-300 hover:shadow-luxury"
     >
       <div className="relative aspect-square overflow-hidden bg-neutral-50">
         <img
@@ -149,19 +149,19 @@ function LuxuryDealCard({ deal }) {
         />
         
         {discountPercent >= 30 && (
-          <div className="absolute top-4 left-4 bg-neutral-900 text-white px-3 py-1.5 rounded-full text-sm font-semibold tracking-wide">
+          <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-neutral-900 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide">
             {deal.discount} OFF
           </div>
         )}
 
         <button
           onClick={handleFavorite}
-          className={`absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isFavorited ? 'text-rose-500' : 'text-neutral-400'}`}
+          className={`absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isFavorited ? 'text-rose-500' : 'text-neutral-400'}`}
         >
-          <Heart className="w-5 h-5" fill={isFavorited ? 'currentColor' : 'none'} />
+          <Heart className="w-4 h-4 md:w-5 md:h-5" fill={isFavorited ? 'currentColor' : 'none'} />
         </button>
 
-        <div className={`absolute inset-0 bg-neutral-900/80 backdrop-blur-sm flex items-center justify-center transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className={`absolute inset-0 bg-neutral-900/80 backdrop-blur-sm items-center justify-center transition-opacity duration-300 hidden md:flex ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <div className="bg-white px-6 py-3 rounded-full flex items-center gap-2 text-neutral-900 font-medium">
             <span>View Deal</span>
             <ExternalLink className="w-4 h-4" />
@@ -169,41 +169,41 @@ function LuxuryDealCard({ deal }) {
         </div>
       </div>
 
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-2">
+      <div className="p-3 md:p-5">
+        <div className="flex items-center justify-between mb-1 md:mb-2">
           <span className="text-xs font-medium tracking-widest uppercase text-neutral-500">
             {deal.brand}
           </span>
-          <span className="text-xs text-neutral-400">
+          <span className="text-xs text-neutral-400 hidden md:block">
             {deal.retailer}
           </span>
         </div>
 
-        <h3 className="font-display text-lg font-medium text-neutral-900 mb-3 line-clamp-2 leading-snug min-h-[3.5rem]">
+        <h3 className="font-display text-sm md:text-lg font-medium text-neutral-900 mb-2 md:mb-3 line-clamp-2 leading-snug min-h-[2.5rem] md:min-h-[3.5rem]">
           {deal.product}
         </h3>
 
-        <div className="flex items-end justify-between mb-3">
+        <div className="flex items-end justify-between mb-2 md:mb-3">
           <div>
-            <div className="flex items-baseline gap-2">
-              <span className="font-display text-2xl font-semibold text-neutral-900">
+            <div className="flex items-baseline gap-1 md:gap-2">
+              <span className="font-display text-lg md:text-2xl font-semibold text-neutral-900">
                 ${deal.salePrice}
               </span>
               {deal.originalPrice > deal.salePrice && (
-                <span className="text-sm text-neutral-400 line-through">
+                <span className="text-xs md:text-sm text-neutral-400 line-through">
                   ${deal.originalPrice}
                 </span>
               )}
             </div>
             {savings > 0 && (
-              <p className="text-xs text-neutral-500 mt-1">
+              <p className="text-xs text-neutral-500 mt-0.5 md:mt-1 hidden md:block">
                 Save ${savings.toFixed(2)}
               </p>
             )}
           </div>
 
           {discountPercent < 30 && discountPercent > 0 && (
-            <div className="bg-neutral-100 text-neutral-700 px-2.5 py-1 rounded-lg text-xs font-semibold">
+            <div className="bg-neutral-100 text-neutral-700 px-2 py-0.5 md:px-2.5 md:py-1 rounded-lg text-xs font-semibold">
               {deal.discount}
             </div>
           )}
@@ -281,6 +281,11 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedGenders, setSelectedGenders] = useState([]);
+
+  // NEW: Search, Sort, Filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dealSort, setDealSort] = useState('discount');
+  const [dealFilter, setDealFilter] = useState('all');
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -493,14 +498,49 @@ export default function App() {
     setActiveTab('brands');
   };
 
-  const filteredDeals = selectedGenders.length > 0
-    ? deals.filter(deal => {
+  const filteredDeals = React.useMemo(() => {
+    let result = deals;
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(deal => 
+        deal.product.toLowerCase().includes(query) ||
+        deal.brand.toLowerCase().includes(query)
+      );
+    }
+    
+    // Gender filter
+    if (selectedGenders.length > 0) {
+      result = result.filter(deal => {
         if (deal.gender) {
           return selectedGenders.includes(deal.gender) || deal.gender === 'unisex';
         }
         return true;
-      })
-    : deals;
+      });
+    }
+    
+    // Discount filter
+    if (dealFilter === '>30%') {
+      result = result.filter(deal => parseInt(deal.discount) >= 30);
+    } else if (dealFilter === '>50%') {
+      result = result.filter(deal => parseInt(deal.discount) >= 50);
+    }
+    
+    // Sorting
+    const sorted = [...result];
+    if (dealSort === 'discount') {
+      sorted.sort((a, b) => parseInt(b.discount) - parseInt(a.discount));
+    } else if (dealSort === 'price-low') {
+      sorted.sort((a, b) => a.salePrice - b.salePrice);
+    } else if (dealSort === 'price-high') {
+      sorted.sort((a, b) => b.salePrice - a.salePrice);
+    } else if (dealSort === 'brand') {
+      sorted.sort((a, b) => a.brand.localeCompare(b.brand));
+    }
+    
+    return sorted;
+  }, [deals, searchQuery, selectedGenders, dealFilter, dealSort]);
 
   const stats = {
     totalBrands: myBrands.length,
@@ -582,6 +622,65 @@ export default function App() {
           <div>
             {myBrands.length > 0 && <GenderPreference selectedGenders={selectedGenders} onGenderChange={setSelectedGenders} />}
 
+            {/* Search, Sort, Filter Controls */}
+            {myBrands.length > 0 && (
+              <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-neutral-200 p-3 md:p-4 mb-4 md:mb-6">
+                <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+                  {/* Search Bar */}
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 w-4 h-4 md:w-5 md:h-5 text-neutral-400" />
+                      <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Search products or brands..."
+                        className="w-full pl-9 md:pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm md:text-base"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-3 top-2.5 text-neutral-400"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* Filter & Sort */}
+                  <div className="flex gap-2 md:gap-3">
+                    <select
+                      value={dealFilter}
+                      onChange={(e) => setDealFilter(e.target.value)}
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none"
+                    >
+                      <option value="all">All Deals</option>
+                      <option value=">30%">30%+ Off</option>
+                      <option value=">50%">50%+ Off</option>
+                    </select>
+                    
+                    <select
+                      value={dealSort}
+                      onChange={(e) => setDealSort(e.target.value)}
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none"
+                    >
+                      <option value="discount">Best Deals</option>
+                      <option value="price-low">Price: Low</option>
+                      <option value="price-high">Price: High</option>
+                      <option value="brand">Brand A-Z</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {searchQuery && (
+                  <div className="mt-3 text-sm text-neutral-600">
+                    Found {filteredDeals.length} result{filteredDeals.length !== 1 ? 's' : ''} for "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Brands Tracked</div>
@@ -645,7 +744,7 @@ export default function App() {
             )}
 
             {!dealsLoading && !dealsError && filteredDeals.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                 {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} />)}
               </div>
             )}
