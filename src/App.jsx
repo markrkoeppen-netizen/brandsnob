@@ -30,7 +30,9 @@ const BRAND_COLLECTIONS = [
       { name: 'Fendi', category: 'Fashion' },
       { name: 'Saint Laurent', category: 'Fashion' },
       { name: 'Chloé', category: 'Fashion' },
-      { name: 'The Row', category: 'Fashion' }
+      { name: 'The Row', category: 'Fashion' },
+      { name: 'Burberry', category: 'Fashion' },
+      { name: 'Dolce & Gabbana', category: 'Fashion' }
     ]
   },
   {
@@ -88,21 +90,38 @@ const BRAND_COLLECTIONS = [
       { name: 'Lacoste', category: 'Fashion' },
       { name: 'Abercrombie & Fitch', category: 'Fashion' },
       { name: 'Madewell', category: 'Fashion' },
-      { name: 'Kith', category: 'Fashion' }
+      { name: 'Kith', category: 'Fashion' },
+      { name: 'Brooks Brothers', category: 'Fashion' },
+      { name: 'Chubbies', category: 'Fashion' },
+      { name: 'TravisMatthew', category: 'Fashion' },
+      { name: 'Rhone', category: 'Fashion' }
     ]
   },
   {
     id: 6,
-    name: 'Footwear Favorites',
+    name: 'Footwear & Comfort',
     description: 'Comfort meets style',
     brands: [
       { name: 'UGG', category: 'Footwear' },
       { name: 'BIRKENSTOCK', category: 'Footwear' },
-      { name: 'Crocs', category: 'Footwear' }
+      { name: 'Crocs', category: 'Footwear' },
+      { name: 'Allbirds', category: 'Footwear' },
+      { name: 'Bombas', category: 'Accessories' }
     ]
   },
   {
     id: 7,
+    name: 'Eyewear & Accessories',
+    description: 'Premium sunglasses and accessories',
+    brands: [
+      { name: 'Ray-Ban', category: 'Accessories' },
+      { name: 'Oakley', category: 'Accessories' },
+      { name: 'Costa', category: 'Accessories' },
+      { name: 'Kendra Scott', category: 'Jewelry' }
+    ]
+  },
+  {
+    id: 8,
     name: 'Outdoor & Technical',
     description: 'Performance gear for adventure',
     brands: [
@@ -112,21 +131,23 @@ const BRAND_COLLECTIONS = [
     ]
   },
   {
-    id: 8,
+    id: 9,
     name: 'Avant-Garde & Modern',
     description: 'Cutting-edge contemporary fashion',
     brands: [
       { name: 'Thom Browne', category: 'Fashion' },
       { name: 'Cult Gaia', category: 'Accessories' },
-      { name: 'Burlebo', category: 'Fashion' }
+      { name: 'Burlebo', category: 'Fashion' },
+      { name: 'Poncho', category: 'Fashion' }
     ]
   },
   {
-    id: 9,
+    id: 10,
     name: 'Beauty & Home',
     description: 'Luxury beauty and home essentials',
     brands: [
       { name: 'Estée Lauder', category: 'Cosmetics' },
+      { name: 'Lush', category: 'Cosmetics' },
       { name: 'Dacor', category: 'Home' }
     ]
   }
@@ -182,15 +203,17 @@ const RECOMMENDATIONS = [
 
 // All available brands for autocomplete
 const ALL_AVAILABLE_BRANDS = [
-  'Abercrombie & Fitch', 'Adidas', 'Alo', 'Athleta', 'BIRKENSTOCK', 'Burlebo',
-  'Chloé', 'Christian Louboutin', 'Coach', 'Cole Haan', 'Columbia', 'Crocs',
-  'Cult Gaia', 'Dacor', 'Donna Karan', 'Estée Lauder', 'Fendi', 'Feragamo',
-  'Gucci', 'Hermès', 'Jimmy Choo', 'Kate Spade', 'Kith', 'Lacoste',
-  'Louis Vuitton', 'Lucchese', 'Lululemon', 'Madewell', 'Marc Jacobs',
-  'Michael Kors', 'Nike', 'On Running', 'Oscar de la Renta', 'Polo Ralph Lauren',
-  'Prada', 'Saint Laurent', 'Stuart Weitzman', 'The North Face', 'The Row',
-  'Thom Browne', 'Tom Ford', 'Tommy Bahama', 'Tory Burch', 'Tumi', 'UGG',
-  'Vera Wang', 'Vineyard Vines', 'Vuori', 'Yeti'
+  'Abercrombie & Fitch', 'Adidas', 'Allbirds', 'Alo', 'Athleta', 'BIRKENSTOCK',
+  'Bombas', 'Brooks Brothers', 'Burberry', 'Burlebo', 'Chloé', 'Christian Louboutin',
+  'Chubbies', 'Coach', 'Cole Haan', 'Columbia', 'Costa', 'Crocs', 'Cult Gaia',
+  'Dacor', 'Dolce & Gabbana', 'Donna Karan', 'Estée Lauder', 'Fendi', 'Feragamo',
+  'Gucci', 'Hermès', 'Jimmy Choo', 'Kate Spade', 'Kendra Scott', 'Kith', 'Lacoste',
+  'Louis Vuitton', 'Lucchese', 'Lululemon', 'Lush', 'Madewell', 'Marc Jacobs',
+  'Michael Kors', 'Nike', 'Oakley', 'On Running', 'Oscar de la Renta', 'Polo Ralph Lauren',
+  'Poncho', 'Prada', 'Ray-Ban', 'Rhone', 'Saint Laurent', 'Stuart Weitzman',
+  'The North Face', 'The Row', 'Thom Browne', 'Tom Ford', 'Tommy Bahama',
+  'Tory Burch', 'TravisMatthew', 'Tumi', 'UGG', 'Vera Wang', 'Vineyard Vines',
+  'Vuori', 'Yeti'
 ];
 
 function LuxuryDealCard({ deal }) {
