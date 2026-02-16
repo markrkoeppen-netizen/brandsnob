@@ -216,14 +216,23 @@ const ALL_AVAILABLE_BRANDS = [
   'Vuori', 'Yeti'
 ];
 
-function LuxuryDealCard({ deal }) {
+function LuxuryDealCard({ deal, onAddToBag }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  const [addedToBag, setAddedToBag] = useState(false);
 
   const handleFavorite = (e) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFavorited(!isFavorited);
+  };
+
+  const handleAddToBag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onAddToBag(deal);
+    setAddedToBag(true);
+    setTimeout(() => setAddedToBag(false), 2000); // Reset after 2s
   };
 
   const discountPercent = parseInt(deal.discount);
@@ -306,6 +315,28 @@ function LuxuryDealCard({ deal }) {
             </div>
           )}
         </div>
+
+        {/* Add to Bag Button */}
+        <button
+          onClick={handleAddToBag}
+          className={`mt-3 w-full py-2 rounded-lg font-medium text-sm transition-all ${
+            addedToBag 
+              ? 'bg-green-600 text-white' 
+              : 'bg-neutral-900 text-white hover:bg-neutral-800'
+          }`}
+        >
+          {addedToBag ? (
+            <span className="flex items-center justify-center gap-2">
+              <Check className="w-4 h-4" />
+              Added to Bag
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              <ShoppingBag className="w-4 h-4" />
+              Add to Bag
+            </span>
+          )}
+        </button>
       </div>
     </a>
   );
@@ -365,6 +396,119 @@ function GenderPreference({ selectedGenders, onGenderChange }) {
   );
 }
 
+// Shopping Bag Modal
+function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippingProfile }) {
+  const totalItems = bag.length;
+  const totalValue = bag.reduce((sum, item) => sum + item.salePrice, 0);
+  const totalSavings = bag.reduce((sum, item) => sum + (item.originalPrice - item.salePrice), 0);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b border-neutral-200">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-bold text-neutral-900">Shopping Bag</h2>
+            <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <p className="text-sm text-neutral-600">
+            {totalItems} item{totalItems !== 1 ? 's' : ''} • ${totalValue.toFixed(2)} total
+          </p>
+        </div>
+
+        {/* Items List */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {bag.length === 0 ? (
+            <div className="text-center py-12">
+              <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+              <p className="text-neutral-500">Your bag is empty</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {bag.map(item => (
+                <div key={item.id} className="flex gap-4 bg-neutral-50 rounded-xl p-4">
+                  <img 
+                    src={item.image} 
+                    alt={item.product}
+                    className="w-20 h-20 object-cover rounded-lg"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-neutral-500 mb-1">{item.brand}</p>
+                    <h3 className="font-medium text-neutral-900 line-clamp-2 text-sm mb-2">
+                      {item.product}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-neutral-900">${item.salePrice}</span>
+                      {item.originalPrice > item.salePrice && (
+                        <>
+                          <span className="text-xs text-neutral-400 line-through">${item.originalPrice}</span>
+                          <span className="text-xs text-green-600 font-medium">{item.discount} off</span>
+                        </>
+                      )}
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-1">{item.retailer}</p>
+                  </div>
+                  <button
+                    onClick={() => onRemove(item.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Shipping Helper */}
+        {bag.length > 0 && shippingProfile.firstName && (
+          <div className="p-6 bg-neutral-50 border-t border-neutral-200">
+            <p className="text-sm font-medium text-neutral-700 mb-2">📦 Your Shipping Info (copy for checkout):</p>
+            <div className="bg-white rounded-lg p-3 text-xs text-neutral-600 font-mono">
+              {shippingProfile.firstName} {shippingProfile.lastName}<br />
+              {shippingProfile.address}<br />
+              {shippingProfile.city}, {shippingProfile.state} {shippingProfile.zip}<br />
+              {shippingProfile.email} • {shippingProfile.phone}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        {bag.length > 0 && (
+          <div className="p-6 border-t border-neutral-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm text-neutral-600">Total Value</p>
+                <p className="text-2xl font-bold text-neutral-900">${totalValue.toFixed(2)}</p>
+                {totalSavings > 0 && (
+                  <p className="text-sm text-green-600">Save ${totalSavings.toFixed(2)}</p>
+                )}
+              </div>
+              <button
+                onClick={onClear}
+                className="text-sm text-neutral-500 hover:text-neutral-700"
+              >
+                Clear All
+              </button>
+            </div>
+            <button
+              onClick={onCheckout}
+              className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-medium"
+            >
+              Checkout All ({totalItems} item{totalItems !== 1 ? 's' : ''})
+            </button>
+            <p className="text-xs text-neutral-500 text-center mt-3">
+              Opens each retailer in a new tab with items ready to checkout
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
@@ -386,6 +530,28 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [dealSort, setDealSort] = useState('discount');
   const [dealFilter, setDealFilter] = useState('all');
+
+  // Shopping Bag
+  const [shoppingBag, setShoppingBag] = useState(() => {
+    const saved = localStorage.getItem('shoppingBag');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showBagModal, setShowBagModal] = useState(false);
+
+  // Shipping Profile
+  const [shippingProfile, setShippingProfile] = useState(() => {
+    const saved = localStorage.getItem('shippingProfile');
+    return saved ? JSON.parse(saved) : {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      state: '',
+      zip: ''
+    };
+  });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -410,6 +576,14 @@ export default function App() {
       saveToCloud();
     }
   }, [myBrands, user]);
+
+  useEffect(() => {
+    localStorage.setItem('shoppingBag', JSON.stringify(shoppingBag));
+  }, [shoppingBag]);
+
+  useEffect(() => {
+    localStorage.setItem('shippingProfile', JSON.stringify(shippingProfile));
+  }, [shippingProfile]);
 
   useEffect(() => {
     const savedGenders = localStorage.getItem('selectedGenders');
@@ -604,6 +778,45 @@ export default function App() {
     setBrandSuggestions([]);
   };
 
+  const addToBag = (deal) => {
+    // Check if already in bag
+    if (shoppingBag.find(item => item.id === deal.id)) {
+      return; // Already in bag
+    }
+    setShoppingBag([...shoppingBag, deal]);
+  };
+
+  const removeFromBag = (dealId) => {
+    setShoppingBag(shoppingBag.filter(item => item.id !== dealId));
+  };
+
+  const clearBag = () => {
+    setShoppingBag([]);
+  };
+
+  const checkoutAll = () => {
+    if (shoppingBag.length === 0) return;
+    
+    // Group items by retailer to minimize tabs
+    const byRetailer = {};
+    shoppingBag.forEach(item => {
+      if (!byRetailer[item.retailer]) {
+        byRetailer[item.retailer] = [];
+      }
+      byRetailer[item.retailer].push(item);
+    });
+
+    // Open each retailer's items (stagger to avoid popup blocker)
+    Object.values(byRetailer).forEach((items, index) => {
+      setTimeout(() => {
+        // Open first item's link for each retailer
+        window.open(items[0].link, '_blank');
+      }, index * 300);
+    });
+
+    setShowBagModal(false);
+  };
+
   const removeBrand = (id) => {
     setMyBrands(myBrands.filter(b => b.id !== id));
   };
@@ -686,6 +899,19 @@ export default function App() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              {/* Shopping Bag Button */}
+              <button 
+                onClick={() => setShowBagModal(true)}
+                className="relative p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              >
+                <ShoppingBag className="w-6 h-6 text-neutral-700" />
+                {shoppingBag.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-neutral-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                    {shoppingBag.length}
+                  </span>
+                )}
+              </button>
+
               {syncStatus === 'syncing' && (
                 <div className="flex items-center gap-2 text-blue-600">
                   <Cloud className="w-5 h-5 animate-pulse" />
@@ -724,7 +950,7 @@ export default function App() {
       <div className="bg-white border-b border-neutral-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-8">
-            {['deals', 'brands', 'collections', 'recommendations'].map(tab => (
+            {['deals', 'brands', 'collections', 'recommendations', 'profile'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -867,7 +1093,7 @@ export default function App() {
 
             {!dealsLoading && !dealsError && filteredDeals.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} />)}
+                {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />)}
               </div>
             )}
 
@@ -1067,7 +1293,129 @@ export default function App() {
             </div>
           </div>
         )}
+
+        {activeTab === 'profile' && (
+          <div>
+            <div className="mb-6">
+              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">My Profile</h2>
+              <p className="text-neutral-600">Save your shipping info for faster checkout</p>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 max-w-2xl">
+              <h3 className="font-semibold text-lg mb-4">Shipping Information</h3>
+              <p className="text-sm text-neutral-600 mb-6">
+                This info will be displayed when you checkout, making it easy to copy and paste into each retailer's site.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">First Name</label>
+                  <input
+                    type="text"
+                    value={shippingProfile.firstName}
+                    onChange={(e) => setShippingProfile({...shippingProfile, firstName: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="John"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Last Name</label>
+                  <input
+                    type="text"
+                    value={shippingProfile.lastName}
+                    onChange={(e) => setShippingProfile({...shippingProfile, lastName: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="Doe"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    value={shippingProfile.email}
+                    onChange={(e) => setShippingProfile({...shippingProfile, email: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="john.doe@example.com"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    value={shippingProfile.phone}
+                    onChange={(e) => setShippingProfile({...shippingProfile, phone: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="(555) 123-4567"
+                  />
+                </div>
+
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Address</label>
+                  <input
+                    type="text"
+                    value={shippingProfile.address}
+                    onChange={(e) => setShippingProfile({...shippingProfile, address: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="123 Main Street"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">City</label>
+                  <input
+                    type="text"
+                    value={shippingProfile.city}
+                    onChange={(e) => setShippingProfile({...shippingProfile, city: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="Spring"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">State</label>
+                  <input
+                    type="text"
+                    value={shippingProfile.state}
+                    onChange={(e) => setShippingProfile({...shippingProfile, state: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="TX"
+                    maxLength="2"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">ZIP Code</label>
+                  <input
+                    type="text"
+                    value={shippingProfile.zip}
+                    onChange={(e) => setShippingProfile({...shippingProfile, zip: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    placeholder="77389"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>💡 Tip:</strong> Your shipping info is saved locally and will appear in a convenient copy-paste box when you checkout!
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
-    </div>
-  );
-}
+
+      {/* Shopping Bag Modal */}
+      {showBagModal && (
+        <ShoppingBagModal
+          bag={shoppingBag}
+          onClose={() => setShowBagModal(false)}
+          onRemove={removeFromBag}
+          onCheckout={checkoutAll}
+          onClear={clearBag}
+          shippingProfile={shippingProfile}
+        />
+      )}
