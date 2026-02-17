@@ -595,7 +595,9 @@ export default function App() {
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
-  const [newBrandCategory, setNewBrandCategory] = useState('Fashion');
+  const [newBrandCollection, setNewBrandCollection] = useState('');
+  const [newCollectionName, setNewCollectionName] = useState('');
+  const [showNewCollection, setShowNewCollection] = useState(false);
   const [brandSuggestions, setBrandSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeTab, setActiveTab] = useState('deals');
@@ -834,17 +836,29 @@ export default function App() {
   };
 
   const addBrand = () => {
-    if (newBrandName.trim()) {
-      setMyBrands([...myBrands, {
-        id: Date.now(),
-        name: newBrandName.trim(),
-        category: newBrandCategory
-      }]);
-      setNewBrandName('');
-      setShowAddBrand(false);
-      setShowSuggestions(false);
-    }
+    if (!newBrandName.trim()) return;
+    
+    const collection = showNewCollection 
+      ? newCollectionName.trim() 
+      : newBrandCollection;
+    
+    if (!collection) return;
+    
+    setMyBrands([...myBrands, {
+      id: Date.now(),
+      name: newBrandName.trim(),
+      collection: collection
+    }]);
+    setNewBrandName('');
+    setNewBrandCollection('');
+    setNewCollectionName('');
+    setShowNewCollection(false);
+    setShowAddBrand(false);
+    setShowSuggestions(false);
   };
+
+  // Get unique user collections
+  const userCollections = [...new Set(myBrands.map(b => b.collection).filter(Boolean))];
 
   const handleBrandInputChange = (value) => {
     setNewBrandName(value);
@@ -953,7 +967,7 @@ export default function App() {
     ).map(brand => ({
       id: Date.now() + Math.random(),
       name: brand.name,
-      category: brand.category
+      collection: collection.name
     }));
     setMyBrands([...myBrands, ...newBrands]);
     setActiveTab('brands');
@@ -1291,8 +1305,6 @@ export default function App() {
                       onKeyPress={(e) => e.key === 'Enter' && addBrand()}
                       onFocus={() => newBrandName && setShowSuggestions(brandSuggestions.length > 0)}
                     />
-                    
-                    {/* Autocomplete Dropdown */}
                     {showSuggestions && brandSuggestions.length > 0 && (
                       <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                         {brandSuggestions.map((brand, index) => (
@@ -1307,20 +1319,65 @@ export default function App() {
                       </div>
                     )}
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">Category</label>
-                    <select
-                      value={newBrandCategory}
-                      onChange={(e) => setNewBrandCategory(e.target.value)}
-                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    >
-                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">Collection</label>
+                    {!showNewCollection ? (
+                      <div className="space-y-2">
+                        <select
+                          value={newBrandCollection}
+                          onChange={(e) => setNewBrandCollection(e.target.value)}
+                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                        >
+                          <option value="">Select a collection...</option>
+                          {userCollections.map(col => (
+                            <option key={col} value={col}>{col}</option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => setShowNewCollection(true)}
+                          className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-1"
+                        >
+                          <Plus className="w-4 h-4" />
+                          Create new collection
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={newCollectionName}
+                          onChange={(e) => setNewCollectionName(e.target.value)}
+                          placeholder="e.g., Athletic Gear, Luxury Bags..."
+                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                          autoFocus
+                        />
+                        {userCollections.length > 0 && (
+                          <button
+                            onClick={() => setShowNewCollection(false)}
+                            className="text-sm text-neutral-600 hover:text-neutral-900"
+                          >
+                            ← Choose existing collection
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={addBrand} className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors">Add Brand</button>
-                  <button onClick={() => setShowAddBrand(false)} className="bg-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-300 transition-colors">Cancel</button>
+                  <button
+                    onClick={addBrand}
+                    disabled={!newBrandName.trim() || (!newBrandCollection && !newCollectionName.trim())}
+                    className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Add Brand
+                  </button>
+                  <button
+                    onClick={() => { setShowAddBrand(false); setShowNewCollection(false); }}
+                    className="bg-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </div>
             )}
@@ -1329,18 +1386,21 @@ export default function App() {
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
                 <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
                 <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No brands added yet</h3>
-                <p className="text-neutral-500">Click "Add Brand" to get started!</p>
+                <p className="text-neutral-500">Click "Add Brand" and create your first collection to get started!</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {CATEGORIES.map(category => {
-                  const brandsInCategory = myBrands.filter(b => b.category === category);
-                  if (brandsInCategory.length === 0) return null;
+                {userCollections.map(collection => {
+                  const brandsInCollection = myBrands.filter(b => b.collection === collection);
+                  if (brandsInCollection.length === 0) return null;
                   return (
-                    <div key={category} className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                      <h3 className="font-semibold text-lg text-neutral-800 mb-4">{category}</h3>
+                    <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-semibold text-lg text-neutral-800">{collection}</h3>
+                        <span className="text-sm text-neutral-500">{brandsInCollection.length} brand{brandsInCollection.length !== 1 ? 's' : ''}</span>
+                      </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {brandsInCategory.map(brand => (
+                        {brandsInCollection.map(brand => (
                           <div key={brand.id} className="flex items-center justify-between bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200">
                             <span className="font-medium text-neutral-800">{brand.name}</span>
                             <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
@@ -1352,6 +1412,22 @@ export default function App() {
                     </div>
                   );
                 })}
+                {/* Brands with no collection assigned */}
+                {myBrands.filter(b => !b.collection).length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
+                    <h3 className="font-semibold text-lg text-neutral-800 mb-4">Uncategorized</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                      {myBrands.filter(b => !b.collection).map(brand => (
+                        <div key={brand.id} className="flex items-center justify-between bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200">
+                          <span className="font-medium text-neutral-800">{brand.name}</span>
+                          <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
+                            <X className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1360,8 +1436,68 @@ export default function App() {
         {activeTab === 'collections' && (
           <div>
             <div className="mb-6">
-              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">Brand Collections</h2>
-              <p className="text-neutral-600">Curated brand lists for different lifestyles</p>
+              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">My Collections</h2>
+              <p className="text-neutral-600">Deals organized by your custom collections</p>
+            </div>
+
+            {userCollections.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
+                <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No collections yet</h3>
+                <p className="text-neutral-500 mb-6">Go to Brands tab, add a brand and create your first collection!</p>
+                <button
+                  onClick={() => setActiveTab('brands')}
+                  className="bg-neutral-900 text-white px-6 py-3 rounded-lg inline-flex items-center gap-2"
+                >
+                  <Plus className="w-5 h-5" />
+                  Go to Brands
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {userCollections.map(collection => {
+                  const collectionBrandNames = myBrands
+                    .filter(b => b.collection === collection)
+                    .map(b => b.name);
+                  const collectionDeals = deals.filter(d =>
+                    collectionBrandNames.includes(d.brand)
+                  );
+
+                  return (
+                    <div key={collection}>
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="font-display text-xl font-bold text-neutral-900">{collection}</h3>
+                          <p className="text-sm text-neutral-500">
+                            {collectionBrandNames.length} brand{collectionBrandNames.length !== 1 ? 's' : ''} · {collectionDeals.length} deal{collectionDeals.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                      </div>
+
+                      {collectionDeals.length === 0 ? (
+                        <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
+                          <p className="text-neutral-500 text-sm">No deals found yet for this collection.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                          {collectionDeals.map(deal => (
+                            <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'recommendations' && (
+          <div>
+            <div className="mb-6">
+              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">Recommended Brands</h2>
+              <p className="text-neutral-600">Discover curated brand collections for every style</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {BRAND_COLLECTIONS.map(collection => (
@@ -1377,12 +1513,14 @@ export default function App() {
                         {collection.brands.map((brand, idx) => (
                           <div key={idx} className="flex items-center justify-between bg-neutral-50 px-3 py-2 rounded-lg">
                             <span className="font-medium text-neutral-800">{brand.name}</span>
-                            <span className="text-sm text-neutral-500">{brand.category}</span>
                           </div>
                         ))}
                       </div>
                     </div>
-                    <button onClick={() => loadCollection(collection)} className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-semibold">
+                    <button
+                      onClick={() => loadCollection(collection)}
+                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-semibold"
+                    >
                       Add All to My Brands
                     </button>
                   </div>
@@ -1391,44 +1529,6 @@ export default function App() {
             </div>
           </div>
         )}
-
-        {activeTab === 'recommendations' && (
-          <div>
-            <div className="mb-6">
-              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">Discover New Brands</h2>
-              <p className="text-neutral-600">Based on your preferences for premium products</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {RECOMMENDATIONS.map(rec => (
-                <div key={rec.id} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="relative">
-                    <img src={rec.image} alt={rec.product} className="w-full h-48 object-cover" />
-                    <div className="absolute top-2 left-2 bg-neutral-900 text-white px-3 py-1 rounded-full text-xs font-semibold">Recommended</div>
-                  </div>
-                  <div className="p-4">
-                    <div className="text-sm text-neutral-900 font-semibold mb-1">{rec.brand}</div>
-                    <div className="text-xs text-neutral-500 mb-2">Because you like: {rec.reason}</div>
-                    <h3 className="font-display font-bold text-lg text-neutral-800 mb-2">{rec.product}</h3>
-                    <div className="font-display text-2xl font-bold text-neutral-900 mb-3">${rec.price.toLocaleString()}</div>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setMyBrands([...myBrands, { id: Date.now(), name: rec.brand, category: rec.category }]);
-                          setActiveTab('brands');
-                        }}
-                        className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm"
-                      >
-                        Add to My Brands
-                      </button>
-                      <button className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors text-sm">Learn More</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {activeTab === 'profile' && (
           <div>
             <div className="mb-6">
