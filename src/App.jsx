@@ -1018,11 +1018,16 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <ShoppingBag className="w-8 h-8 text-neutral-900" />
-              <div>
-                <h1 className="font-display text-2xl font-bold text-neutral-900">Brandsnobs</h1>
-                <p className="text-xs text-neutral-500 tracking-wide">CURATED BRAND DEALS</p>
-              </div>
+              <button
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              >
+                <ShoppingBag className="w-8 h-8 text-neutral-900" />
+                <div className="text-left">
+                  <h1 className="font-display text-2xl font-bold text-neutral-900">Brandsnobs</h1>
+                  <p className="text-xs text-neutral-500 tracking-wide">CURATED BRAND DEALS</p>
+                </div>
+              </button>
             </div>
             <div className="flex items-center gap-3">
               {/* Shopping Bag Button */}
@@ -1073,7 +1078,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="bg-white border-b border-neutral-200 sticky top-0 z-40 shadow-sm">
+      <div className="bg-white border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-8">
             {['deals', 'brands', 'collections', 'recommendations', 'profile'].map(tab => (
