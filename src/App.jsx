@@ -640,21 +640,23 @@ export default function App() {
   });
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        loadUserData(currentUser.uid);
+        // User signed in - load from Firebase
+        await loadUserData(currentUser.uid);
+      } else {
+        // No user - load from localStorage
+        const savedBrands = localStorage.getItem('myBrands');
+        if (savedBrands) {
+          setMyBrands(JSON.parse(savedBrands));
+        }
       }
     });
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    const savedBrands = localStorage.getItem('myBrands');
-    if (savedBrands) {
-      setMyBrands(JSON.parse(savedBrands));
-    }
-  }, []);
+  // Removed the separate localStorage load effect - now handled in auth listener above
 
   useEffect(() => {
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
@@ -665,10 +667,16 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('shoppingBag', JSON.stringify(shoppingBag));
+    if (user) {
+      saveToCloud();
+    }
   }, [shoppingBag]);
 
   useEffect(() => {
     localStorage.setItem('shippingProfile', JSON.stringify(shippingProfile));
+    if (user) {
+      saveToCloud();
+    }
   }, [shippingProfile]);
 
   useEffect(() => {
@@ -764,6 +772,8 @@ export default function App() {
         const data = userDoc.data();
         if (data.brands) setMyBrands(data.brands);
         if (data.genderPreferences) setSelectedGenders(data.genderPreferences);
+        if (data.shoppingBag) setShoppingBag(data.shoppingBag);
+        if (data.shippingProfile) setShippingProfile(data.shippingProfile);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -788,6 +798,9 @@ export default function App() {
       setSyncStatus('syncing');
       await setDoc(doc(db, 'users', user.uid), {
         brands: myBrands,
+        genderPreferences: selectedGenders,
+        shoppingBag: shoppingBag,
+        shippingProfile: shippingProfile,
         updatedAt: new Date().toISOString()
       }, { merge: true });
       setSyncStatus('synced');
