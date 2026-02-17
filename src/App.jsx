@@ -511,6 +511,86 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
   );
 }
 
+// Recommend Brand Modal
+function RecommendBrandModal({ onClose, onSubmit, brandName, setBrandName, email, setEmail, submitting, success }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Recommend a Brand</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        {success ? (
+          <div className="text-center py-8">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Check className="w-8 h-8 text-green-600" />
+            </div>
+            <h4 className="text-lg font-semibold text-neutral-900 mb-2">Thank you!</h4>
+            <p className="text-neutral-600">We'll review your brand recommendation.</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-sm text-neutral-600 mb-6">
+              Don't see your favorite brand? Let us know and we'll consider adding it!
+            </p>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Brand Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={brandName}
+                  onChange={(e) => setBrandName(e.target.value)}
+                  placeholder="e.g., Patagonia"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Your Email (optional)
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                />
+                <p className="text-xs text-neutral-500 mt-1">
+                  We'll notify you if we add this brand
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={onSubmit}
+                disabled={!brandName.trim() || submitting}
+                className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Submitting...' : 'Submit'}
+              </button>
+              <button
+                onClick={onClose}
+                className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
@@ -539,6 +619,13 @@ export default function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showBagModal, setShowBagModal] = useState(false);
+
+  // Brand Recommendation
+  const [showRecommendModal, setShowRecommendModal] = useState(false);
+  const [recommendBrand, setRecommendBrand] = useState('');
+  const [recommendEmail, setRecommendEmail] = useState('');
+  const [recommendSubmitting, setRecommendSubmitting] = useState(false);
+  const [recommendSuccess, setRecommendSuccess] = useState(false);
 
   // Shipping Profile
   const [shippingProfile, setShippingProfile] = useState(() => {
@@ -817,6 +904,43 @@ export default function App() {
     });
 
     setShowBagModal(false);
+  };
+
+  const submitBrandRecommendation = async () => {
+    if (!recommendBrand.trim()) return;
+    
+    setRecommendSubmitting(true);
+    
+    try {
+      // Using EmailJS or similar service - you'll need to set this up
+      // For now, we'll use a simple fetch to a serverless function
+      await fetch('https://formsubmit.co/ajax/admin@brandsnobs.com', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          brand: recommendBrand,
+          email: recommendEmail || 'Not provided',
+          userEmail: user?.email || 'Anonymous',
+          date: new Date().toISOString()
+        })
+      });
+      
+      setRecommendSuccess(true);
+      setTimeout(() => {
+        setShowRecommendModal(false);
+        setRecommendBrand('');
+        setRecommendEmail('');
+        setRecommendSuccess(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error submitting recommendation:', error);
+      alert('Failed to submit recommendation. Please try again.');
+    } finally {
+      setRecommendSubmitting(false);
+    }
   };
 
   const removeBrand = (id) => {
@@ -1134,6 +1258,10 @@ export default function App() {
                   <Plus className="w-5 h-5" />
                   Add Brand
                 </button>
+                <button onClick={() => setShowRecommendModal(true)} className="bg-neutral-200 text-neutral-700 px-4 py-2 rounded-lg hover:bg-neutral-300 transition-colors flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Recommend
+                </button>
               </div>
             </div>
 
@@ -1419,6 +1547,20 @@ export default function App() {
           onCheckout={checkoutAll}
           onClear={clearBag}
           shippingProfile={shippingProfile}
+        />
+      )}
+
+      {/* Recommend Brand Modal */}
+      {showRecommendModal && (
+        <RecommendBrandModal
+          onClose={() => setShowRecommendModal(false)}
+          onSubmit={submitBrandRecommendation}
+          brandName={recommendBrand}
+          setBrandName={setRecommendBrand}
+          email={recommendEmail}
+          setEmail={setRecommendEmail}
+          submitting={recommendSubmitting}
+          success={recommendSuccess}
         />
       )}
     </div>
