@@ -1024,7 +1024,8 @@ export default function App() {
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="bg-white border-b border-neutral-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="pt-safe">
+          <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button
@@ -1085,6 +1086,7 @@ export default function App() {
               )}
             </div>
           </div>
+        </div>
         </div>
       </header>
 
