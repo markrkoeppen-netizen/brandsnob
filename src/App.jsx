@@ -639,10 +639,6 @@ export default function App() {
   const [recommendEmail, setRecommendEmail] = useState('');
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
-  const [recommendBrand, setRecommendBrand] = useState('');
-  const [recommendEmail, setRecommendEmail] = useState('');
-  const [recommendSubmitting, setRecommendSubmitting] = useState(false);
-  const [recommendSuccess, setRecommendSuccess] = useState(false);
 
   // Shipping Profile
   const [shippingProfile, setShippingProfile] = useState(() => {
