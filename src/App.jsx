@@ -1106,7 +1106,7 @@ export default function App() {
       <div className="bg-white border-b border-neutral-200">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-8">
-            {['deals', 'brands', 'collections', 'recommendations', 'profile'].map(tab => (
+            {['deals', 'brands', 'recommendations', 'profile'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -1130,7 +1130,6 @@ export default function App() {
             {myBrands.length > 0 && (
               <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-neutral-200 p-3 md:p-4 mb-4 md:mb-6">
                 <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                  {/* Search Bar */}
                   <div className="flex-1">
                     <div className="relative">
                       <Search className="absolute left-3 top-2.5 w-4 h-4 md:w-5 md:h-5 text-neutral-400" />
@@ -1142,33 +1141,19 @@ export default function App() {
                         className="w-full pl-9 md:pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm md:text-base"
                       />
                       {searchQuery && (
-                        <button
-                          onClick={() => setSearchQuery('')}
-                          className="absolute right-3 top-2.5 text-neutral-400"
-                        >
+                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-2.5 text-neutral-400">
                           <X className="w-4 h-4" />
                         </button>
                       )}
                     </div>
                   </div>
-                  
-                  {/* Filter & Sort */}
                   <div className="flex gap-2 md:gap-3">
-                    <select
-                      value={dealFilter}
-                      onChange={(e) => setDealFilter(e.target.value)}
-                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none"
-                    >
+                    <select value={dealFilter} onChange={(e) => setDealFilter(e.target.value)} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none">
                       <option value="all">All Deals</option>
                       <option value=">30%">30%+ Off</option>
                       <option value=">50%">50%+ Off</option>
                     </select>
-                    
-                    <select
-                      value={dealSort}
-                      onChange={(e) => setDealSort(e.target.value)}
-                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none"
-                    >
+                    <select value={dealSort} onChange={(e) => setDealSort(e.target.value)} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none">
                       <option value="discount">Best Deals</option>
                       <option value="price-low">Price: Low</option>
                       <option value="price-high">Price: High</option>
@@ -1176,7 +1161,6 @@ export default function App() {
                     </select>
                   </div>
                 </div>
-                
                 {searchQuery && (
                   <div className="mt-3 text-sm text-neutral-600">
                     Found {filteredDeals.length} result{filteredDeals.length !== 1 ? 's' : ''} for "{searchQuery}"
@@ -1185,6 +1169,7 @@ export default function App() {
               </div>
             )}
 
+            {/* Stats Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Brands Tracked</div>
@@ -1204,21 +1189,6 @@ export default function App() {
               </div>
             </div>
 
-            {lastUpdated && (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-4 mb-6 flex items-center justify-between">
-                <div className="flex items-center gap-2 text-sm text-neutral-600">
-                  <TrendingUp className="w-4 h-4" />
-                  <span>{getTimeAgo(lastUpdated)}</span>
-                  <span className="text-neutral-400">•</span>
-                  <span className="text-neutral-500">Deals refresh every 6 hours</span>
-                </div>
-                <button onClick={refreshDeals} disabled={refreshing} className="flex items-center gap-2 text-neutral-900 hover:text-neutral-700 font-medium disabled:opacity-50">
-                  <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
-                  {refreshing ? 'Refreshing...' : 'Refresh'}
-                </button>
-              </div>
-            )}
-
             {dealsLoading && (
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
                 <RefreshCw className="w-12 h-12 text-neutral-600 mx-auto mb-4 animate-spin" />
@@ -1235,11 +1205,12 @@ export default function App() {
               </div>
             )}
 
+            {/* No brands state */}
             {!dealsLoading && myBrands.length === 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
                 <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
                 <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No brands yet</h3>
-                <p className="text-neutral-500 mb-4">Add some brands to start seeing deals!</p>
+                <p className="text-neutral-500 mb-4">Add brands to collections to start seeing deals!</p>
                 <button onClick={() => setActiveTab('brands')} className="bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition-colors inline-flex items-center gap-2">
                   <Plus className="w-5 h-5" />
                   Add Brands
@@ -1247,18 +1218,113 @@ export default function App() {
               </div>
             )}
 
-            {!dealsLoading && !dealsError && filteredDeals.length > 0 && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />)}
-              </div>
-            )}
+            {/* Deals grouped by collection */}
+            {!dealsLoading && !dealsError && myBrands.length > 0 && (
+              <div>
+                {/* If searching/filtering, show flat list with header */}
+                {(searchQuery || dealFilter !== 'all') ? (
+                  <div>
+                    <p className="text-sm text-neutral-500 mb-4">{filteredDeals.length} deal{filteredDeals.length !== 1 ? 's' : ''} found</p>
+                    {filteredDeals.length === 0 ? (
+                      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
+                        <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                        <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No deals found</h3>
+                        <p className="text-neutral-500">Try adjusting your search or filters</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />)}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Grouped by collection */
+                  <div className="space-y-4">
+                    {userCollections.length > 0 ? (
+                      userCollections.map(collection => {
+                        const collectionBrandNames = myBrands
+                          .filter(b => b.collection === collection)
+                          .map(b => b.name);
+                        const collectionDeals = filteredDeals.filter(d =>
+                          collectionBrandNames.includes(d.brand)
+                        );
+                        const isCollapsed = collapsedCollections.includes(collection);
 
-            {!dealsLoading && !dealsError && myBrands.length > 0 && filteredDeals.length === 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
-                <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No deals found</h3>
-                <p className="text-neutral-500 mb-4">We couldn't find any current deals for your selected preferences.</p>
-                <p className="text-sm text-neutral-400">Try adjusting your gender preferences or check back soon!</p>
+                        return (
+                          <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+                            <button
+                              onClick={() => toggleCollectionCollapse(collection)}
+                              className="w-full flex items-center justify-between p-6 hover:bg-neutral-50 transition-colors"
+                            >
+                              <div className="text-left">
+                                <h3 className="font-display text-xl font-bold text-neutral-900">{collection}</h3>
+                                <p className="text-sm text-neutral-500 mt-0.5">
+                                  {collectionBrandNames.length} brand{collectionBrandNames.length !== 1 ? 's' : ''} · {collectionDeals.length} deal{collectionDeals.length !== 1 ? 's' : ''}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <span className="text-sm text-neutral-500 hidden md:block">
+                                  {isCollapsed ? 'Show deals' : 'Hide deals'}
+                                </span>
+                                {isCollapsed
+                                  ? <ChevronDown className="w-5 h-5 text-neutral-500" />
+                                  : <ChevronUp className="w-5 h-5 text-neutral-500" />
+                                }
+                              </div>
+                            </button>
+                            {!isCollapsed && (
+                              <div className="px-6 pb-6">
+                                {collectionDeals.length === 0 ? (
+                                  <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
+                                    <p className="text-neutral-500 text-sm">No deals found for this collection right now.</p>
+                                  </div>
+                                ) : (
+                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                                    {collectionDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />)}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      /* Brands with no collection - show flat */
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />)}
+                      </div>
+                    )}
+
+                    {/* Uncollected brands deals */}
+                    {myBrands.filter(b => !b.collection).length > 0 && (() => {
+                      const uncollectedNames = myBrands.filter(b => !b.collection).map(b => b.name);
+                      const uncollectedDeals = filteredDeals.filter(d => uncollectedNames.includes(d.brand));
+                      if (uncollectedDeals.length === 0) return null;
+                      const isCollapsed = collapsedCollections.includes('__uncollected__');
+                      return (
+                        <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+                          <button
+                            onClick={() => toggleCollectionCollapse('__uncollected__')}
+                            className="w-full flex items-center justify-between p-6 hover:bg-neutral-50 transition-colors"
+                          >
+                            <div className="text-left">
+                              <h3 className="font-display text-xl font-bold text-neutral-900">Other Brands</h3>
+                              <p className="text-sm text-neutral-500 mt-0.5">{uncollectedDeals.length} deal{uncollectedDeals.length !== 1 ? 's' : ''}</p>
+                            </div>
+                            {isCollapsed ? <ChevronDown className="w-5 h-5 text-neutral-500" /> : <ChevronUp className="w-5 h-5 text-neutral-500" />}
+                          </button>
+                          {!isCollapsed && (
+                            <div className="px-6 pb-6">
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                                {uncollectedDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />)}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1439,85 +1505,6 @@ export default function App() {
                     </div>
                   </div>
                 )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'collections' && (
-          <div>
-            <div className="mb-6">
-              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">My Collections</h2>
-              <p className="text-neutral-600">Deals organized by your custom collections</p>
-            </div>
-
-            {userCollections.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
-                <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No collections yet</h3>
-                <p className="text-neutral-500 mb-6">Go to Brands tab, add a brand and create your first collection!</p>
-                <button
-                  onClick={() => setActiveTab('brands')}
-                  className="bg-neutral-900 text-white px-6 py-3 rounded-lg inline-flex items-center gap-2"
-                >
-                  <Plus className="w-5 h-5" />
-                  Go to Brands
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {userCollections.map(collection => {
-                  const collectionBrandNames = myBrands
-                    .filter(b => b.collection === collection)
-                    .map(b => b.name);
-                  const collectionDeals = deals.filter(d =>
-                    collectionBrandNames.includes(d.brand)
-                  );
-                  const isCollapsed = collapsedCollections.includes(collection);
-
-                  return (
-                    <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-                      {/* Collection Header - always visible, click to collapse */}
-                      <button
-                        onClick={() => toggleCollectionCollapse(collection)}
-                        className="w-full flex items-center justify-between p-6 hover:bg-neutral-50 transition-colors"
-                      >
-                        <div className="text-left">
-                          <h3 className="font-display text-xl font-bold text-neutral-900">{collection}</h3>
-                          <p className="text-sm text-neutral-500 mt-0.5">
-                            {collectionBrandNames.length} brand{collectionBrandNames.length !== 1 ? 's' : ''} · {collectionDeals.length} deal{collectionDeals.length !== 1 ? 's' : ''}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-sm text-neutral-500 hidden md:block">
-                            {isCollapsed ? 'Show deals' : 'Hide deals'}
-                          </span>
-                          {isCollapsed
-                            ? <ChevronDown className="w-5 h-5 text-neutral-500" />
-                            : <ChevronUp className="w-5 h-5 text-neutral-500" />
-                          }
-                        </div>
-                      </button>
-
-                      {/* Deals Grid - collapsible */}
-                      {!isCollapsed && (
-                        <div className="px-6 pb-6">
-                          {collectionDeals.length === 0 ? (
-                            <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-                              <p className="text-neutral-500 text-sm">No deals found yet for this collection.</p>
-                            </div>
-                          ) : (
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                              {collectionDeals.map(deal => (
-                                <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
               </div>
             )}
           </div>
