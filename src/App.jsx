@@ -1034,8 +1034,8 @@ export default function App() {
               >
                 <ShoppingBag className="w-8 h-8 text-neutral-900" />
                 <div className="text-left">
-                  <h1 className="font-display text-2xl font-bold text-neutral-900">Brandsnobs</h1>
-                  <p className="text-xs text-neutral-500 tracking-wide">CURATED BRAND DEALS</p>
+                  <h1 className="font-display text-2xl font-bold text-neutral-900">BrandSnobs</h1>
+                  <p className="text-xs text-neutral-500 tracking-wide">YOU LIKE WHAT YOU LIKE</p>
                 </div>
               </button>
             </div>
