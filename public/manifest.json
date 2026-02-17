@@ -1,7 +1,7 @@
 {
-  "name": "Brandsnobs",
-  "short_name": "Brandsnobs",
-  "description": "Curated brand deals for the discerning shopper",
+  "name": "BrandSnobs",
+  "short_name": "BrandSnobs",
+  "description": "You Like What You Like",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
