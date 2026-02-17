@@ -639,24 +639,47 @@ export default function App() {
     };
   });
 
+  // Load localStorage data immediately on mount (before auth resolves)
+  useEffect(() => {
+    const savedBrands = localStorage.getItem('myBrands');
+    const savedBag = localStorage.getItem('shoppingBag');
+    const savedProfile = localStorage.getItem('shippingProfile');
+    const savedGenders = localStorage.getItem('selectedGenders');
+    
+    if (savedBrands) setMyBrands(JSON.parse(savedBrands));
+    if (savedBag) setShoppingBag(JSON.parse(savedBag));
+    if (savedProfile) setShippingProfile(JSON.parse(savedProfile));
+    if (savedGenders) setSelectedGenders(JSON.parse(savedGenders));
+  }, []);
+
+  // Handle auth state and Firebase sync
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        // User signed in - load from Firebase
-        await loadUserData(currentUser.uid);
-      } else {
-        // No user - load from localStorage
-        const savedBrands = localStorage.getItem('myBrands');
-        if (savedBrands) {
-          setMyBrands(JSON.parse(savedBrands));
+        // User signed in - load from Firebase and merge with existing data
+        try {
+          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            // Only overwrite if Firebase has data
+            if (data.brands && data.brands.length > 0) setMyBrands(data.brands);
+            if (data.genderPreferences) setSelectedGenders(data.genderPreferences);
+            if (data.shoppingBag) setShoppingBag(data.shoppingBag);
+            if (data.shippingProfile) setShippingProfile(data.shippingProfile);
+          } else {
+            // First time sign in - upload current localStorage data to Firebase
+            if (myBrands.length > 0 || shoppingBag.length > 0) {
+              saveToCloud();
+            }
+          }
+        } catch (error) {
+          console.error('Error loading user data:', error);
         }
       }
     });
     return () => unsubscribe();
   }, []);
-
-  // Removed the separate localStorage load effect - now handled in auth listener above
 
   useEffect(() => {
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
@@ -678,13 +701,6 @@ export default function App() {
       saveToCloud();
     }
   }, [shippingProfile]);
-
-  useEffect(() => {
-    const savedGenders = localStorage.getItem('selectedGenders');
-    if (savedGenders) {
-      setSelectedGenders(JSON.parse(savedGenders));
-    }
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('selectedGenders', JSON.stringify(selectedGenders));
