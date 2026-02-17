@@ -353,47 +353,31 @@ function GenderPreference({ selectedGenders, onGenderChange }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 mb-6">
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 bg-neutral-900 rounded-xl flex items-center justify-center">
-          <User className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <h3 className="text-lg font-semibold text-neutral-900">Shopping Preferences</h3>
-          <p className="text-sm text-neutral-500">Select categories to personalize your deals</p>
-        </div>
+    <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-3 md:p-5 mb-4 md:mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <User className="w-4 h-4 text-neutral-500" />
+        <span className="text-sm font-medium text-neutral-700">Shopping For</span>
       </div>
-
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+      <div className="flex flex-wrap gap-2">
         {GENDER_OPTIONS.map((option) => {
           const isSelected = selectedGenders.includes(option.id);
-          
           return (
             <button
               key={option.id}
               onClick={() => toggleGender(option.id)}
-              className={`relative p-4 rounded-xl border-2 transition-all duration-200 ${isSelected ? 'border-neutral-900 bg-neutral-50' : 'border-neutral-200 bg-white hover:border-neutral-300'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
+                isSelected
+                  ? 'border-neutral-900 bg-neutral-900 text-white'
+                  : 'border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400'
+              }`}
             >
-              {isSelected && (
-                <div className="absolute top-2 right-2 w-5 h-5 bg-neutral-900 rounded-full flex items-center justify-center">
-                  <Check className="w-3 h-3 text-white" />
-                </div>
-              )}
-              
-              <div className="text-3xl mb-2">{option.icon}</div>
-              <div className={`text-sm font-medium ${isSelected ? 'text-neutral-900' : 'text-neutral-600'}`}>
-                {option.label}
-              </div>
+              <span className="text-base">{option.icon}</span>
+              <span>{option.label}</span>
+              {isSelected && <Check className="w-3 h-3" />}
             </button>
           );
         })}
       </div>
-
-      {selectedGenders.length === 0 && (
-        <div className="mt-4 text-center text-sm text-neutral-400">
-          Select at least one category to see personalized deals
-        </div>
-      )}
     </div>
   );
 }
@@ -1081,21 +1065,22 @@ export default function App() {
                 </div>
               )}
               {user ? (
-                <div className="flex items-center gap-3">
-                  <div className="text-right">
+                <div className="flex items-center gap-2">
+                  <div className="text-right hidden md:block">
                     <p className="text-sm font-medium text-neutral-900">{user.displayName}</p>
                     <p className="text-xs text-neutral-500">{user.email}</p>
                   </div>
-                  {user.photoURL && <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full" />}
-                  <button onClick={signOut} className="bg-neutral-100 text-neutral-900 px-4 py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">
+                  {user.photoURL && <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 md:w-10 md:h-10 rounded-full" />}
+                  <button onClick={signOut} className="bg-neutral-100 text-neutral-900 p-2 md:px-4 md:py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    <span className="hidden md:inline">Sign Out</span>
                   </button>
                 </div>
               ) : (
-                <button onClick={signIn} className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2">
+                <button onClick={signIn} className="bg-neutral-900 text-white px-3 md:px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2 text-sm">
                   <LogIn className="w-4 h-4" />
-                  Sign In with Google
+                  <span className="hidden md:inline">Sign In with Google</span>
+                  <span className="md:hidden">Sign In</span>
                 </button>
               )}
             </div>
@@ -1104,13 +1089,13 @@ export default function App() {
       </header>
 
       <div className="bg-white border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex gap-8">
+        <div className="max-w-7xl mx-auto px-2 md:px-4">
+          <div className="flex overflow-x-auto scrollbar-hide">
             {['deals', 'brands', 'recommendations', 'profile'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 px-2 border-b-2 transition-colors font-medium capitalize ${activeTab === tab ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-500 hover:text-neutral-700'}`}
+                className={`flex-shrink-0 py-3 md:py-4 px-3 md:px-4 border-b-2 transition-colors font-medium text-xs md:text-sm capitalize whitespace-nowrap ${activeTab === tab ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-500 hover:text-neutral-700'}`}
               >
                 {tab}
                 {tab === 'deals' && filteredDeals.length > 0 && ` (${filteredDeals.length})`}
@@ -1332,31 +1317,32 @@ export default function App() {
 
         {activeTab === 'brands' && (
           <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
               <div>
                 <h2 className="font-display text-2xl font-bold text-neutral-900">My Brands</h2>
-                <p className="text-neutral-600">Track deals from your favorite brands</p>
+                <p className="text-neutral-600 text-sm md:text-base">Track deals from your favorite brands</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {user && (
                   <>
-                    <button onClick={saveToCloud} disabled={syncStatus === 'syncing'} className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 disabled:opacity-50">
-                      <Cloud className="w-5 h-5" />
-                      Save
+                    <button onClick={saveToCloud} disabled={syncStatus === 'syncing'} className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5 disabled:opacity-50 text-sm">
+                      <Cloud className="w-4 h-4" />
+                      <span className="hidden md:inline">Save</span>
                     </button>
-                    <button onClick={restoreFromCloud} disabled={syncStatus === 'syncing'} className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 disabled:opacity-50">
-                      <CloudOff className="w-5 h-5" />
-                      Restore
+                    <button onClick={restoreFromCloud} disabled={syncStatus === 'syncing'} className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5 disabled:opacity-50 text-sm">
+                      <CloudOff className="w-4 h-4" />
+                      <span className="hidden md:inline">Restore</span>
                     </button>
                   </>
                 )}
-                <button onClick={() => setShowAddBrand(!showAddBrand)} className="bg-neutral-900 text-white px-4 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2">
-                  <Plus className="w-5 h-5" />
+                <button onClick={() => setShowAddBrand(!showAddBrand)} className="bg-neutral-900 text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-sm">
+                  <Plus className="w-4 h-4" />
                   Add Brand
                 </button>
-                <button onClick={() => setShowRecommendModal(true)} className="bg-neutral-200 text-neutral-700 px-4 py-2 rounded-lg hover:bg-neutral-300 transition-colors flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5" />
-                  Recommend
+                <button onClick={() => setShowRecommendModal(true)} className="bg-neutral-200 text-neutral-700 px-3 py-2 rounded-lg hover:bg-neutral-300 transition-colors flex items-center gap-1.5 text-sm">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="hidden md:inline">Recommend</span>
+                  <span className="md:hidden">Suggest</span>
                 </button>
               </div>
             </div>
