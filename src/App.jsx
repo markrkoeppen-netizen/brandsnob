@@ -263,6 +263,13 @@ function LuxuryDealCard({ deal, onAddToBag }) {
           </div>
         )}
 
+        {deal.sizeMatchScore && deal.sizeMatchScore > 0 && (
+          <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-green-600 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide flex items-center gap-1">
+            <Check className="w-3 h-3 md:w-4 md:h-4" />
+            Your Size
+          </div>
+        )}
+
         <button
           onClick={handleFavorite}
           className={`absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isFavorited ? 'text-rose-500' : 'text-neutral-400'}`}
@@ -624,10 +631,10 @@ export default function App() {
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
 
-  // Shipping Profile
+  // Shipping Profile with Size Preferences
   const [shippingProfile, setShippingProfile] = useState(() => {
     const saved = localStorage.getItem('shippingProfile');
-    return saved ? JSON.parse(saved) : {
+    const defaultProfile = {
       firstName: '',
       lastName: '',
       email: '',
@@ -635,8 +642,26 @@ export default function App() {
       address: '',
       city: '',
       state: '',
-      zip: ''
+      zip: '',
+      // Size preferences
+      shirtSize: '',
+      pantsWaist: '',
+      pantsInseam: '',
+      shoeSize: '',
+      dressSize: ''
     };
+    
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Merge with defaults to ensure all fields exist
+        return { ...defaultProfile, ...parsed };
+      } catch (error) {
+        console.error('Error parsing shipping profile:', error);
+        return defaultProfile;
+      }
+    }
+    return defaultProfile;
   });
 
   // Load localStorage data immediately on mount (before auth resolves)
@@ -1026,20 +1051,62 @@ export default function App() {
       result = result.filter(deal => parseInt(deal.discount) >= 50);
     }
     
+    // Size-based prioritization (boost matching sizes to top, don't filter out)
+    const hasSizePreferences = shippingProfile?.shirtSize || shippingProfile?.shoeSize || 
+                                shippingProfile?.pantsWaist || shippingProfile?.pantsInseam || 
+                                shippingProfile?.dressSize;
+    
+    if (hasSizePreferences) {
+      result = result.map(deal => {
+        const productLower = (deal.product || '').toLowerCase();
+        let sizeMatchScore = 0;
+        
+        // Check for size matches in product title
+        if (shippingProfile.shirtSize && productLower.includes(`size ${shippingProfile.shirtSize.toLowerCase()}`)) sizeMatchScore += 3;
+        if (shippingProfile.shirtSize && new RegExp(`\\b${shippingProfile.shirtSize.toLowerCase()}\\b`).test(productLower)) sizeMatchScore += 2;
+        
+        if (shippingProfile.shoeSize && productLower.includes(`size ${shippingProfile.shoeSize}`)) sizeMatchScore += 3;
+        if (shippingProfile.shoeSize && new RegExp(`\\b${shippingProfile.shoeSize}\\b`).test(productLower)) sizeMatchScore += 2;
+        
+        if (shippingProfile.pantsWaist && productLower.includes(`${shippingProfile.pantsWaist}w`)) sizeMatchScore += 3;
+        if (shippingProfile.pantsWaist && productLower.includes(`waist ${shippingProfile.pantsWaist}`)) sizeMatchScore += 2;
+        
+        if (shippingProfile.pantsInseam && productLower.includes(`${shippingProfile.pantsInseam}l`)) sizeMatchScore += 3;
+        if (shippingProfile.pantsInseam && productLower.includes(`inseam ${shippingProfile.pantsInseam}`)) sizeMatchScore += 2;
+        
+        if (shippingProfile.dressSize && productLower.includes(`size ${shippingProfile.dressSize}`)) sizeMatchScore += 3;
+        
+        return { ...deal, sizeMatchScore };
+      });
+    }
+    
     // Sorting
     const sorted = [...result];
     if (dealSort === 'discount') {
-      sorted.sort((a, b) => parseInt(b.discount) - parseInt(a.discount));
+      sorted.sort((a, b) => {
+        // Prioritize size matches, then sort by discount
+        if (a.sizeMatchScore !== b.sizeMatchScore) return (b.sizeMatchScore || 0) - (a.sizeMatchScore || 0);
+        return parseInt(b.discount) - parseInt(a.discount);
+      });
     } else if (dealSort === 'price-low') {
-      sorted.sort((a, b) => a.salePrice - b.salePrice);
+      sorted.sort((a, b) => {
+        if (a.sizeMatchScore !== b.sizeMatchScore) return (b.sizeMatchScore || 0) - (a.sizeMatchScore || 0);
+        return a.salePrice - b.salePrice;
+      });
     } else if (dealSort === 'price-high') {
-      sorted.sort((a, b) => b.salePrice - a.salePrice);
+      sorted.sort((a, b) => {
+        if (a.sizeMatchScore !== b.sizeMatchScore) return (b.sizeMatchScore || 0) - (a.sizeMatchScore || 0);
+        return b.salePrice - a.salePrice;
+      });
     } else if (dealSort === 'brand') {
-      sorted.sort((a, b) => a.brand.localeCompare(b.brand));
+      sorted.sort((a, b) => {
+        if (a.sizeMatchScore !== b.sizeMatchScore) return (b.sizeMatchScore || 0) - (a.sizeMatchScore || 0);
+        return a.brand.localeCompare(b.brand);
+      });
     }
     
     return sorted;
-  }, [deals, searchQuery, selectedGenders, dealFilter, dealSort]);
+  }, [deals, searchQuery, selectedGenders, dealFilter, dealSort, shippingProfile]);
 
   const stats = {
     totalBrands: myBrands.length,
@@ -1681,6 +1748,105 @@ export default function App() {
               <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
                   <strong>💡 Tip:</strong> Your shipping info is saved locally and will appear in a convenient copy-paste box when you checkout!
+                </p>
+              </div>
+            </div>
+
+            {/* Size Preferences */}
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 max-w-2xl mt-6">
+              <h3 className="font-semibold text-lg mb-2">Size Preferences</h3>
+              <p className="text-sm text-neutral-600 mb-6">
+                Help us show you the most relevant deals by saving your sizes
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Shirt Size</label>
+                  <select
+                    value={shippingProfile.shirtSize}
+                    onChange={(e) => setShippingProfile({...shippingProfile, shirtSize: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  >
+                    <option value="">Select size...</option>
+                    <option value="XS">XS</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                    <option value="XXXL">XXXL</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Shoe Size (US)</label>
+                  <select
+                    value={shippingProfile.shoeSize}
+                    onChange={(e) => setShippingProfile({...shippingProfile, shoeSize: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  >
+                    <option value="">Select size...</option>
+                    {Array.from({length: 20}, (_, i) => i + 5).map(size => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Pants Waist (inches)</label>
+                  <select
+                    value={shippingProfile.pantsWaist}
+                    onChange={(e) => setShippingProfile({...shippingProfile, pantsWaist: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  >
+                    <option value="">Select waist...</option>
+                    {Array.from({length: 24}, (_, i) => (i + 24)).map(size => (
+                      <option key={size} value={size}>{size}"</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Pants Inseam (inches)</label>
+                  <select
+                    value={shippingProfile.pantsInseam}
+                    onChange={(e) => setShippingProfile({...shippingProfile, pantsInseam: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  >
+                    <option value="">Select inseam...</option>
+                    {Array.from({length: 11}, (_, i) => (i + 28)).map(size => (
+                      <option key={size} value={size}>{size}"</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-neutral-700 mb-2">Dress Size</label>
+                  <select
+                    value={shippingProfile.dressSize}
+                    onChange={(e) => setShippingProfile({...shippingProfile, dressSize: e.target.value})}
+                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  >
+                    <option value="">Select size...</option>
+                    <option value="00">00</option>
+                    <option value="0">0</option>
+                    <option value="2">2</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                    <option value="18">18</option>
+                    <option value="20">20</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>✨ Smart Filtering:</strong> We'll prioritize showing you deals that match your sizes
                 </p>
               </div>
             </div>
