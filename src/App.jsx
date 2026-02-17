@@ -61,7 +61,9 @@ const BRAND_COLLECTIONS = [
       { name: 'Alo', category: 'Fashion' },
       { name: 'Vuori', category: 'Fashion' },
       { name: 'On Running', category: 'Footwear' },
-      { name: 'Athleta', category: 'Fashion' }
+      { name: 'Athleta', category: 'Fashion' },
+      { name: 'Under Armour', category: 'Fashion' },
+      { name: 'YoungLA', category: 'Fashion' }
     ]
   },
   {
@@ -138,7 +140,7 @@ const BRAND_COLLECTIONS = [
       { name: 'Thom Browne', category: 'Fashion' },
       { name: 'Cult Gaia', category: 'Accessories' },
       { name: 'Burlebo', category: 'Fashion' },
-      { name: 'Poncho', category: 'Fashion' }
+      { name: 'Poncho Outdoors', category: 'Fashion' }
     ]
   },
   {
@@ -210,10 +212,10 @@ const ALL_AVAILABLE_BRANDS = [
   'Gucci', 'Hermès', 'Jimmy Choo', 'Kate Spade', 'Kendra Scott', 'Kith', 'Lacoste',
   'Louis Vuitton', 'Lucchese', 'Lululemon', 'Lush', 'Madewell', 'Marc Jacobs',
   'Michael Kors', 'Nike', 'Oakley', 'On Running', 'Oscar de la Renta', 'Polo Ralph Lauren',
-  'Poncho', 'Prada', 'Ray-Ban', 'Rhone', 'Saint Laurent', 'Stuart Weitzman',
+  'Poncho Outdoors', 'Prada', 'Ray-Ban', 'Rhone', 'Saint Laurent', 'Stuart Weitzman',
   'The North Face', 'The Row', 'Thom Browne', 'Tom Ford', 'Tommy Bahama',
-  'Tory Burch', 'TravisMatthew', 'Tumi', 'UGG', 'Vera Wang', 'Vineyard Vines',
-  'Vuori', 'Yeti'
+  'Tory Burch', 'TravisMatthew', 'Tumi', 'UGG', 'Under Armour', 'Vera Wang',
+  'Vineyard Vines', 'Vuori', 'Yeti', 'YoungLA'
 ];
 
 function LuxuryDealCard({ deal, onAddToBag }) {
@@ -1419,3 +1421,6 @@ export default function App() {
           shippingProfile={shippingProfile}
         />
       )}
+    </div>
+  );
+}
