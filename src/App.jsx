@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search } from 'lucide-react';
+import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
@@ -622,8 +622,23 @@ export default function App() {
   });
   const [showBagModal, setShowBagModal] = useState(false);
 
+  // Collections collapse state
+  const [collapsedCollections, setCollapsedCollections] = useState([]);
+
+  const toggleCollectionCollapse = (collectionName) => {
+    setCollapsedCollections(prev =>
+      prev.includes(collectionName)
+        ? prev.filter(c => c !== collectionName)
+        : [...prev, collectionName]
+    );
+  };
+
   // Brand Recommendation
   const [showRecommendModal, setShowRecommendModal] = useState(false);
+  const [recommendBrand, setRecommendBrand] = useState('');
+  const [recommendEmail, setRecommendEmail] = useState('');
+  const [recommendSubmitting, setRecommendSubmitting] = useState(false);
+  const [recommendSuccess, setRecommendSuccess] = useState(false);
   const [recommendBrand, setRecommendBrand] = useState('');
   const [recommendEmail, setRecommendEmail] = useState('');
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
@@ -1454,7 +1469,7 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <div className="space-y-8">
+              <div className="space-y-4">
                 {userCollections.map(collection => {
                   const collectionBrandNames = myBrands
                     .filter(b => b.collection === collection)
@@ -1462,27 +1477,46 @@ export default function App() {
                   const collectionDeals = deals.filter(d =>
                     collectionBrandNames.includes(d.brand)
                   );
+                  const isCollapsed = collapsedCollections.includes(collection);
 
                   return (
-                    <div key={collection}>
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
+                    <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+                      {/* Collection Header - always visible, click to collapse */}
+                      <button
+                        onClick={() => toggleCollectionCollapse(collection)}
+                        className="w-full flex items-center justify-between p-6 hover:bg-neutral-50 transition-colors"
+                      >
+                        <div className="text-left">
                           <h3 className="font-display text-xl font-bold text-neutral-900">{collection}</h3>
-                          <p className="text-sm text-neutral-500">
+                          <p className="text-sm text-neutral-500 mt-0.5">
                             {collectionBrandNames.length} brand{collectionBrandNames.length !== 1 ? 's' : ''} · {collectionDeals.length} deal{collectionDeals.length !== 1 ? 's' : ''}
                           </p>
                         </div>
-                      </div>
-
-                      {collectionDeals.length === 0 ? (
-                        <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-                          <p className="text-neutral-500 text-sm">No deals found yet for this collection.</p>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm text-neutral-500 hidden md:block">
+                            {isCollapsed ? 'Show deals' : 'Hide deals'}
+                          </span>
+                          {isCollapsed
+                            ? <ChevronDown className="w-5 h-5 text-neutral-500" />
+                            : <ChevronUp className="w-5 h-5 text-neutral-500" />
+                          }
                         </div>
-                      ) : (
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                          {collectionDeals.map(deal => (
-                            <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />
-                          ))}
+                      </button>
+
+                      {/* Deals Grid - collapsible */}
+                      {!isCollapsed && (
+                        <div className="px-6 pb-6">
+                          {collectionDeals.length === 0 ? (
+                            <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
+                              <p className="text-neutral-500 text-sm">No deals found yet for this collection.</p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+                              {collectionDeals.map(deal => (
+                                <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} />
+                              ))}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
