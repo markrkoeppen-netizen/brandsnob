@@ -1096,11 +1096,22 @@ export default function App() {
               )}
               {user ? (
                 <div className="flex items-center gap-2">
-                  <div className="text-right hidden md:block">
-                    <p className="text-sm font-medium text-neutral-900">{user.displayName}</p>
-                    <p className="text-xs text-neutral-500">{user.email}</p>
-                  </div>
-                  {user.photoURL && <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 md:w-10 md:h-10 rounded-full" />}
+                  <button 
+                    onClick={() => setActiveTab('profile')}
+                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+                  >
+                    <div className="text-right hidden md:block">
+                      <p className="text-sm font-medium text-neutral-900">{user.displayName}</p>
+                      <p className="text-xs text-neutral-500">{user.email}</p>
+                    </div>
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-transparent hover:border-neutral-300 transition-colors" />
+                    ) : (
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center font-semibold text-sm border-2 border-transparent hover:border-neutral-300 transition-colors">
+                        {user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </button>
                   <button onClick={signOut} className="bg-neutral-100 text-neutral-900 p-2 md:px-4 md:py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">
                     <LogOut className="w-4 h-4" />
                     <span className="hidden md:inline">Sign Out</span>
