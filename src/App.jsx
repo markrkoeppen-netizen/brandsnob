@@ -707,9 +707,13 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    console.log('🔄 myBrands changed:', myBrands.length, 'brands');
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
     if (user) {
+      console.log('✅ User exists, calling saveToCloud...');
       saveToCloud();
+    } else {
+      console.log('⚠️ No user, skipping cloud save');
     }
   }, [myBrands, user]);
 
