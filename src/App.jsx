@@ -834,8 +834,15 @@ export default function App() {
   };
 
   const saveToCloud = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('❌ saveToCloud: No user signed in');
+      return;
+    }
     try {
+      console.log('💾 saveToCloud: Starting sync...', { 
+        userId: user.uid, 
+        brandsCount: myBrands.length 
+      });
       setSyncStatus('syncing');
       await setDoc(doc(db, 'users', user.uid), {
         brands: myBrands,
@@ -844,10 +851,11 @@ export default function App() {
         shippingProfile: shippingProfile,
         updatedAt: new Date().toISOString()
       }, { merge: true });
+      console.log('✅ saveToCloud: Sync successful!');
       setSyncStatus('synced');
       setTimeout(() => setSyncStatus('idle'), 2000);
     } catch (error) {
-      console.error('Error syncing:', error);
+      console.error('❌ saveToCloud error:', error);
       setSyncStatus('error');
     }
   };
