@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Firebase configuration
@@ -18,6 +18,16 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize services
 export const auth = getAuth(app);
+
+// Set auth persistence to LOCAL (persists even after browser close)
+setPersistence(auth, browserLocalPersistence)
+  .then(() => {
+    console.log('✅ Auth persistence set to LOCAL');
+  })
+  .catch((error) => {
+    console.error('❌ Auth persistence error:', error);
+  });
+
 export const googleProvider = new GoogleAuthProvider();
 
 // Force account selection on every sign-in
