@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
 const CATEGORIES = [
@@ -686,6 +686,24 @@ export default function App() {
     if (savedGenders) setSelectedGenders(JSON.parse(savedGenders));
   }, []);
 
+  // Handle redirect result (for mobile sign-in)
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          console.log('✅ Redirect sign-in successful:', result.user.email);
+        }
+      } catch (error) {
+        console.error('❌ Redirect sign-in error:', error);
+        if (error.code !== 'auth/popup-closed-by-user') {
+          alert('Sign in failed. Please try again.');
+        }
+      }
+    };
+    handleRedirectResult();
+  }, []);
+
   // Handle auth state and Firebase sync
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -891,9 +909,21 @@ export default function App() {
 
   const signIn = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      // Detect if mobile device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Use redirect for mobile (works better on iOS/Android)
+        console.log('📱 Mobile detected - using redirect sign-in');
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        // Use popup for desktop (better UX)
+        console.log('💻 Desktop detected - using popup sign-in');
+        await signInWithPopup(auth, googleProvider);
+      }
     } catch (error) {
-      console.error('Sign in error:', error);
+      console.error('❌ Sign in error:', error);
+      alert('Sign in failed. Please try again.');
     }
   };
 
