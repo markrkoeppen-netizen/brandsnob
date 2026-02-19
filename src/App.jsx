@@ -471,6 +471,15 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
         {/* Footer */}
         {bag.length > 0 && (
           <div className="p-6 border-t border-neutral-200">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-sm text-blue-800 font-medium mb-2">💡 Quick Checkout Tips:</p>
+              <ul className="text-xs text-blue-700 space-y-1">
+                <li>• Each item will open in a new tab</li>
+                <li>• Click "Add to Cart" on each product page</li>
+                <li>• Complete checkout on each retailer's site</li>
+                <li>• Your shipping info is copied above for easy pasting!</li>
+              </ul>
+            </div>
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="text-sm text-neutral-600">Total Value</p>
@@ -490,10 +499,10 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
               onClick={onCheckout}
               className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-medium"
             >
-              Checkout All ({totalItems} item{totalItems !== 1 ? 's' : ''})
+              Open All Items ({totalItems} item{totalItems !== 1 ? 's' : ''})
             </button>
             <p className="text-xs text-neutral-500 text-center mt-3">
-              Opens each retailer in a new tab with items ready to checkout
+              Items grouped by retailer to minimize tabs
             </p>
           </div>
         )}
@@ -970,6 +979,9 @@ export default function App() {
       byRetailer[item.retailer].push(item);
     });
 
+    // Show instruction modal
+    alert(`Opening ${Object.keys(byRetailer).length} retailer tabs...\n\nOn each site:\n1. Click "Add to Cart"\n2. Proceed to checkout\n3. Use your saved shipping info`);
+
     // Open each retailer's items (stagger to avoid popup blocker)
     Object.values(byRetailer).forEach((items, index) => {
       setTimeout(() => {
@@ -987,22 +999,17 @@ export default function App() {
     setRecommendSubmitting(true);
     
     try {
-      // Using EmailJS or similar service - you'll need to set this up
-      // For now, we'll use a simple fetch to a serverless function
-      await fetch('https://formsubmit.co/ajax/admin@brandsnobs.com', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          brand: recommendBrand,
-          email: recommendEmail || 'Not provided',
-          userEmail: user?.email || 'Anonymous',
-          date: new Date().toISOString()
-        })
+      // Save recommendation to Firestore
+      const recommendationRef = collection(db, 'brand_recommendations');
+      await setDoc(doc(recommendationRef), {
+        brandName: recommendBrand.trim(),
+        submitterEmail: recommendEmail.trim() || 'Not provided',
+        userEmail: user?.email || 'Anonymous',
+        submittedAt: new Date().toISOString(),
+        status: 'pending'
       });
       
+      console.log('✅ Brand recommendation submitted successfully');
       setRecommendSuccess(true);
       setTimeout(() => {
         setShowRecommendModal(false);
@@ -1011,7 +1018,7 @@ export default function App() {
         setRecommendSuccess(false);
       }, 2000);
     } catch (error) {
-      console.error('Error submitting recommendation:', error);
+      console.error('❌ Error submitting recommendation:', error);
       alert('Failed to submit recommendation. Please try again.');
     } finally {
       setRecommendSubmitting(false);
