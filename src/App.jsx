@@ -731,7 +731,7 @@ export default function App() {
               bagItems: data.shoppingBag?.length || 0
             });
             
-            // Smart merge: Use Firebase data if it has more items than localStorage
+            // Smart merge: Prefer Firebase if it has data, otherwise use localStorage
             const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
             const firebaseBrands = data.brands || [];
             
@@ -740,17 +740,21 @@ export default function App() {
               firebase: firebaseBrands.length
             });
             
-            if (firebaseBrands.length > localBrands.length) {
-              console.log('📦 Firebase has more brands, loading from Firebase:', firebaseBrands.length);
-              console.log('Brands to load:', firebaseBrands);
-              setMyBrands(firebaseBrands);
+            // Priority: Firebase with data > localStorage with data > empty
+            if (firebaseBrands.length > 0) {
+              if (localBrands.length > firebaseBrands.length) {
+                console.log('📤 localStorage has MORE brands, keeping localStorage:', localBrands.length);
+                setMyBrands(localBrands);
+                // Will trigger saveToCloud to update Firebase
+              } else {
+                console.log('📦 Loading from Firebase:', firebaseBrands.length, 'brands');
+                console.log('Brands:', firebaseBrands.map(b => b.name).join(', '));
+                setMyBrands(firebaseBrands);
+              }
             } else if (localBrands.length > 0) {
-              console.log('📤 localStorage has data, keeping localStorage:', localBrands.length);
-              setMyBrands(localBrands); // Keep localStorage brands
-              // Will trigger saveToCloud via useEffect
-            } else if (firebaseBrands.length > 0) {
-              console.log('📦 No localStorage, loading from Firebase:', firebaseBrands.length);
-              setMyBrands(firebaseBrands);
+              console.log('📤 Firebase empty, using localStorage:', localBrands.length);
+              setMyBrands(localBrands);
+              // Will trigger saveToCloud
             } else {
               console.log('⚠️ No brands in either location');
             }
@@ -921,6 +925,13 @@ export default function App() {
       console.log('❌ saveToCloud: No user signed in');
       return;
     }
+    
+    // Don't save if ALL data is empty (prevents wiping Firebase on first sign-in)
+    if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0) {
+      console.log('⚠️ saveToCloud: Skipping - no data to save');
+      return;
+    }
+    
     try {
       console.log('💾 saveToCloud: Starting sync...', { 
         userId: user.uid, 
