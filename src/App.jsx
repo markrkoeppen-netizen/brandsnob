@@ -707,26 +707,38 @@ export default function App() {
   // Handle auth state and Firebase sync
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      console.log('🔐 Auth state changed:', currentUser ? currentUser.email : 'No user');
       setUser(currentUser);
       if (currentUser) {
         // User signed in - load from Firebase and merge with existing data
         try {
+          console.log('📥 Loading data from Firebase for:', currentUser.uid);
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
           if (userDoc.exists()) {
             const data = userDoc.data();
+            console.log('✅ Firebase data found:', {
+              brands: data.brands?.length || 0,
+              genderPrefs: data.genderPreferences?.length || 0,
+              bagItems: data.shoppingBag?.length || 0
+            });
             // Only overwrite if Firebase has data
-            if (data.brands && data.brands.length > 0) setMyBrands(data.brands);
+            if (data.brands && data.brands.length > 0) {
+              console.log('📦 Loading brands from Firebase:', data.brands.length);
+              setMyBrands(data.brands);
+            }
             if (data.genderPreferences) setSelectedGenders(data.genderPreferences);
             if (data.shoppingBag) setShoppingBag(data.shoppingBag);
             if (data.shippingProfile) setShippingProfile(data.shippingProfile);
           } else {
+            console.log('⚠️ No Firebase data found - first time sign in');
             // First time sign in - upload current localStorage data to Firebase
             if (myBrands.length > 0 || shoppingBag.length > 0) {
+              console.log('📤 Uploading localStorage data to Firebase');
               saveToCloud();
             }
           }
         } catch (error) {
-          console.error('Error loading user data:', error);
+          console.error('❌ Error loading user data:', error);
         }
       }
     });
