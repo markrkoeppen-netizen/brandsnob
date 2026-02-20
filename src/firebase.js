@@ -21,7 +21,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth - use getAuth, not initializeAuth
+// Initialize Auth
 export const auth = getAuth(app);
 
 // Set persistence explicitly
@@ -29,7 +29,7 @@ auth.setPersistence(browserLocalPersistence).catch((error) => {
   console.error('Persistence error:', error);
 });
 
-// Create Google provider with proper configuration
+// Create Google provider
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.addScope('profile');
 googleProvider.addScope('email');
