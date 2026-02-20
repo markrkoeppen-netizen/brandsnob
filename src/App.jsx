@@ -710,10 +710,11 @@ export default function App() {
       console.log('🔐 Auth state changed:', currentUser ? currentUser.email : 'No user');
       setUser(currentUser);
       if (currentUser) {
-        // User signed in - load from Firebase and merge with existing data
+        // User signed in - intelligently merge localStorage with Firebase
         try {
           console.log('📥 Loading data from Firebase for:', currentUser.uid);
           const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          
           if (userDoc.exists()) {
             const data = userDoc.data();
             console.log('✅ Firebase data found:', {
@@ -721,20 +722,37 @@ export default function App() {
               genderPrefs: data.genderPreferences?.length || 0,
               bagItems: data.shoppingBag?.length || 0
             });
-            // Only overwrite if Firebase has data
-            if (data.brands && data.brands.length > 0) {
-              console.log('📦 Loading brands from Firebase:', data.brands.length);
-              setMyBrands(data.brands);
+            
+            // Smart merge: Use Firebase data if it has more items than localStorage
+            const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
+            const firebaseBrands = data.brands || [];
+            
+            if (firebaseBrands.length > localBrands.length) {
+              console.log('📦 Firebase has more brands, loading from Firebase:', firebaseBrands.length);
+              setMyBrands(firebaseBrands);
+            } else if (localBrands.length > 0) {
+              console.log('📤 localStorage has data, uploading to Firebase:', localBrands.length);
+              setMyBrands(localBrands); // Keep localStorage brands
+              // Will trigger saveToCloud via useEffect
             }
-            if (data.genderPreferences) setSelectedGenders(data.genderPreferences);
-            if (data.shoppingBag) setShoppingBag(data.shoppingBag);
-            if (data.shippingProfile) setShippingProfile(data.shippingProfile);
+            
+            if (data.genderPreferences && data.genderPreferences.length > 0) {
+              setSelectedGenders(data.genderPreferences);
+            }
+            if (data.shoppingBag && data.shoppingBag.length > 0) {
+              setShoppingBag(data.shoppingBag);
+            }
+            if (data.shippingProfile) {
+              setShippingProfile(data.shippingProfile);
+            }
           } else {
-            console.log('⚠️ No Firebase data found - first time sign in');
+            console.log('⚠️ No Firebase document - first time sign in');
             // First time sign in - upload current localStorage data to Firebase
-            if (myBrands.length > 0 || shoppingBag.length > 0) {
-              console.log('📤 Uploading localStorage data to Firebase');
-              saveToCloud();
+            const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
+            if (localBrands.length > 0) {
+              console.log('📤 Uploading localStorage data to Firebase:', localBrands.length);
+              setMyBrands(localBrands);
+              // Will trigger saveToCloud via useEffect
             }
           }
         } catch (error) {
