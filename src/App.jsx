@@ -1092,9 +1092,21 @@ export default function App() {
 
     try {
       const actionCodeSettings = {
-        url: window.location.origin + window.location.pathname,
+        url: 'https://www.brandsnobs.com',
         handleCodeInApp: true,
+        iOS: {
+          bundleId: 'com.brandsnobs.app'
+        },
+        android: {
+          packageName: 'com.brandsnobs.app',
+          installApp: false,
+          minimumVersion: '1'
+        },
+        dynamicLinkDomain: undefined
       };
+
+      console.log('📧 Sending sign-in link to:', emailForSignIn);
+      console.log('Action code settings:', actionCodeSettings);
 
       await sendSignInLinkToEmail(auth, emailForSignIn, actionCodeSettings);
       
@@ -1102,7 +1114,7 @@ export default function App() {
       window.localStorage.setItem('emailForSignIn', emailForSignIn);
       
       setEmailLinkSent(true);
-      console.log('✅ Sign-in link sent to:', emailForSignIn);
+      console.log('✅ Sign-in link sent successfully to:', emailForSignIn);
     } catch (error) {
       console.error('❌ Error sending email link:', error);
       
