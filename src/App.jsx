@@ -909,21 +909,53 @@ export default function App() {
 
   const signIn = async () => {
     try {
-      // Detect if mobile device
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      console.log('🔐 Starting sign-in process...');
       
-      if (isMobile) {
-        // Use redirect for mobile (works better on iOS/Android)
-        console.log('📱 Mobile detected - using redirect sign-in');
-        await signInWithRedirect(auth, googleProvider);
-      } else {
-        // Use popup for desktop (better UX)
-        console.log('💻 Desktop detected - using popup sign-in');
+      // Try popup first (best UX on desktop)
+      try {
+        console.log('📱 Attempting popup sign-in...');
         await signInWithPopup(auth, googleProvider);
+        console.log('✅ Popup sign-in successful!');
+        return;
+      } catch (popupError) {
+        console.log('⚠️ Popup method failed:', popupError.code);
+        
+        // If popup was blocked, cancelled, or failed - use redirect
+        if (
+          popupError.code === 'auth/popup-blocked' ||
+          popupError.code === 'auth/popup-closed-by-user' ||
+          popupError.code === 'auth/cancelled-popup-request' ||
+          popupError.code === 'auth/operation-not-supported-in-this-environment'
+        ) {
+          console.log('🔄 Switching to redirect sign-in...');
+          await signInWithRedirect(auth, googleProvider);
+          // Redirect happens, user will return to app
+          return;
+        }
+        
+        // For other errors, still try redirect as fallback
+        console.log('🔄 Trying redirect as fallback...');
+        await signInWithRedirect(auth, googleProvider);
       }
     } catch (error) {
-      console.error('❌ Sign in error:', error);
-      alert('Sign in failed. Please try again.');
+      console.error('❌ Sign-in error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
+      // Provide helpful error messages
+      let userMessage = 'Sign in failed. ';
+      
+      if (error.code === 'auth/unauthorized-domain') {
+        userMessage = '⚠️ Domain not authorized. Please contact support with error code: unauthorized-domain';
+      } else if (error.code === 'auth/network-request-failed') {
+        userMessage = '⚠️ Network error. Please check your internet connection and try again.';
+      } else if (error.code === 'auth/too-many-requests') {
+        userMessage = '⚠️ Too many attempts. Please wait a few minutes and try again.';
+      } else {
+        userMessage += `Please try again or contact support. Error: ${error.code}`;
+      }
+      
+      alert(userMessage);
     }
   };
 
