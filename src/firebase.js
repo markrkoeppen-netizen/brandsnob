@@ -22,7 +22,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth with IndexedDB persistence (works better on mobile)
+// Initialize Auth with IndexedDB persistence
 export const auth = initializeAuth(app, {
   persistence: indexedDBLocalPersistence,
 });
@@ -31,7 +31,6 @@ export const auth = initializeAuth(app, {
 onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log('✅ User signed in:', user.email);
-    // Store auth hint in localStorage as backup
     localStorage.setItem('auth_user_email', user.email);
   } else {
     console.log('❌ No user signed in');
@@ -41,7 +40,6 @@ onAuthStateChanged(auth, (user) => {
 
 export const googleProvider = new GoogleAuthProvider();
 
-// Don't force account selection - this might be breaking mobile auth
 googleProvider.setCustomParameters({
   prompt: 'consent'
 });
