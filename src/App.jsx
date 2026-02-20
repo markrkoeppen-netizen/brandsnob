@@ -708,15 +708,23 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       console.log('🔐 Auth state changed:', currentUser ? currentUser.email : 'No user');
+      console.log('User ID:', currentUser?.uid);
       setUser(currentUser);
       if (currentUser) {
         // User signed in - intelligently merge localStorage with Firebase
         try {
-          console.log('📥 Loading data from Firebase for:', currentUser.uid);
-          const userDoc = await getDoc(doc(db, 'users', currentUser.uid));
+          console.log('📥 Attempting to load data from Firebase...');
+          console.log('User ID for query:', currentUser.uid);
+          
+          const userDocRef = doc(db, 'users', currentUser.uid);
+          console.log('Document path:', 'users/' + currentUser.uid);
+          
+          const userDoc = await getDoc(userDocRef);
+          console.log('Document exists?', userDoc.exists());
           
           if (userDoc.exists()) {
             const data = userDoc.data();
+            console.log('📦 RAW Firebase data:', data);
             console.log('✅ Firebase data found:', {
               brands: data.brands?.length || 0,
               genderPrefs: data.genderPreferences?.length || 0,
@@ -727,13 +735,24 @@ export default function App() {
             const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
             const firebaseBrands = data.brands || [];
             
+            console.log('📊 Comparison:', {
+              localStorage: localBrands.length,
+              firebase: firebaseBrands.length
+            });
+            
             if (firebaseBrands.length > localBrands.length) {
               console.log('📦 Firebase has more brands, loading from Firebase:', firebaseBrands.length);
+              console.log('Brands to load:', firebaseBrands);
               setMyBrands(firebaseBrands);
             } else if (localBrands.length > 0) {
-              console.log('📤 localStorage has data, uploading to Firebase:', localBrands.length);
+              console.log('📤 localStorage has data, keeping localStorage:', localBrands.length);
               setMyBrands(localBrands); // Keep localStorage brands
               // Will trigger saveToCloud via useEffect
+            } else if (firebaseBrands.length > 0) {
+              console.log('📦 No localStorage, loading from Firebase:', firebaseBrands.length);
+              setMyBrands(firebaseBrands);
+            } else {
+              console.log('⚠️ No brands in either location');
             }
             
             if (data.genderPreferences && data.genderPreferences.length > 0) {
@@ -746,7 +765,8 @@ export default function App() {
               setShippingProfile(data.shippingProfile);
             }
           } else {
-            console.log('⚠️ No Firebase document - first time sign in');
+            console.log('❌ No Firebase document found!');
+            console.log('Document ID searched:', currentUser.uid);
             // First time sign in - upload current localStorage data to Firebase
             const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
             if (localBrands.length > 0) {
@@ -757,6 +777,8 @@ export default function App() {
           }
         } catch (error) {
           console.error('❌ Error loading user data:', error);
+          console.error('Error details:', error.message);
+          console.error('Error code:', error.code);
         }
       }
     });
