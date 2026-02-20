@@ -1,10 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { 
-  getAuth, 
+  getAuth,
   GoogleAuthProvider, 
   onAuthStateChanged,
-  indexedDBLocalPersistence,
-  initializeAuth
+  browserLocalPersistence
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -22,26 +21,29 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Auth with IndexedDB persistence
-export const auth = initializeAuth(app, {
-  persistence: indexedDBLocalPersistence,
+// Initialize Auth - use getAuth, not initializeAuth
+export const auth = getAuth(app);
+
+// Set persistence explicitly
+auth.setPersistence(browserLocalPersistence).catch((error) => {
+  console.error('Persistence error:', error);
+});
+
+// Create Google provider with proper configuration
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('profile');
+googleProvider.addScope('email');
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
 });
 
 // Debug auth state
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    console.log('✅ User signed in:', user.email);
-    localStorage.setItem('auth_user_email', user.email);
+    console.log('✅ Auth: User signed in:', user.email);
   } else {
-    console.log('❌ No user signed in');
-    localStorage.removeItem('auth_user_email');
+    console.log('❌ Auth: No user signed in');
   }
-});
-
-export const googleProvider = new GoogleAuthProvider();
-
-googleProvider.setCustomParameters({
-  prompt: 'consent'
 });
 
 export const db = getFirestore(app);
