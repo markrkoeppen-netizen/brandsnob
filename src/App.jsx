@@ -1242,6 +1242,19 @@ export default function App() {
         status: 'pending'
       });
       
+      // Send email notification
+      const subject = encodeURIComponent(`New Brand Recommendation: ${recommendBrand.trim()}`);
+      const body = encodeURIComponent(
+        `New Brand Recommendation\n\n` +
+        `Brand Name: ${recommendBrand.trim()}\n` +
+        `Submitted by: ${user?.email || 'Anonymous'}\n` +
+        `Contact Email: ${recommendEmail.trim() || 'Not provided'}\n` +
+        `Time: ${new Date().toLocaleString()}`
+      );
+      
+      // Open mailto link to send email
+      window.location.href = `mailto:admin@brandsnobs.com?subject=${subject}&body=${body}`;
+      
       console.log('✅ Brand recommendation submitted successfully');
       setRecommendSuccess(true);
       setTimeout(() => {
