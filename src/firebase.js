@@ -3,7 +3,8 @@ import {
   getAuth, 
   GoogleAuthProvider,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -24,17 +25,15 @@ const app = initializeApp(firebaseConfig);
 // Initialize Auth
 export const auth = getAuth(app);
 
-// Set persistence to LOCAL (stays logged in even after closing app)
-setPersistence(auth, browserLocalPersistence).catch((error) => {
-  console.error('Persistence error:', error);
-});
+// Set persistence to LOCAL - keeps users signed in even after closing app
+setPersistence(auth, browserLocalPersistence)
+  .catch((error) => {
+    console.error('Auth persistence error:', error);
+  });
 
 export const googleProvider = new GoogleAuthProvider();
 
-// Remove prompt entirely - let user stay signed in
-googleProvider.setCustomParameters({
-  // No prompt parameter - this allows seamless re-authentication
-});
+// No custom parameters - allows seamless sign-in persistence
 
 export const db = getFirestore(app);
 
