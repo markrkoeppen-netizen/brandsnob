@@ -3,6 +3,10 @@ import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, 
 import { auth, googleProvider, db } from './firebase';
 import { signInWithPopup, signInWithRedirect, getRedirectResult, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import emailjs from '@emailjs/browser';
+
+// Initialize EmailJS with your public key
+emailjs.init('QPiBFFlW7aGv6W0UP');
 
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
@@ -1242,20 +1246,26 @@ export default function App() {
         status: 'pending'
       });
       
-      // Send email notification
-      const subject = encodeURIComponent(`New Brand Recommendation: ${recommendBrand.trim()}`);
-      const body = encodeURIComponent(
-        `New Brand Recommendation\n\n` +
-        `Brand Name: ${recommendBrand.trim()}\n` +
-        `Submitted by: ${user?.email || 'Anonymous'}\n` +
-        `Contact Email: ${recommendEmail.trim() || 'Not provided'}\n` +
-        `Time: ${new Date().toLocaleString()}`
+      console.log('✅ Recommendation saved to Firestore');
+      
+      // Send email notification via EmailJS
+      const emailParams = {
+        brand_name: recommendBrand.trim(),
+        user_email: user?.email || 'Anonymous',
+        submitter_email: recommendEmail.trim() || 'Not provided',
+        submitted_at: new Date().toLocaleString('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        })
+      };
+      
+      await emailjs.send(
+        'service_9b98jq6',      // Your Service ID
+        'template_7sri3sr',     // Your Template ID
+        emailParams
       );
       
-      // Open mailto link to send email
-      window.location.href = `mailto:admin@brandsnobs.com?subject=${subject}&body=${body}`;
-      
-      console.log('✅ Brand recommendation submitted successfully');
+      console.log('✅ Email sent successfully to admin@brandsnobs.com');
       setRecommendSuccess(true);
       setTimeout(() => {
         setShowRecommendModal(false);
