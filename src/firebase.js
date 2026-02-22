@@ -3,8 +3,7 @@ import {
   getAuth, 
   GoogleAuthProvider,
   setPersistence,
-  browserLocalPersistence,
-  onAuthStateChanged
+  browserLocalPersistence
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -33,7 +32,8 @@ setPersistence(auth, browserLocalPersistence)
 
 export const googleProvider = new GoogleAuthProvider();
 
-// No custom parameters - allows seamless sign-in persistence
+// Remove prompt parameter to allow seamless sign-in persistence
+// No custom parameters needed
 
 export const db = getFirestore(app);
 
