@@ -31,6 +31,7 @@ const BRAND_COLLECTIONS = [
       { name: 'Prada', category: 'Fashion' },
       { name: 'Louis Vuitton', category: 'Fashion' },
       { name: 'Hermès', category: 'Fashion' },
+      { name: 'Goyard', category: 'Accessories' },
       { name: 'Fendi', category: 'Fashion' },
       { name: 'Saint Laurent', category: 'Fashion' },
       { name: 'Chloé', category: 'Fashion' },
@@ -91,6 +92,7 @@ const BRAND_COLLECTIONS = [
     description: 'Everyday luxury and comfort',
     brands: [
       { name: 'Polo Ralph Lauren', category: 'Fashion' },
+      { name: 'Peter Millar', category: 'Fashion' },
       { name: 'Tommy Bahama', category: 'Fashion' },
       { name: 'Vineyard Vines', category: 'Fashion' },
       { name: 'Lacoste', category: 'Fashion' },
