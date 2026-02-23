@@ -806,15 +806,22 @@ export default function App() {
           
           if (userDoc.exists()) {
             const data = userDoc.data();
+            console.log('📦 RAW Firestore data:', data);
             console.log('✅ Firestore data found:', {
               brands: data.brands?.length || 0,
               genderPrefs: data.genderPreferences?.length || 0,
               bagItems: data.shoppingBag?.length || 0
             });
+            console.log('Brands array:', data.brands);
             
             // Load data from Firestore
             const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
             const firebaseBrands = data.brands || [];
+            
+            console.log('🔍 Comparison:', {
+              localBrands: localBrands.length,
+              firebaseBrands: firebaseBrands.length
+            });
             
             // Smart merge: prefer whichever has more data
             if (firebaseBrands.length > 0) {
@@ -828,6 +835,8 @@ export default function App() {
             } else if (localBrands.length > 0) {
               console.log('📤 Firestore empty, using localStorage');
               setMyBrands(localBrands);
+            } else {
+              console.log('⚠️ Both Firestore and localStorage are empty');
             }
             
             if (data.genderPreferences && data.genderPreferences.length > 0) {
@@ -1217,16 +1226,19 @@ export default function App() {
         return;
       }
       
-      // Store verified email in localStorage
+      // Store verified email in localStorage (normalize to lowercase and trim)
+      const normalizedEmail = emailForSignIn.toLowerCase().trim();
       console.log('Saving to localStorage...');
-      localStorage.setItem('verified_email', emailForSignIn);
-      localStorage.setItem('user_id', emailForSignIn);
+      console.log('Original email:', emailForSignIn);
+      console.log('Normalized email:', normalizedEmail);
+      localStorage.setItem('verified_email', normalizedEmail);
+      localStorage.setItem('user_id', normalizedEmail);
       console.log('✅ Saved to localStorage');
       
       // Create user object
       const userObj = {
-        email: emailForSignIn,
-        uid: emailForSignIn,
+        email: normalizedEmail,
+        uid: normalizedEmail,
         emailVerified: true
       };
       
@@ -1240,7 +1252,8 @@ export default function App() {
       // CRITICAL FIX: Load data from Firestore immediately after sign-in
       try {
         console.log('📥 Loading latest data from Firestore...');
-        const userDocRef = doc(db, 'users', emailForSignIn);
+        console.log('Document ID:', normalizedEmail);
+        const userDocRef = doc(db, 'users', normalizedEmail);
         const userDoc = await getDoc(userDocRef);
         
         if (userDoc.exists()) {
