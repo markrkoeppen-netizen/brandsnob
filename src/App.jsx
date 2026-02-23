@@ -882,9 +882,16 @@ export default function App() {
   useEffect(() => {
     console.log('🔄 myBrands changed:', myBrands.length, 'brands');
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
+    
     if (user) {
-      console.log('✅ User exists, calling saveToCloud...');
-      saveToCloud();
+      // Debounce: Only save 2 seconds after last change
+      const timeoutId = setTimeout(() => {
+        console.log('✅ Debounced save triggered for myBrands');
+        saveToCloud();
+      }, 2000);
+      
+      // Cleanup: Cancel previous timeout if myBrands changes again
+      return () => clearTimeout(timeoutId);
     } else {
       console.log('⚠️ No user, skipping cloud save');
     }
@@ -892,17 +899,29 @@ export default function App() {
 
   useEffect(() => {
     localStorage.setItem('shoppingBag', JSON.stringify(shoppingBag));
+    
     if (user) {
-      saveToCloud();
+      const timeoutId = setTimeout(() => {
+        console.log('✅ Debounced save triggered for shoppingBag');
+        saveToCloud();
+      }, 2000);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [shoppingBag]);
+  }, [shoppingBag, user]);
 
   useEffect(() => {
     localStorage.setItem('shippingProfile', JSON.stringify(shippingProfile));
+    
     if (user) {
-      saveToCloud();
+      const timeoutId = setTimeout(() => {
+        console.log('✅ Debounced save triggered for shippingProfile');
+        saveToCloud();
+      }, 2000);
+      
+      return () => clearTimeout(timeoutId);
     }
-  }, [shippingProfile]);
+  }, [shippingProfile, user]);
 
   useEffect(() => {
     localStorage.setItem('selectedGenders', JSON.stringify(selectedGenders));
