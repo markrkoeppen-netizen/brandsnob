@@ -3,7 +3,8 @@ import {
   getAuth, 
   GoogleAuthProvider,
   setPersistence,
-  browserLocalPersistence
+  browserLocalPersistence,
+  onAuthStateChanged
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -24,17 +25,33 @@ const app = initializeApp(firebaseConfig);
 // Initialize Auth
 export const auth = getAuth(app);
 
-// Set persistence to LOCAL - keeps users signed in even after closing app
-setPersistence(auth, browserLocalPersistence)
-  .catch((error) => {
-    console.error('Auth persistence error:', error);
-  });
+// CRITICAL: Set persistence IMMEDIATELY and AWAIT it
+// This ensures auth state persists across sessions (especially mobile)
+(async () => {
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    console.log('✅ Auth persistence set to LOCAL');
+  } catch (error) {
+    console.error('❌ Auth persistence failed:', error);
+  }
+})();
+
+// Monitor auth state restoration (helpful for debugging)
+let authInitialized = false;
+onAuthStateChanged(auth, (user) => {
+  if (!authInitialized) {
+    authInitialized = true;
+    if (user) {
+      console.log('🔐 Auth restored from storage:', user.email);
+    } else {
+      console.log('⚠️ No persisted auth found');
+    }
+  }
+});
 
 export const googleProvider = new GoogleAuthProvider();
 
-// Remove prompt parameter to allow seamless sign-in persistence
-// No custom parameters needed
-
+// No custom parameters - allows seamless persistence
 export const db = getFirestore(app);
 
 export default app;
