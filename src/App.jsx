@@ -97,16 +97,20 @@ const BRAND_COLLECTIONS = [
       { name: 'Abercrombie & Fitch', category: 'Fashion' },
       { name: 'American Giant', category: 'Fashion' },
       { name: 'Brooks Brothers', category: 'Fashion' },
+      { name: 'Carhartt', category: 'Fashion' },
       { name: 'Chubbies', category: 'Fashion' },
+      { name: 'Everlane', category: 'Fashion' },
       { name: 'Kith', category: 'Fashion' },
       { name: 'Lacoste', category: 'Fashion' },
+      { name: 'Levi Strauss', category: 'Fashion' },
       { name: 'Madewell', category: 'Fashion' },
       { name: 'Peter Millar', category: 'Fashion' },
       { name: 'Polo Ralph Lauren', category: 'Fashion' },
       { name: 'Rhone', category: 'Fashion' },
       { name: 'Tommy Bahama', category: 'Fashion' },
       { name: 'TravisMatthew', category: 'Fashion' },
-      { name: 'Vineyard Vines', category: 'Fashion' }
+      { name: 'Vineyard Vines', category: 'Fashion' },
+      { name: 'Wrangler', category: 'Fashion' }
     ]
   },
   {
@@ -118,6 +122,11 @@ const BRAND_COLLECTIONS = [
       { name: 'BIRKENSTOCK', category: 'Footwear' },
       { name: 'Bombas', category: 'Accessories' },
       { name: 'Crocs', category: 'Footwear' },
+      { name: 'Havaianas', category: 'Footwear' },
+      { name: 'OluKai', category: 'Footwear' },
+      { name: 'OOFOS', category: 'Footwear' },
+      { name: 'Reef', category: 'Footwear' },
+      { name: 'Sanuk', category: 'Footwear' },
       { name: 'Teva', category: 'Footwear' },
       { name: 'UGG', category: 'Footwear' }
     ]
@@ -146,6 +155,20 @@ const BRAND_COLLECTIONS = [
   },
   {
     id: 9,
+    name: 'Western & Country',
+    description: 'Western wear and country lifestyle',
+    brands: [
+      { name: 'Ariat', category: 'Footwear' },
+      { name: 'Cinch', category: 'Fashion' },
+      { name: 'Cruel Girl', category: 'Fashion' },
+      { name: 'Justin Boots', category: 'Footwear' },
+      { name: 'Panhandle Slim', category: 'Fashion' },
+      { name: 'Stetson', category: 'Accessories' },
+      { name: 'Tony Lama', category: 'Footwear' }
+    ]
+  },
+  {
+    id: 10,
     name: 'Avant-Garde & Modern',
     description: 'Cutting-edge contemporary fashion',
     brands: [
@@ -156,7 +179,7 @@ const BRAND_COLLECTIONS = [
     ]
   },
   {
-    id: 10,
+    id: 11,
     name: 'Beauty & Home',
     description: 'Luxury beauty and home essentials',
     brands: [
