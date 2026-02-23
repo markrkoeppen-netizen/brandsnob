@@ -778,78 +778,56 @@ export default function App() {
 
   // Handle auth state and Firebase sync
   useEffect(() => {
-    console.log('🔄 Setting up auth state listener...');
+    console.log('🔄 Checking for verified email...');
     
-    // First, check current auth state immediately
-    const currentAuth = auth.currentUser;
-    console.log('Initial auth check:', currentAuth ? currentAuth.email : 'No user');
+    // Check if user has verified email in localStorage
+    const verifiedEmail = localStorage.getItem('verified_email');
+    const userId = localStorage.getItem('user_id');
     
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log('🔐 Auth state changed:', currentUser ? currentUser.email : 'No user');
-      console.log('User ID:', currentUser?.uid);
-      console.log('Auth currentUser:', auth.currentUser?.email || 'null');
+    if (verifiedEmail && userId) {
+      console.log('✅ Found verified email:', verifiedEmail);
       
-      // Check if we actually have a valid token
-      if (currentUser) {
-        try {
-          const token = await currentUser.getIdToken();
-          console.log('✅ Valid auth token exists:', token.substring(0, 20) + '...');
-        } catch (error) {
-          console.error('❌ Failed to get auth token:', error);
-          console.error('Auth is broken - forcing sign out');
-          setUser(null);
-          return;
-        }
-      }
+      const userObj = {
+        email: verifiedEmail,
+        uid: userId,
+        emailVerified: true
+      };
       
-      setUser(currentUser);
-      if (currentUser) {
-        // User signed in - intelligently merge localStorage with Firebase
+      setUser(userObj);
+      
+      // Load user data from Firestore
+      const loadUserData = async () => {
         try {
-          console.log('📥 Attempting to load data from Firebase...');
-          console.log('User ID for query:', currentUser.uid);
+          console.log('📥 Loading data from Firestore...');
+          console.log('User ID:', userId);
           
-          const userDocRef = doc(db, 'users', currentUser.uid);
-          console.log('Document path:', 'users/' + currentUser.uid);
-          
+          const userDocRef = doc(db, 'users', userId);
           const userDoc = await getDoc(userDocRef);
-          console.log('Document exists?', userDoc.exists());
           
           if (userDoc.exists()) {
             const data = userDoc.data();
-            console.log('📦 RAW Firebase data:', data);
-            console.log('✅ Firebase data found:', {
+            console.log('✅ Firestore data found:', {
               brands: data.brands?.length || 0,
               genderPrefs: data.genderPreferences?.length || 0,
               bagItems: data.shoppingBag?.length || 0
             });
             
-            // Smart merge: Prefer Firebase if it has data, otherwise use localStorage
+            // Load data from Firestore
             const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
             const firebaseBrands = data.brands || [];
             
-            console.log('📊 Comparison:', {
-              localStorage: localBrands.length,
-              firebase: firebaseBrands.length
-            });
-            
-            // Priority: Firebase with data > localStorage with data > empty
+            // Smart merge: prefer whichever has more data
             if (firebaseBrands.length > 0) {
               if (localBrands.length > firebaseBrands.length) {
-                console.log('📤 localStorage has MORE brands, keeping localStorage:', localBrands.length);
+                console.log('📤 localStorage has more brands, keeping local');
                 setMyBrands(localBrands);
-                // Will trigger saveToCloud to update Firebase
               } else {
-                console.log('📦 Loading from Firebase:', firebaseBrands.length, 'brands');
-                console.log('Brands:', firebaseBrands.map(b => b.name).join(', '));
+                console.log('📦 Loading from Firestore:', firebaseBrands.length, 'brands');
                 setMyBrands(firebaseBrands);
               }
             } else if (localBrands.length > 0) {
-              console.log('📤 Firebase empty, using localStorage:', localBrands.length);
+              console.log('📤 Firestore empty, using localStorage');
               setMyBrands(localBrands);
-              // Will trigger saveToCloud
-            } else {
-              console.log('⚠️ No brands in either location');
             }
             
             if (data.genderPreferences && data.genderPreferences.length > 0) {
@@ -862,25 +840,18 @@ export default function App() {
               setShippingProfile(data.shippingProfile);
             }
           } else {
-            console.log('❌ No Firebase document found!');
-            console.log('Document ID searched:', currentUser.uid);
-            // First time sign in - upload current localStorage data to Firebase
-            const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
-            if (localBrands.length > 0) {
-              console.log('📤 Uploading localStorage data to Firebase:', localBrands.length);
-              setMyBrands(localBrands);
-              // Will trigger saveToCloud via useEffect
-            }
+            console.log('No Firestore document yet - will create on first save');
           }
         } catch (error) {
           console.error('❌ Error loading user data:', error);
-          console.error('Error details:', error.message);
-          console.error('Error code:', error.code);
-          console.error('Full error:', error);
         }
-      }
-    });
-    return () => unsubscribe();
+      };
+      
+      loadUserData();
+    } else {
+      console.log('⚠️ No verified email found');
+      setUser(null);
+    }
   }, []);
 
   useEffect(() => {
@@ -1232,24 +1203,21 @@ export default function App() {
     try {
       console.log('✅ Code verified! Signing in...');
       
-      // Create a temporary Firebase account or sign in
-      // Since we can't use Firebase custom tokens without a backend,
-      // we'll use email/password with a random password
-      const tempPassword = generatedCode + emailForSignIn + Date.now();
+      // Store verified email in localStorage
+      localStorage.setItem('verified_email', emailForSignIn);
+      localStorage.setItem('user_id', emailForSignIn);
       
-      try {
-        // Try to sign in first
-        await signInWithEmailAndPassword(auth, emailForSignIn, tempPassword);
-      } catch (signInError) {
-        // If user doesn't exist, create account
-        if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/wrong-password') {
-          await createUserWithEmailAndPassword(auth, emailForSignIn, tempPassword);
-        } else {
-          throw signInError;
-        }
-      }
+      // Create user object
+      const userObj = {
+        email: emailForSignIn,
+        uid: emailForSignIn,
+        emailVerified: true
+      };
       
-      console.log('✅ Sign-in successful!');
+      // Set user state (this triggers the auth listener logic)
+      setUser(userObj);
+      
+      console.log('✅ Sign-in successful!', userObj);
       
       // Reset states
       setShowEmailSignIn(false);
@@ -1268,7 +1236,14 @@ export default function App() {
 
   const signOut = async () => {
     try {
-      await firebaseSignOut(auth);
+      // Clear verified email from localStorage
+      localStorage.removeItem('verified_email');
+      localStorage.removeItem('user_id');
+      
+      // Clear user state
+      setUser(null);
+      
+      console.log('✅ Signed out successfully');
     } catch (error) {
       console.error('Sign out error:', error);
     }
