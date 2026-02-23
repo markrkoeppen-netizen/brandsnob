@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signInWithRedirect, getRedirectResult, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import emailjs from '@emailjs/browser';
 
@@ -675,12 +675,16 @@ export default function App() {
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
 
-  // Email Link Sign-In
+  // Email Code Sign-In
   const [showEmailSignIn, setShowEmailSignIn] = useState(false);
   const [emailForSignIn, setEmailForSignIn] = useState('');
-  const [emailLinkSent, setEmailLinkSent] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [codeExpiry, setCodeExpiry] = useState(null);
+  const [codeSent, setCodeSent] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [verifyingCode, setVerifyingCode] = useState(false);
   const [emailSignInError, setEmailSignInError] = useState('');
-  const [sendingEmailLink, setSendingEmailLink] = useState(false);
 
   // Shipping Profile with Size Preferences
   const [shippingProfile, setShippingProfile] = useState(() => {
@@ -746,31 +750,31 @@ export default function App() {
     handleRedirectResult();
   }, []);
 
-  // Handle email link sign-in completion
-  useEffect(() => {
-    const completeEmailLinkSignIn = async () => {
-      if (isSignInWithEmailLink(auth, window.location.href)) {
-        console.log('📧 Email link detected, completing sign-in...');
-        let email = window.localStorage.getItem('emailForSignIn');
-        if (!email) {
-          email = window.prompt('Please provide your email for confirmation');
-        }
-        
-        if (email) {
-          try {
-            const result = await signInWithEmailLink(auth, email, window.location.href);
-            console.log('✅ Email link sign-in successful:', result.user.email);
-            window.localStorage.removeItem('emailForSignIn');
-            window.history.replaceState({}, document.title, window.location.pathname);
-          } catch (error) {
-            console.error('❌ Email link sign-in error:', error);
-            alert('Sign in failed. The link may have expired. Please request a new one.');
-          }
-        }
-      }
-    };
-    completeEmailLinkSignIn();
-  }, []);
+  // Email link sign-in is deprecated - using code verification instead
+  // useEffect(() => {
+  //   const completeEmailLinkSignIn = async () => {
+  //     if (isSignInWithEmailLink(auth, window.location.href)) {
+  //       console.log('📧 Email link detected, completing sign-in...');
+  //       let email = window.localStorage.getItem('emailForSignIn');
+  //       if (!email) {
+  //         email = window.prompt('Please provide your email for confirmation');
+  //       }
+  //       
+  //       if (email) {
+  //         try {
+  //           const result = await signInWithEmailLink(auth, email, window.location.href);
+  //           console.log('✅ Email link sign-in successful:', result.user.email);
+  //           window.localStorage.removeItem('emailForSignIn');
+  //           window.history.replaceState({}, document.title, window.location.pathname);
+  //         } catch (error) {
+  //           console.error('❌ Email link sign-in error:', error);
+  //           alert('Sign in failed. The link may have expired. Please request a new one.');
+  //         }
+  //       }
+  //     }
+  //   };
+  //   completeEmailLinkSignIn();
+  // }, []);
 
   // Handle auth state and Firebase sync
   useEffect(() => {
@@ -1160,52 +1164,105 @@ export default function App() {
     }
   };
 
-  const sendEmailSignInLink = async () => {
+  const sendVerificationCode = async () => {
     if (!emailForSignIn || !emailForSignIn.includes('@')) {
       setEmailSignInError('Please enter a valid email address');
       return;
     }
 
-    setSendingEmailLink(true);
+    setSendingCode(true);
     setEmailSignInError('');
 
     try {
-      const actionCodeSettings = {
-        url: 'https://www.brandsnobs.com',
-        handleCodeInApp: true,
-        iOS: {
-          bundleId: 'com.brandsnobs.app'
-        },
-        android: {
-          packageName: 'com.brandsnobs.app',
-          installApp: false,
-          minimumVersion: '1'
-        },
-        dynamicLinkDomain: undefined
-      };
-
-      console.log('📧 Sending sign-in link to:', emailForSignIn);
-      console.log('Action code settings:', actionCodeSettings);
-
-      await sendSignInLinkToEmail(auth, emailForSignIn, actionCodeSettings);
+      // Generate 6-digit code
+      const code = Math.floor(100000 + Math.random() * 900000).toString();
+      setGeneratedCode(code);
       
-      // Save email to complete sign-in after link click
-      window.localStorage.setItem('emailForSignIn', emailForSignIn);
+      // Set expiry to 10 minutes from now
+      const expiry = Date.now() + (10 * 60 * 1000);
+      setCodeExpiry(expiry);
       
-      setEmailLinkSent(true);
-      console.log('✅ Sign-in link sent successfully to:', emailForSignIn);
+      console.log('📧 Sending verification code to:', emailForSignIn);
+      
+      // Send via EmailJS
+      await emailjs.send(
+        'service_9b98jq6',
+        'template_vvw8gyu',
+        {
+          to_email: emailForSignIn,
+          verification_code: code
+        }
+      );
+      
+      console.log('✅ Verification code sent successfully');
+      setCodeSent(true);
+      
     } catch (error) {
-      console.error('❌ Error sending email link:', error);
-      
-      if (error.code === 'auth/invalid-email') {
-        setEmailSignInError('Invalid email address');
-      } else if (error.code === 'auth/too-many-requests') {
-        setEmailSignInError('Too many requests. Please try again later.');
-      } else {
-        setEmailSignInError('Failed to send link. Please try again.');
-      }
+      console.error('❌ Error sending verification code:', error);
+      setEmailSignInError('Failed to send code. Please try again.');
     } finally {
-      setSendingEmailLink(false);
+      setSendingCode(false);
+    }
+  };
+
+  const verifyCodeAndSignIn = async () => {
+    if (!verificationCode || verificationCode.length !== 6) {
+      setEmailSignInError('Please enter the 6-digit code');
+      return;
+    }
+
+    // Check if code expired
+    if (Date.now() > codeExpiry) {
+      setEmailSignInError('Code expired. Please request a new one.');
+      setCodeSent(false);
+      setVerificationCode('');
+      setGeneratedCode('');
+      return;
+    }
+
+    // Verify code matches
+    if (verificationCode !== generatedCode) {
+      setEmailSignInError('Invalid code. Please check and try again.');
+      return;
+    }
+
+    setVerifyingCode(true);
+    setEmailSignInError('');
+
+    try {
+      console.log('✅ Code verified! Signing in...');
+      
+      // Create a temporary Firebase account or sign in
+      // Since we can't use Firebase custom tokens without a backend,
+      // we'll use email/password with a random password
+      const tempPassword = generatedCode + emailForSignIn + Date.now();
+      
+      try {
+        // Try to sign in first
+        await signInWithEmailAndPassword(auth, emailForSignIn, tempPassword);
+      } catch (signInError) {
+        // If user doesn't exist, create account
+        if (signInError.code === 'auth/user-not-found' || signInError.code === 'auth/wrong-password') {
+          await createUserWithEmailAndPassword(auth, emailForSignIn, tempPassword);
+        } else {
+          throw signInError;
+        }
+      }
+      
+      console.log('✅ Sign-in successful!');
+      
+      // Reset states
+      setShowEmailSignIn(false);
+      setCodeSent(false);
+      setVerificationCode('');
+      setGeneratedCode('');
+      setEmailForSignIn('');
+      
+    } catch (error) {
+      console.error('❌ Sign-in error:', error);
+      setEmailSignInError('Sign-in failed. Please try again.');
+    } finally {
+      setVerifyingCode(false);
     }
   };
 
@@ -1537,7 +1594,7 @@ export default function App() {
               ) : (
                 <button onClick={signIn} className="bg-neutral-900 text-white px-3 md:px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2 text-sm">
                   <LogIn className="w-4 h-4" />
-                  <span className="hidden md:inline">Sign In with Google</span>
+                  <span className="hidden md:inline">Sign In</span>
                   <span className="md:hidden">Sign In</span>
                 </button>
               )}
@@ -2254,36 +2311,71 @@ export default function App() {
                   <p className="text-red-600 text-sm mb-4">{emailSignInError}</p>
                 )}
 
-                <button
-                  onClick={sendEmailSignInLink}
-                  disabled={sendingEmailLink}
-                  className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
-                >
-                  {sendingEmailLink ? 'Sending...' : 'Send Sign-In Link'}
-                </button>
+                {!codeSent ? (
+                  <>
+                    <input
+                      type="email"
+                      placeholder="Enter your email"
+                      value={emailForSignIn}
+                      onChange={(e) => setEmailForSignIn(e.target.value)}
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-3"
+                    />
 
-                <div className="flex items-center gap-3 my-4">
-                  <div className="flex-1 h-px bg-neutral-200"></div>
-                  <span className="text-sm text-neutral-500">or</span>
-                  <div className="flex-1 h-px bg-neutral-200"></div>
-                </div>
+                    <button
+                      onClick={sendVerificationCode}
+                      disabled={sendingCode}
+                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
+                    >
+                      {sendingCode ? 'Sending...' : 'Send Verification Code'}
+                    </button>
 
-                <button
-                  onClick={signInWithGoogle}
-                  className="w-full bg-white border border-neutral-300 text-neutral-900 py-3 rounded-lg hover:bg-neutral-50 transition-colors font-medium flex items-center justify-center gap-2"
-                >
-                  <svg className="w-5 h-5" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                  </svg>
-                  Continue with Google
-                </button>
+                    <p className="text-xs text-neutral-500 text-center mt-4">
+                      By signing in, you agree to sync your brands and collections across devices.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                      <p className="text-green-800 font-medium mb-2">Code sent! 📧</p>
+                      <p className="text-green-700 text-sm">We sent a 6-digit code to:</p>
+                      <p className="text-green-900 font-semibold">{emailForSignIn}</p>
+                    </div>
 
-                <p className="text-xs text-neutral-500 text-center mt-4">
-                  By signing in, you agree to sync your brands and collections across devices.
-                </p>
+                    <p className="text-neutral-600 mb-4 text-sm">
+                      Enter the code from your email. It expires in 10 minutes.
+                    </p>
+
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      placeholder="000000"
+                      value={verificationCode}
+                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-3 text-center text-2xl font-mono tracking-widest"
+                    />
+
+                    <button
+                      onClick={verifyCodeAndSignIn}
+                      disabled={verifyingCode || verificationCode.length !== 6}
+                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
+                    >
+                      {verifyingCode ? 'Verifying...' : 'Verify & Sign In'}
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setCodeSent(false);
+                        setVerificationCode('');
+                        setEmailSignInError('');
+                      }}
+                      className="text-neutral-600 hover:text-neutral-900 text-sm font-medium"
+                    >
+                      ← Didn't get it? Try again
+                    </button>
+                  </>
+                )}
               </>
             ) : (
               <>
