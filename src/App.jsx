@@ -1202,10 +1202,26 @@ export default function App() {
 
     try {
       console.log('✅ Code verified! Signing in...');
+      console.log('Email:', emailForSignIn);
+      console.log('Generated code:', generatedCode);
+      console.log('Entered code:', verificationCode);
+      
+      // Test if localStorage is available (Safari might block it)
+      try {
+        localStorage.setItem('test_storage', 'test');
+        localStorage.removeItem('test_storage');
+        console.log('✅ localStorage is available');
+      } catch (storageError) {
+        console.error('❌ localStorage is blocked:', storageError);
+        setEmailSignInError('Storage blocked. Please disable Private Browsing and try again.');
+        return;
+      }
       
       // Store verified email in localStorage
+      console.log('Saving to localStorage...');
       localStorage.setItem('verified_email', emailForSignIn);
       localStorage.setItem('user_id', emailForSignIn);
+      console.log('✅ Saved to localStorage');
       
       // Create user object
       const userObj = {
@@ -1214,10 +1230,54 @@ export default function App() {
         emailVerified: true
       };
       
+      console.log('Setting user state:', userObj);
+      
       // Set user state (this triggers the auth listener logic)
       setUser(userObj);
       
       console.log('✅ Sign-in successful!', userObj);
+      
+      // CRITICAL FIX: Load data from Firestore immediately after sign-in
+      try {
+        console.log('📥 Loading latest data from Firestore...');
+        const userDocRef = doc(db, 'users', emailForSignIn);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          console.log('✅ Firestore data found:', {
+            brands: data.brands?.length || 0,
+            genderPrefs: data.genderPreferences?.length || 0,
+            bagItems: data.shoppingBag?.length || 0,
+            updatedAt: data.updatedAt
+          });
+          
+          // Load all data from Firestore (this is the source of truth)
+          if (data.brands && data.brands.length > 0) {
+            console.log('📦 Loading', data.brands.length, 'brands from Firestore');
+            setMyBrands(data.brands);
+          } else {
+            console.log('⚠️ No brands in Firestore');
+          }
+          
+          if (data.genderPreferences && data.genderPreferences.length > 0) {
+            setSelectedGenders(data.genderPreferences);
+          }
+          if (data.shoppingBag && data.shoppingBag.length > 0) {
+            setShoppingBag(data.shoppingBag);
+          }
+          if (data.shippingProfile) {
+            setShippingProfile(data.shippingProfile);
+          }
+          
+          console.log('✅ All data loaded from Firestore successfully');
+        } else {
+          console.log('ℹ️ No Firestore document yet - first time sign in');
+        }
+      } catch (firestoreError) {
+        console.error('❌ Error loading from Firestore:', firestoreError);
+        // Don't block sign-in if Firestore load fails
+      }
       
       // Reset states
       setShowEmailSignIn(false);
@@ -1228,7 +1288,10 @@ export default function App() {
       
     } catch (error) {
       console.error('❌ Sign-in error:', error);
-      setEmailSignInError('Sign-in failed. Please try again.');
+      console.error('Error type:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      setEmailSignInError(`Sign-in failed: ${error.message}`);
     } finally {
       setVerifyingCode(false);
     }
