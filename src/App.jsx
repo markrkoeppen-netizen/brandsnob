@@ -1235,6 +1235,23 @@ export default function App() {
       localStorage.setItem('user_id', normalizedEmail);
       console.log('✅ Saved to localStorage');
       
+      // IMMEDIATE VERIFICATION
+      const checkEmail = localStorage.getItem('verified_email');
+      const checkId = localStorage.getItem('user_id');
+      console.log('🔍 VERIFY immediately after save:');
+      console.log('  verified_email:', checkEmail);
+      console.log('  user_id:', checkId);
+      
+      if (!checkEmail || !checkId) {
+        console.error('❌ CRITICAL: localStorage.setItem() succeeded but getItem() returns null!');
+        console.error('This is a browser storage bug. Trying alternative approach...');
+        // Try setting with JSON
+        localStorage.setItem('verified_email', JSON.stringify(normalizedEmail));
+        localStorage.setItem('user_id', JSON.stringify(normalizedEmail));
+        const recheck = localStorage.getItem('verified_email');
+        console.log('Recheck after JSON.stringify:', recheck);
+      }
+      
       // Create user object
       const userObj = {
         email: normalizedEmail,
