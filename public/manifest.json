@@ -3,6 +3,7 @@
   "short_name": "BrandSnobs",
   "description": "You Like What You Like",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#171717",
