@@ -1088,31 +1088,56 @@ export default function App() {
     try {
       console.log('🔐 Starting Google sign-in process...');
       
-      // Try popup first (best UX on desktop)
-      try {
-        console.log('📱 Attempting popup sign-in...');
-        await signInWithPopup(auth, googleProvider);
-        console.log('✅ Popup sign-in successful!');
-        setShowEmailSignIn(false);
-        return;
-      } catch (popupError) {
-        console.log('⚠️ Popup method failed:', popupError.code);
-        
-        // If popup was blocked, cancelled, or failed - use redirect
-        if (
-          popupError.code === 'auth/popup-blocked' ||
-          popupError.code === 'auth/popup-closed-by-user' ||
-          popupError.code === 'auth/cancelled-popup-request' ||
-          popupError.code === 'auth/operation-not-supported-in-this-environment'
-        ) {
-          console.log('🔄 Switching to redirect sign-in...');
-          await signInWithRedirect(auth, googleProvider);
+      // Detect if user is on Safari
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      
+      if (isSafari) {
+        // Safari: ONLY use popup (redirect causes "missing initial state" error)
+        console.log('🍎 Safari detected - using popup only');
+        try {
+          await signInWithPopup(auth, googleProvider);
+          console.log('✅ Popup sign-in successful!');
+          setShowEmailSignIn(false);
           return;
+        } catch (popupError) {
+          console.error('❌ Popup sign-in failed:', popupError);
+          
+          if (popupError.code === 'auth/popup-blocked') {
+            alert('🚫 Pop-up blocked!\n\nPlease allow pop-ups for brandsnobs.com in Safari settings:\n\n1. Safari → Settings → Websites → Pop-up Windows\n2. Find brandsnobs.com → Select "Allow"\n3. Try signing in again');
+            return;
+          } else if (popupError.code === 'auth/popup-closed-by-user') {
+            // User cancelled - no error needed
+            console.log('User closed the popup');
+            return;
+          }
+          
+          throw popupError; // Re-throw other errors
         }
-        
-        // For other errors, still try redirect as fallback
-        console.log('🔄 Trying redirect as fallback...');
-        await signInWithRedirect(auth, googleProvider);
+      } else {
+        // Non-Safari: Try popup first, then redirect
+        console.log('📱 Attempting popup sign-in...');
+        try {
+          await signInWithPopup(auth, googleProvider);
+          console.log('✅ Popup sign-in successful!');
+          setShowEmailSignIn(false);
+          return;
+        } catch (popupError) {
+          console.log('⚠️ Popup method failed:', popupError.code);
+          
+          // If popup was blocked or failed - use redirect (works on non-Safari)
+          if (
+            popupError.code === 'auth/popup-blocked' ||
+            popupError.code === 'auth/popup-closed-by-user' ||
+            popupError.code === 'auth/cancelled-popup-request' ||
+            popupError.code === 'auth/operation-not-supported-in-this-environment'
+          ) {
+            console.log('🔄 Switching to redirect sign-in...');
+            await signInWithRedirect(auth, googleProvider);
+            return;
+          }
+          
+          throw popupError; // Re-throw other errors
+        }
       }
     } catch (error) {
       console.error('❌ Sign-in error:', error);
@@ -1122,13 +1147,13 @@ export default function App() {
       let userMessage = 'Sign in failed. ';
       
       if (error.code === 'auth/unauthorized-domain') {
-        userMessage = '⚠️ Domain not authorized. Please contact support with error code: unauthorized-domain';
+        userMessage = '⚠️ Domain not authorized. Please contact support.';
       } else if (error.code === 'auth/network-request-failed') {
-        userMessage = '⚠️ Network error. Please check your internet connection and try again.';
+        userMessage = '⚠️ Network error. Please check your connection.';
       } else if (error.code === 'auth/too-many-requests') {
-        userMessage = '⚠️ Too many attempts. Please wait a few minutes and try again.';
+        userMessage = '⚠️ Too many attempts. Please wait a few minutes.';
       } else {
-        userMessage += `Please try again or contact support. Error: ${error.code}`;
+        userMessage += `Please try again. Error: ${error.code}`;
       }
       
       alert(userMessage);
