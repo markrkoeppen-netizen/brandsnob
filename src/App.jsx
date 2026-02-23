@@ -76,14 +76,17 @@ const BRAND_COLLECTIONS = [
     name: 'Contemporary American',
     description: 'Modern American designers and lifestyle brands',
     brands: [
-      { name: 'Michael Kors', category: 'Fashion' },
-      { name: 'Tory Burch', category: 'Fashion' },
+      { name: 'Donna Karan', category: 'Fashion' },
+      { name: 'Free People', category: 'Fashion' },
       { name: 'Kate Spade', category: 'Accessories' },
       { name: 'Marc Jacobs', category: 'Fashion' },
-      { name: 'Donna Karan', category: 'Fashion' },
-      { name: 'Vera Wang', category: 'Fashion' },
+      { name: 'Michael Kors', category: 'Fashion' },
       { name: 'Oscar de la Renta', category: 'Fashion' },
-      { name: 'Tom Ford', category: 'Fashion' }
+      { name: 'Spanx', category: 'Fashion' },
+      { name: 'Tom Ford', category: 'Fashion' },
+      { name: 'Tory Burch', category: 'Fashion' },
+      { name: 'Trendia', category: 'Fashion' },
+      { name: 'Vera Wang', category: 'Fashion' }
     ]
   },
   {
@@ -91,18 +94,19 @@ const BRAND_COLLECTIONS = [
     name: 'Casual & Lifestyle',
     description: 'Everyday luxury and comfort',
     brands: [
-      { name: 'Polo Ralph Lauren', category: 'Fashion' },
-      { name: 'Peter Millar', category: 'Fashion' },
-      { name: 'Tommy Bahama', category: 'Fashion' },
-      { name: 'Vineyard Vines', category: 'Fashion' },
-      { name: 'Lacoste', category: 'Fashion' },
       { name: 'Abercrombie & Fitch', category: 'Fashion' },
-      { name: 'Madewell', category: 'Fashion' },
-      { name: 'Kith', category: 'Fashion' },
+      { name: 'American Giant', category: 'Fashion' },
       { name: 'Brooks Brothers', category: 'Fashion' },
       { name: 'Chubbies', category: 'Fashion' },
+      { name: 'Kith', category: 'Fashion' },
+      { name: 'Lacoste', category: 'Fashion' },
+      { name: 'Madewell', category: 'Fashion' },
+      { name: 'Peter Millar', category: 'Fashion' },
+      { name: 'Polo Ralph Lauren', category: 'Fashion' },
+      { name: 'Rhone', category: 'Fashion' },
+      { name: 'Tommy Bahama', category: 'Fashion' },
       { name: 'TravisMatthew', category: 'Fashion' },
-      { name: 'Rhone', category: 'Fashion' }
+      { name: 'Vineyard Vines', category: 'Fashion' }
     ]
   },
   {
@@ -110,22 +114,24 @@ const BRAND_COLLECTIONS = [
     name: 'Footwear & Comfort',
     description: 'Comfort meets style',
     brands: [
-      { name: 'UGG', category: 'Footwear' },
-      { name: 'BIRKENSTOCK', category: 'Footwear' },
-      { name: 'Crocs', category: 'Footwear' },
       { name: 'Allbirds', category: 'Footwear' },
-      { name: 'Bombas', category: 'Accessories' }
+      { name: 'BIRKENSTOCK', category: 'Footwear' },
+      { name: 'Bombas', category: 'Accessories' },
+      { name: 'Crocs', category: 'Footwear' },
+      { name: 'Teva', category: 'Footwear' },
+      { name: 'UGG', category: 'Footwear' }
     ]
   },
   {
     id: 7,
-    name: 'Eyewear & Accessories',
-    description: 'Premium sunglasses and accessories',
+    name: 'Accessories & Jewelry',
+    description: 'Premium sunglasses, jewelry, and accessories',
     brands: [
-      { name: 'Ray-Ban', category: 'Accessories' },
-      { name: 'Oakley', category: 'Accessories' },
       { name: 'Costa', category: 'Accessories' },
-      { name: 'Kendra Scott', category: 'Jewelry' }
+      { name: 'Gorjana', category: 'Jewelry' },
+      { name: 'Kendra Scott', category: 'Jewelry' },
+      { name: 'Oakley', category: 'Accessories' },
+      { name: 'Ray-Ban', category: 'Accessories' }
     ]
   },
   {
