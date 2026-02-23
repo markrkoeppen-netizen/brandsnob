@@ -2277,21 +2277,23 @@ export default function App() {
       {showEmailSignIn && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-            {!emailLinkSent ? (
-              <>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold text-neutral-900">Sign In to BrandSnobs</h2>
-                  <button onClick={() => {
-                    setShowEmailSignIn(false);
-                    setEmailForSignIn('');
-                    setEmailSignInError('');
-                  }} className="text-neutral-400 hover:text-neutral-600">
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold text-neutral-900">Sign In to BrandSnobs</h2>
+              <button onClick={() => {
+                setShowEmailSignIn(false);
+                setEmailForSignIn('');
+                setEmailSignInError('');
+                setCodeSent(false);
+                setVerificationCode('');
+              }} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
 
+            {!codeSent ? (
+              <>
                 <p className="text-neutral-600 mb-6">
-                  Enter your email to receive a secure sign-in link. No password needed!
+                  Enter your email to receive a 6-digit verification code.
                 </p>
 
                 <input
@@ -2302,111 +2304,67 @@ export default function App() {
                     setEmailForSignIn(e.target.value);
                     setEmailSignInError('');
                   }}
-                  onKeyPress={(e) => e.key === 'Enter' && sendEmailSignInLink()}
+                  onKeyPress={(e) => e.key === 'Enter' && sendVerificationCode()}
                   className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-4"
-                  disabled={sendingEmailLink}
+                  disabled={sendingCode}
                 />
 
                 {emailSignInError && (
                   <p className="text-red-600 text-sm mb-4">{emailSignInError}</p>
                 )}
 
-                {!codeSent ? (
-                  <>
-                    <input
-                      type="email"
-                      placeholder="Enter your email"
-                      value={emailForSignIn}
-                      onChange={(e) => setEmailForSignIn(e.target.value)}
-                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-3"
-                    />
+                <button
+                  onClick={sendVerificationCode}
+                  disabled={sendingCode}
+                  className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
+                >
+                  {sendingCode ? 'Sending Code...' : 'Send Verification Code'}
+                </button>
 
-                    <button
-                      onClick={sendVerificationCode}
-                      disabled={sendingCode}
-                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
-                    >
-                      {sendingCode ? 'Sending...' : 'Send Verification Code'}
-                    </button>
-
-                    <p className="text-xs text-neutral-500 text-center mt-4">
-                      By signing in, you agree to sync your brands and collections across devices.
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                      <p className="text-green-800 font-medium mb-2">Code sent! 📧</p>
-                      <p className="text-green-700 text-sm">We sent a 6-digit code to:</p>
-                      <p className="text-green-900 font-semibold">{emailForSignIn}</p>
-                    </div>
-
-                    <p className="text-neutral-600 mb-4 text-sm">
-                      Enter the code from your email. It expires in 10 minutes.
-                    </p>
-
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={6}
-                      placeholder="000000"
-                      value={verificationCode}
-                      onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                      className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-3 text-center text-2xl font-mono tracking-widest"
-                    />
-
-                    <button
-                      onClick={verifyCodeAndSignIn}
-                      disabled={verifyingCode || verificationCode.length !== 6}
-                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
-                    >
-                      {verifyingCode ? 'Verifying...' : 'Verify & Sign In'}
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setCodeSent(false);
-                        setVerificationCode('');
-                        setEmailSignInError('');
-                      }}
-                      className="text-neutral-600 hover:text-neutral-900 text-sm font-medium"
-                    >
-                      ← Didn't get it? Try again
-                    </button>
-                  </>
-                )}
+                <p className="text-xs text-neutral-500 text-center mt-4">
+                  By signing in, you agree to sync your brands and collections across devices.
+                </p>
               </>
             ) : (
               <>
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-2xl font-bold text-neutral-900">Check Your Email! 📧</h2>
-                  <button onClick={() => {
-                    setShowEmailSignIn(false);
-                    setEmailLinkSent(false);
-                    setEmailForSignIn('');
-                  }} className="text-neutral-400 hover:text-neutral-600">
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <p className="text-green-800 font-medium mb-2">Sign-in link sent!</p>
-                  <p className="text-green-700 text-sm">We sent a sign-in link to:</p>
+                  <p className="text-green-800 font-medium mb-2">Code sent! 📧</p>
+                  <p className="text-green-700 text-sm">We sent a 6-digit code to:</p>
                   <p className="text-green-900 font-semibold">{emailForSignIn}</p>
                 </div>
 
-                <p className="text-neutral-600 mb-4">
-                  Click the link in your email to complete sign-in. The link is valid for 24 hours.
+                <p className="text-neutral-600 mb-4 text-sm">
+                  Enter the code from your email. It expires in 10 minutes.
                 </p>
 
-                <p className="text-sm text-neutral-500 mb-4">
-                  💡 Tip: You can click the link on any device - your brands will sync automatically!
-                </p>
+                {emailSignInError && (
+                  <p className="text-red-600 text-sm mb-4">{emailSignInError}</p>
+                )}
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                  onKeyPress={(e) => e.key === 'Enter' && verificationCode.length === 6 && verifyCodeAndSignIn()}
+                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-3 text-center text-2xl font-mono tracking-widest"
+                />
+
+                <button
+                  onClick={verifyCodeAndSignIn}
+                  disabled={verifyingCode || verificationCode.length !== 6}
+                  className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
+                >
+                  {verifyingCode ? 'Verifying...' : 'Verify & Sign In'}
+                </button>
 
                 <button
                   onClick={() => {
-                    setEmailLinkSent(false);
+                    setCodeSent(false);
+                    setVerificationCode('');
                     setEmailSignInError('');
                   }}
                   className="text-neutral-600 hover:text-neutral-900 text-sm font-medium"
