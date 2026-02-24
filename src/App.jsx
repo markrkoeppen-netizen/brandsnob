@@ -543,6 +543,11 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
             <p className="text-xs text-neutral-500 text-center mt-3">
               Items grouped by retailer to minimize tabs
             </p>
+            <div className="mt-4 pt-4 border-t border-neutral-200">
+              <p className="text-xs text-neutral-500 text-center">
+                💡 <span className="font-medium">Affiliate Disclosure:</span> BrandSnobs earns commissions on purchases made through our links. This helps keep our service free. You never pay extra.
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -1299,6 +1304,16 @@ export default function App() {
   // Get unique user collections
   const userCollections = [...new Set(myBrands.map(b => b.collection).filter(Boolean))];
 
+  // Get brand logo/image from deals
+  const getBrandImage = (brandName) => {
+    const brandDeals = deals.filter(deal => 
+      deal.merchant?.toLowerCase() === brandName.toLowerCase() ||
+      deal.brand?.toLowerCase() === brandName.toLowerCase()
+    );
+    return brandDeals.length > 0 ? brandDeals[0].image : null;
+  };
+
+
   const handleBrandInputChange = (value) => {
     setNewBrandName(value);
     
@@ -1382,6 +1397,9 @@ export default function App() {
       }, index * 500);
     });
 
+    // Clear the shopping bag after opening checkouts
+    clearBag();
+    
     setShowBagModal(false);
   };
 
@@ -1541,7 +1559,6 @@ export default function App() {
   const stats = {
     totalBrands: myBrands.length,
     totalDeals: filteredDeals.length,
-    totalSavings: filteredDeals.reduce((sum, deal) => sum + (deal.originalPrice - deal.salePrice), 0),
     avgDiscount: filteredDeals.length > 0
       ? Math.round(filteredDeals.reduce((sum, deal) => sum + parseInt(deal.discount), 0) / filteredDeals.length)
       : 0
@@ -1704,13 +1721,16 @@ export default function App() {
                 <div className="font-display text-3xl font-bold text-neutral-900">{stats.totalDeals}</div>
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                <div className="text-sm text-neutral-500 mb-1">Total Savings</div>
-                <div className="font-display text-3xl font-bold text-neutral-900">${stats.totalSavings.toLocaleString()}</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Avg Discount</div>
                 <div className="font-display text-3xl font-bold text-neutral-900">{stats.avgDiscount}%</div>
               </div>
+            </div>
+
+            {/* FTC Affiliate Disclosure */}
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
+              <p className="text-sm text-blue-900">
+                <span className="font-semibold">💡 Affiliate Disclosure:</span> BrandSnobs participates in affiliate programs and earns commissions on purchases made through links on this site. This helps keep BrandSnobs free for everyone. You never pay extra.
+              </p>
             </div>
 
             {dealsLoading && (
@@ -2002,14 +2022,24 @@ export default function App() {
                         <span className="text-sm text-neutral-500">{brandsInCollection.length} brand{brandsInCollection.length !== 1 ? 's' : ''}</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {brandsInCollection.map(brand => (
-                          <div key={brand.id} className="flex items-center justify-between bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200">
-                            <span className="font-medium text-neutral-800">{brand.name}</span>
-                            <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
-                              <X className="w-5 h-5" />
-                            </button>
-                          </div>
-                        ))}
+                        {brandsInCollection.map(brand => {
+                          const brandImage = getBrandImage(brand.name);
+                          return (
+                            <div key={brand.id} className="flex items-center gap-3 bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200 hover:shadow-sm transition-shadow">
+                              {brandImage && (
+                                <img 
+                                  src={brandImage} 
+                                  alt={brand.name}
+                                  className="w-10 h-10 object-contain rounded-lg bg-white p-1"
+                                />
+                              )}
+                              <span className="font-medium text-neutral-800 flex-1">{brand.name}</span>
+                              <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
+                                <X className="w-5 h-5" />
+                              </button>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   );
@@ -2019,14 +2049,24 @@ export default function App() {
                   <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                     <h3 className="font-semibold text-lg text-neutral-800 mb-4">Uncategorized</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {myBrands.filter(b => !b.collection).map(brand => (
-                        <div key={brand.id} className="flex items-center justify-between bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200">
-                          <span className="font-medium text-neutral-800">{brand.name}</span>
-                          <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
-                            <X className="w-5 h-5" />
-                          </button>
-                        </div>
-                      ))}
+                      {myBrands.filter(b => !b.collection).map(brand => {
+                        const brandImage = getBrandImage(brand.name);
+                        return (
+                          <div key={brand.id} className="flex items-center gap-3 bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200 hover:shadow-sm transition-shadow">
+                            {brandImage && (
+                              <img 
+                                src={brandImage} 
+                                alt={brand.name}
+                                className="w-10 h-10 object-contain rounded-lg bg-white p-1"
+                              />
+                            )}
+                            <span className="font-medium text-neutral-800 flex-1">{brand.name}</span>
+                            <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
@@ -2052,11 +2092,21 @@ export default function App() {
                     <div className="mb-4">
                       <h4 className="font-semibold text-neutral-700 mb-3">Included Brands:</h4>
                       <div className="space-y-2">
-                        {collection.brands.map((brand, idx) => (
-                          <div key={idx} className="flex items-center justify-between bg-neutral-50 px-3 py-2 rounded-lg">
-                            <span className="font-medium text-neutral-800">{brand.name}</span>
-                          </div>
-                        ))}
+                        {collection.brands.map((brand, idx) => {
+                          const brandImage = getBrandImage(brand.name);
+                          return (
+                            <div key={idx} className="flex items-center gap-3 bg-neutral-50 px-3 py-2 rounded-lg hover:bg-neutral-100 transition-colors">
+                              {brandImage && (
+                                <img 
+                                  src={brandImage} 
+                                  alt={brand.name}
+                                  className="w-8 h-8 object-contain rounded bg-white p-1"
+                                />
+                              )}
+                              <span className="font-medium text-neutral-800">{brand.name}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                     <button
@@ -2412,6 +2462,27 @@ export default function App() {
           success={recommendSuccess}
         />
       )}
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-neutral-200 mt-12 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-6 text-sm text-neutral-600">
+              <a href="#" className="hover:text-neutral-900 transition-colors">How It Works</a>
+              <a href="#" className="hover:text-neutral-900 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-neutral-900 transition-colors">Terms of Service</a>
+            </div>
+            <div className="bg-neutral-50 rounded-lg p-4 max-w-2xl mx-auto">
+              <p className="text-xs text-neutral-600">
+                <span className="font-semibold">Affiliate Disclosure:</span> BrandSnobs participates in affiliate marketing programs including CJ Affiliate, ShareASale, and Impact. We earn commissions on purchases made through our links at no extra cost to you. This helps keep BrandSnobs free for everyone.
+              </p>
+            </div>
+            <p className="text-sm text-neutral-500">
+              © 2026 BrandSnobs. You Like What You Like.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
