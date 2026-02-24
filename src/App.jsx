@@ -778,15 +778,11 @@ export default function App() {
 
   // Handle auth state and Firebase sync
   useEffect(() => {
-    console.log('🔄 Checking for verified email...');
-    
     // Check if user has verified email in localStorage
     const verifiedEmail = localStorage.getItem('verified_email');
     const userId = localStorage.getItem('user_id');
     
     if (verifiedEmail && userId) {
-      console.log('✅ Found verified email:', verifiedEmail);
-      
       const userObj = {
         email: verifiedEmail,
         uid: userId,
@@ -798,45 +794,23 @@ export default function App() {
       // Load user data from Firestore
       const loadUserData = async () => {
         try {
-          console.log('📥 Loading data from Firestore...');
-          console.log('User ID:', userId);
-          
           const userDocRef = doc(db, 'users', userId);
           const userDoc = await getDoc(userDocRef);
           
           if (userDoc.exists()) {
             const data = userDoc.data();
-            console.log('📦 RAW Firestore data:', data);
-            console.log('✅ Firestore data found:', {
-              brands: data.brands?.length || 0,
-              genderPrefs: data.genderPreferences?.length || 0,
-              bagItems: data.shoppingBag?.length || 0
-            });
-            console.log('Brands array:', data.brands);
-            
-            // Load data from Firestore
             const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
             const firebaseBrands = data.brands || [];
-            
-            console.log('🔍 Comparison:', {
-              localBrands: localBrands.length,
-              firebaseBrands: firebaseBrands.length
-            });
             
             // Smart merge: prefer whichever has more data
             if (firebaseBrands.length > 0) {
               if (localBrands.length > firebaseBrands.length) {
-                console.log('📤 localStorage has more brands, keeping local');
                 setMyBrands(localBrands);
               } else {
-                console.log('📦 Loading from Firestore:', firebaseBrands.length, 'brands');
                 setMyBrands(firebaseBrands);
               }
             } else if (localBrands.length > 0) {
-              console.log('📤 Firestore empty, using localStorage');
               setMyBrands(localBrands);
-            } else {
-              console.log('⚠️ Both Firestore and localStorage are empty');
             }
             
             if (data.genderPreferences && data.genderPreferences.length > 0) {
@@ -848,36 +822,29 @@ export default function App() {
             if (data.shippingProfile) {
               setShippingProfile(data.shippingProfile);
             }
-          } else {
-            console.log('No Firestore document yet - will create on first save');
           }
         } catch (error) {
-          console.error('❌ Error loading user data:', error);
+          console.error('Error loading user data:', error);
         }
       };
       
       loadUserData();
     } else {
-      console.log('⚠️ No verified email found');
       setUser(null);
     }
   }, []);
 
   useEffect(() => {
-    console.log('🔄 myBrands changed:', myBrands.length, 'brands');
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
     
     if (user) {
       // Debounce: Only save 2 seconds after last change
       const timeoutId = setTimeout(() => {
-        console.log('✅ Debounced save triggered for myBrands');
         saveToCloud();
       }, 2000);
       
       // Cleanup: Cancel previous timeout if myBrands changes again
       return () => clearTimeout(timeoutId);
-    } else {
-      console.log('⚠️ No user, skipping cloud save');
     }
   }, [myBrands, user]);
 
@@ -886,7 +853,6 @@ export default function App() {
     
     if (user) {
       const timeoutId = setTimeout(() => {
-        console.log('✅ Debounced save triggered for shoppingBag');
         saveToCloud();
       }, 2000);
       
@@ -899,7 +865,6 @@ export default function App() {
     
     if (user) {
       const timeoutId = setTimeout(() => {
-        console.log('✅ Debounced save triggered for shippingProfile');
         saveToCloud();
       }, 2000);
       
@@ -1015,21 +980,15 @@ export default function App() {
 
   const saveToCloud = async () => {
     if (!user) {
-      console.log('❌ saveToCloud: No user signed in');
       return;
     }
     
-    // Don't save if ALL data is empty (prevents wiping Firebase on first sign-in)
+    // Don't save if ALL data is empty
     if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0) {
-      console.log('⚠️ saveToCloud: Skipping - no data to save');
       return;
     }
     
     try {
-      console.log('💾 saveToCloud: Starting sync...', { 
-        userId: user.uid, 
-        brandsCount: myBrands.length 
-      });
       setSyncStatus('syncing');
       await setDoc(doc(db, 'users', user.uid), {
         brands: myBrands,
@@ -1038,11 +997,10 @@ export default function App() {
         shippingProfile: shippingProfile,
         updatedAt: new Date().toISOString()
       }, { merge: true });
-      console.log('✅ saveToCloud: Sync successful!');
       setSyncStatus('synced');
       setTimeout(() => setSyncStatus('idle'), 2000);
     } catch (error) {
-      console.error('❌ saveToCloud error:', error);
+      console.error('saveToCloud error:', error);
       setSyncStatus('error');
     }
   };
@@ -1211,45 +1169,28 @@ export default function App() {
 
     try {
       console.log('✅ Code verified! Signing in...');
-      console.log('Email:', emailForSignIn);
-      console.log('Generated code:', generatedCode);
-      console.log('Entered code:', verificationCode);
       
-      // Test if localStorage is available (Safari might block it)
+      // Test if localStorage is available
       try {
         localStorage.setItem('test_storage', 'test');
         localStorage.removeItem('test_storage');
-        console.log('✅ localStorage is available');
       } catch (storageError) {
-        console.error('❌ localStorage is blocked:', storageError);
+        console.error('localStorage blocked:', storageError);
         setEmailSignInError('Storage blocked. Please disable Private Browsing and try again.');
         return;
       }
       
       // Store verified email in localStorage (normalize to lowercase and trim)
       const normalizedEmail = emailForSignIn.toLowerCase().trim();
-      console.log('Saving to localStorage...');
-      console.log('Original email:', emailForSignIn);
-      console.log('Normalized email:', normalizedEmail);
       localStorage.setItem('verified_email', normalizedEmail);
       localStorage.setItem('user_id', normalizedEmail);
-      console.log('✅ Saved to localStorage');
       
-      // IMMEDIATE VERIFICATION
+      // CRITICAL: Immediate verification for Safari compatibility
       const checkEmail = localStorage.getItem('verified_email');
-      const checkId = localStorage.getItem('user_id');
-      console.log('🔍 VERIFY immediately after save:');
-      console.log('  verified_email:', checkEmail);
-      console.log('  user_id:', checkId);
-      
-      if (!checkEmail || !checkId) {
-        console.error('❌ CRITICAL: localStorage.setItem() succeeded but getItem() returns null!');
-        console.error('This is a browser storage bug. Trying alternative approach...');
-        // Try setting with JSON
+      if (!checkEmail) {
+        console.error('localStorage.setItem() failed, trying alternative method...');
         localStorage.setItem('verified_email', JSON.stringify(normalizedEmail));
         localStorage.setItem('user_id', JSON.stringify(normalizedEmail));
-        const recheck = localStorage.getItem('verified_email');
-        console.log('Recheck after JSON.stringify:', recheck);
       }
       
       // Create user object
@@ -1259,35 +1200,22 @@ export default function App() {
         emailVerified: true
       };
       
-      console.log('Setting user state:', userObj);
-      
-      // Set user state (this triggers the auth listener logic)
+      // Set user state
       setUser(userObj);
       
-      console.log('✅ Sign-in successful!', userObj);
+      console.log('✅ Sign-in successful!');
       
-      // CRITICAL FIX: Load data from Firestore immediately after sign-in
+      // Load data from Firestore immediately after sign-in
       try {
-        console.log('📥 Loading latest data from Firestore...');
-        console.log('Document ID:', normalizedEmail);
         const userDocRef = doc(db, 'users', normalizedEmail);
         const userDoc = await getDoc(userDocRef);
         
         if (userDoc.exists()) {
           const data = userDoc.data();
-          console.log('✅ Firestore data found:', {
-            brands: data.brands?.length || 0,
-            genderPrefs: data.genderPreferences?.length || 0,
-            bagItems: data.shoppingBag?.length || 0,
-            updatedAt: data.updatedAt
-          });
           
-          // Load all data from Firestore (this is the source of truth)
           if (data.brands && data.brands.length > 0) {
-            console.log('📦 Loading', data.brands.length, 'brands from Firestore');
+            console.log('Loading', data.brands.length, 'brands from Firestore');
             setMyBrands(data.brands);
-          } else {
-            console.log('⚠️ No brands in Firestore');
           }
           
           if (data.genderPreferences && data.genderPreferences.length > 0) {
@@ -1299,14 +1227,9 @@ export default function App() {
           if (data.shippingProfile) {
             setShippingProfile(data.shippingProfile);
           }
-          
-          console.log('✅ All data loaded from Firestore successfully');
-        } else {
-          console.log('ℹ️ No Firestore document yet - first time sign in');
         }
       } catch (firestoreError) {
-        console.error('❌ Error loading from Firestore:', firestoreError);
-        // Don't block sign-in if Firestore load fails
+        console.error('Error loading from Firestore:', firestoreError);
       }
       
       // Reset states
@@ -1317,10 +1240,7 @@ export default function App() {
       setEmailForSignIn('');
       
     } catch (error) {
-      console.error('❌ Sign-in error:', error);
-      console.error('Error type:', error.name);
-      console.error('Error message:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error('Sign-in error:', error);
       setEmailSignInError(`Sign-in failed: ${error.message}`);
     } finally {
       setVerifyingCode(false);
@@ -1329,14 +1249,9 @@ export default function App() {
 
   const signOut = async () => {
     try {
-      // Clear verified email from localStorage
       localStorage.removeItem('verified_email');
       localStorage.removeItem('user_id');
-      
-      // Clear user state
       setUser(null);
-      
-      console.log('✅ Signed out successfully');
     } catch (error) {
       console.error('Sign out error:', error);
     }
