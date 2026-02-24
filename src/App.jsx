@@ -545,7 +545,7 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
             </p>
             <div className="mt-4 pt-4 border-t border-neutral-200">
               <p className="text-xs text-neutral-500 text-center">
-                💡 <span className="font-medium">Affiliate Disclosure:</span> BrandSnobs earns commissions on purchases made through our links. This helps keep our service free. You never pay extra.
+                💡 <span className="font-medium">Affiliate Disclosure:</span> BrandSnobs earns commissions on purchases made through our links. This helps keep our service free.
               </p>
             </div>
           </div>
@@ -1556,12 +1556,53 @@ export default function App() {
     return sorted;
   }, [deals, searchQuery, selectedGenders, dealFilter, dealSort, shippingProfile]);
 
+  // Calculate which brand has the best average discount
+  const hotBrand = React.useMemo(() => {
+    if (myBrands.length === 0 || filteredDeals.length === 0) return null;
+    
+    // Group deals by brand and calculate average discount
+    const brandStats = {};
+    filteredDeals.forEach(deal => {
+      const brand = deal.merchant || deal.brand;
+      if (!brand) return;
+      
+      if (!brandStats[brand]) {
+        brandStats[brand] = {
+          name: brand,
+          deals: [],
+          totalDiscount: 0
+        };
+      }
+      brandStats[brand].deals.push(deal);
+      brandStats[brand].totalDiscount += parseInt(deal.discount || 0);
+    });
+    
+    // Calculate average and find best
+    let bestBrand = null;
+    let bestAvg = 0;
+    
+    Object.values(brandStats).forEach(brand => {
+      const avgDiscount = brand.totalDiscount / brand.deals.length;
+      if (avgDiscount > bestAvg) {
+        bestAvg = avgDiscount;
+        bestBrand = {
+          name: brand.name,
+          avgDiscount: Math.round(avgDiscount),
+          dealCount: brand.deals.length
+        };
+      }
+    });
+    
+    return bestBrand;
+  }, [myBrands, filteredDeals]);
+
   const stats = {
     totalBrands: myBrands.length,
     totalDeals: filteredDeals.length,
     avgDiscount: filteredDeals.length > 0
       ? Math.round(filteredDeals.reduce((sum, deal) => sum + parseInt(deal.discount), 0) / filteredDeals.length)
-      : 0
+      : 0,
+    hotBrand: hotBrand
   };
 
   return (
@@ -1711,7 +1752,7 @@ export default function App() {
             )}
 
             {/* Stats Row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Brands Tracked</div>
                 <div className="font-display text-3xl font-bold text-neutral-900">{stats.totalBrands}</div>
@@ -1721,15 +1762,31 @@ export default function App() {
                 <div className="font-display text-3xl font-bold text-neutral-900">{stats.totalDeals}</div>
               </div>
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                <div className="text-sm text-neutral-500 mb-1">Avg Discount</div>
-                <div className="font-display text-3xl font-bold text-neutral-900">{stats.avgDiscount}%</div>
+                <div className="text-sm text-neutral-500 mb-1">🔥 Hot Brand</div>
+                {stats.hotBrand ? (
+                  <div className="flex items-center gap-3">
+                    {getBrandImage(stats.hotBrand.name) && (
+                      <img 
+                        src={getBrandImage(stats.hotBrand.name)} 
+                        alt={stats.hotBrand.name}
+                        className="w-12 h-12 object-contain rounded-lg bg-neutral-50 p-1 flex-shrink-0"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-display text-xl font-bold text-green-600 truncate">{stats.hotBrand.name}</div>
+                      <div className="text-sm text-neutral-600">{stats.hotBrand.avgDiscount}% avg • {stats.hotBrand.dealCount} deals</div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="font-display text-xl font-bold text-neutral-400">Add brands</div>
+                )}
               </div>
             </div>
 
             {/* FTC Affiliate Disclosure */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
               <p className="text-sm text-blue-900">
-                <span className="font-semibold">💡 Affiliate Disclosure:</span> BrandSnobs participates in affiliate programs and earns commissions on purchases made through links on this site. This helps keep BrandSnobs free for everyone. You never pay extra.
+                <span className="font-semibold">💡 Affiliate Disclosure:</span> BrandSnobs participates in affiliate programs and earns commissions on purchases made through links on this site. This helps keep BrandSnobs free for everyone.
               </p>
             </div>
 
@@ -2474,7 +2531,7 @@ export default function App() {
             </div>
             <div className="bg-neutral-50 rounded-lg p-4 max-w-2xl mx-auto">
               <p className="text-xs text-neutral-600">
-                <span className="font-semibold">Affiliate Disclosure:</span> BrandSnobs participates in affiliate marketing programs including CJ Affiliate, ShareASale, and Impact. We earn commissions on purchases made through our links at no extra cost to you. This helps keep BrandSnobs free for everyone.
+                <span className="font-semibold">Affiliate Disclosure:</span> BrandSnobs participates in affiliate marketing programs including CJ Affiliate, ShareASale, and Impact. We earn commissions on purchases made through our links. This helps keep BrandSnobs free for everyone.
               </p>
             </div>
             <p className="text-sm text-neutral-500">
