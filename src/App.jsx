@@ -684,6 +684,11 @@ export default function App() {
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
 
+  // Legal page modals
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
+  const [showTermsOfService, setShowTermsOfService] = useState(false);
+
   // Email Code Sign-In
   const [showEmailSignIn, setShowEmailSignIn] = useState(false);
   const [emailForSignIn, setEmailForSignIn] = useState('');
@@ -2525,9 +2530,9 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-6 text-sm text-neutral-600">
-              <a href="#" className="hover:text-neutral-900 transition-colors">How It Works</a>
-              <a href="#" className="hover:text-neutral-900 transition-colors">Privacy Policy</a>
-              <a href="#" className="hover:text-neutral-900 transition-colors">Terms of Service</a>
+              <button onClick={() => setShowHowItWorks(true)} className="hover:text-neutral-900 transition-colors">How It Works</button>
+              <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-neutral-900 transition-colors">Privacy Policy</button>
+              <button onClick={() => setShowTermsOfService(true)} className="hover:text-neutral-900 transition-colors">Terms of Service</button>
             </div>
             <div className="bg-neutral-50 rounded-lg p-4 max-w-2xl mx-auto">
               <p className="text-xs text-neutral-600">
@@ -2540,6 +2545,147 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      {/* Legal Page Modals */}
+      {showHowItWorks && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-neutral-900">How It Works</h2>
+              <button onClick={() => setShowHowItWorks(false)} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="prose prose-neutral max-w-none">
+              <h3>Find Deals on YOUR Favorite Brands</h3>
+              
+              <h4>1. Add Your Brands</h4>
+              <p>Tell us which brands you love - we'll track deals just for you. Unlike other deal sites that show you everything, we only show deals on brands YOU care about.</p>
+              
+              <h4>2. Browse Curated Deals</h4>
+              <p>See the latest sales, discounts, and promotions on your brands across ALL retailers. We search department stores, brand websites, outdoor retailers, and more!</p>
+              
+              <h4>3. Add to Bag</h4>
+              <p>Found something you like? Add it to your BrandSnobs shopping bag. Group items by retailer to streamline checkout.</p>
+              
+              <h4>4. Checkout</h4>
+              <p>Complete your purchase on the retailer's website.</p>
+              <p><strong>Why not checkout on BrandSnobs?</strong></p>
+              <ul>
+                <li>Your payment info stays secure with trusted retailers</li>
+                <li>You earn retailer rewards points</li>
+                <li>Easy returns through the retailer</li>
+                <li>Retailer handles shipping and customer service</li>
+              </ul>
+              <p>We're a deal discovery platform - we find the deals, retailers handle the transaction.</p>
+              
+              <h4>5. Sign In to Sync</h4>
+              <p>Create an account to sync your brands and deals across all your devices. PC, phone, tablet - your brands follow you everywhere.</p>
+              
+              <h3>Why BrandSnobs?</h3>
+              <p><strong>You Like What You Like</strong> - We don't use algorithms to "suggest" brands. You tell us exactly which brands you want, and we find the deals.</p>
+              <p><strong>Save Time</strong> - No more checking 10 different websites. See all your brand deals in one place.</p>
+              <p><strong>Never Miss a Sale</strong> - New deals added daily from retailers across the web.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showPrivacyPolicy && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-neutral-900">Privacy Policy</h2>
+              <button onClick={() => setShowPrivacyPolicy(false)} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="prose prose-neutral max-w-none text-sm">
+              <p><strong>Effective Date:</strong> February 24, 2026</p>
+              
+              <h3>Information We Collect</h3>
+              <p><strong>Information You Provide:</strong></p>
+              <ul>
+                <li>Email address (when you sign in)</li>
+                <li>Brand preferences (brands you add to your list)</li>
+                <li>Shopping bag items (deals you save)</li>
+                <li>Size preferences (optional, for filtering deals)</li>
+              </ul>
+              
+              <p><strong>Automatically Collected:</strong></p>
+              <ul>
+                <li>Device information (browser type, operating system)</li>
+                <li>Usage data (pages viewed, deals clicked)</li>
+                <li>Cookies (for authentication and preferences)</li>
+              </ul>
+              
+              <h3>How We Use Your Information</h3>
+              <p>We use your information to:</p>
+              <ul>
+                <li>Provide and improve our services</li>
+                <li>Show you relevant deals on your favorite brands</li>
+                <li>Sync your preferences across devices</li>
+                <li>Send verification codes for sign-in</li>
+              </ul>
+              
+              <h3>Information Sharing</h3>
+              <p>We do NOT sell your personal information. We may share with affiliate networks to track purchases, email service providers to send verification codes, and analytics providers (aggregated data only).</p>
+              
+              <h3>Affiliate Disclosure</h3>
+              <p>BrandSnobs participates in affiliate marketing programs. When you purchase through our links, we may earn a commission. This helps us keep BrandSnobs free.</p>
+              
+              <h3>Your Rights</h3>
+              <p>You have the right to access your data, delete your account, and update your preferences.</p>
+              
+              <p className="mt-6 text-neutral-500"><em>Last updated: February 24, 2026</em></p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showTermsOfService && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-neutral-900">Terms of Service</h2>
+              <button onClick={() => setShowTermsOfService(false)} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="prose prose-neutral max-w-none text-sm">
+              <p><strong>Effective Date:</strong> February 24, 2026</p>
+              
+              <h3>What BrandSnobs Does</h3>
+              <p>BrandSnobs is a deal discovery platform. We show you deals on brands you care about, aggregate sales from multiple retailers, and provide links to retailers' websites.</p>
+              
+              <p><strong>We do NOT:</strong></p>
+              <ul>
+                <li>Process payments (purchases happen on retailer sites)</li>
+                <li>Handle shipping or fulfillment</li>
+                <li>Provide customer service for purchases</li>
+                <li>Guarantee product availability or pricing</li>
+              </ul>
+              
+              <h3>Acceptable Use</h3>
+              <p>You agree NOT to scrape our data, interfere with the platform, violate any laws, or upload malicious code.</p>
+              
+              <h3>Affiliate Links & Commissions</h3>
+              <p>BrandSnobs earns commissions on purchases made through our links. This helps us keep the service free. Clicking our links means you consent to affiliate tracking.</p>
+              
+              <h3>Third-Party Websites</h3>
+              <p>When you click a deal, you're redirected to retailer websites. We're not responsible for retailer policies, pricing, availability, product quality, or customer service.</p>
+              
+              <h3>Disclaimers</h3>
+              <p>BrandSnobs is provided "as is" without warranties. We don't guarantee continuous availability, error-free operation, or deal accuracy. Deals are subject to change without notice.</p>
+              
+              <h3>Limitation of Liability</h3>
+              <p>BrandSnobs is not liable for purchases made through our links, retailer errors, product defects, shipping delays, or missed deals.</p>
+              
+              <p className="mt-6 text-neutral-500"><em>Last updated: February 24, 2026</em></p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
