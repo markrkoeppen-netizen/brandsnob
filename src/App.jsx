@@ -253,7 +253,7 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Wrangler', 'Yeti', 'YoungLA'
 ];
 
-function LuxuryDealCard({ deal, onAddToBag, onOpenBrowser }) {
+function LuxuryDealCard({ deal, onAddToBag, onDealClick }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [addedToBag, setAddedToBag] = useState(false);
@@ -273,12 +273,8 @@ function LuxuryDealCard({ deal, onAddToBag, onOpenBrowser }) {
   };
 
   const handleClick = () => {
-    if (onOpenBrowser) {
-      // Use in-app browser
-      onOpenBrowser(deal.link, deal.merchant);
-    } else {
-      // Fallback to opening in new tab
-      window.open(deal.link, '_blank', 'noopener,noreferrer');
+    if (onDealClick) {
+      onDealClick(deal.link);
     }
   };
 
@@ -693,11 +689,6 @@ export default function App() {
   const [sendingCode, setSendingCode] = useState(false);
   const [verifyingCode, setVerifyingCode] = useState(false);
   const [emailSignInError, setEmailSignInError] = useState('');
-
-  // In-App Browser
-  const [showBrowser, setShowBrowser] = useState(false);
-  const [browserUrl, setBrowserUrl] = useState('');
-  const [browserTitle, setBrowserTitle] = useState('');
 
   // Shipping Profile with Size Preferences
   const [shippingProfile, setShippingProfile] = useState(() => {
@@ -1270,16 +1261,17 @@ export default function App() {
     }
   };
 
-  const openInAppBrowser = (url, title = 'Shopping') => {
-    setBrowserUrl(url);
-    setBrowserTitle(title);
-    setShowBrowser(true);
-  };
+  // Smart device detection for links
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-  const closeInAppBrowser = () => {
-    setShowBrowser(false);
-    setBrowserUrl('');
-    setBrowserTitle('');
+  const handleDealClick = (url) => {
+    if (isMobile) {
+      // Mobile: Open in same tab (natural mobile behavior)
+      window.location.href = url;
+    } else {
+      // Desktop: Open in new tab
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   };
 
   const addBrand = () => {
@@ -1742,7 +1734,7 @@ export default function App() {
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onOpenBrowser={openInAppBrowser} />)}
+                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
                       </div>
                     )}
                   </div>
@@ -1789,7 +1781,7 @@ export default function App() {
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                                    {collectionDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onOpenBrowser={openInAppBrowser} />)}
+                                    {collectionDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
                                   </div>
                                 )}
                               </div>
@@ -1800,7 +1792,7 @@ export default function App() {
                     ) : (
                       /* Brands with no collection - show flat */
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onOpenBrowser={openInAppBrowser} />)}
+                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
                       </div>
                     )}
 
@@ -1825,7 +1817,7 @@ export default function App() {
                           {!isCollapsed && (
                             <div className="px-6 pb-6">
                               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                                {uncollectedDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onOpenBrowser={openInAppBrowser} />)}
+                                {uncollectedDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
                               </div>
                             </div>
                           )}
@@ -2396,46 +2388,6 @@ export default function App() {
           submitting={recommendSubmitting}
           success={recommendSuccess}
         />
-      )}
-
-      {/* In-App Browser Overlay */}
-      {showBrowser && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex flex-col">
-          {/* Browser Header */}
-          <div className="bg-white border-b border-neutral-200 px-4 py-3 flex items-center justify-between safe-top">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <button
-                onClick={closeInAppBrowser}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-sm truncate">{browserTitle}</p>
-                <p className="text-xs text-neutral-500 truncate">{browserUrl}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => window.open(browserUrl, '_blank')}
-              className="ml-2 p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-              title="Open in new tab"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Browser Content */}
-          <div className="flex-1 bg-white overflow-hidden">
-            <iframe
-              src={browserUrl}
-              className="w-full h-full border-0"
-              title={browserTitle}
-              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-            />
-          </div>
-        </div>
       )}
     </div>
   );
