@@ -1339,24 +1339,47 @@ export default function App() {
   const checkoutAll = () => {
     if (shoppingBag.length === 0) return;
     
-    // Group items by retailer to minimize tabs
+    // Group items by merchant/retailer
     const byRetailer = {};
     shoppingBag.forEach(item => {
-      if (!byRetailer[item.retailer]) {
-        byRetailer[item.retailer] = [];
+      const retailer = item.merchant || item.retailer || 'Unknown Store';
+      if (!byRetailer[retailer]) {
+        byRetailer[retailer] = {
+          items: [],
+          total: 0
+        };
       }
-      byRetailer[item.retailer].push(item);
+      byRetailer[retailer].items.push(item);
+      byRetailer[retailer].total += item.salePrice || 0;
     });
 
-    // Show instruction modal
-    alert(`Opening ${Object.keys(byRetailer).length} retailer tabs...\n\nOn each site:\n1. Click "Add to Cart"\n2. Proceed to checkout\n3. Use your saved shipping info`);
+    const retailerCount = Object.keys(byRetailer).length;
+    const totalAmount = shoppingBag.reduce((sum, item) => sum + (item.salePrice || 0), 0);
 
-    // Open each retailer's items (stagger to avoid popup blocker)
-    Object.values(byRetailer).forEach((items, index) => {
+    // Create checkout summary
+    const retailerSummary = Object.entries(byRetailer)
+      .map(([retailer, data]) => 
+        `  • ${retailer}: ${data.items.length} item${data.items.length > 1 ? 's' : ''} ($${data.total.toFixed(2)})`
+      )
+      .join('\n');
+
+    // Show pre-checkout modal with summary
+    const proceed = confirm(
+      `🛍️ Ready to checkout?\n\n` +
+      `You're buying from ${retailerCount} store${retailerCount > 1 ? 's' : ''}:\n\n` +
+      retailerSummary + `\n\n` +
+      `Total: $${totalAmount.toFixed(2)}\n\n` +
+      `We'll open ${retailerCount} tab${retailerCount > 1 ? 's' : ''} to complete your purchase.\n\n` +
+      `Click OK to continue.`
+    );
+
+    if (!proceed) return;
+
+    // Open checkout tabs - use smart link handler
+    Object.entries(byRetailer).forEach(([retailer, data], index) => {
       setTimeout(() => {
-        // Open first item's link for each retailer
-        window.open(items[0].link, '_blank');
-      }, index * 300);
+        handleDealClick(data.items[0].link);
+      }, index * 500);
     });
 
     setShowBagModal(false);
