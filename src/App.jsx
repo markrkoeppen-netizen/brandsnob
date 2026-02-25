@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
-import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signInWithRedirect, getRedirectResult, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged } from 'firebase/auth';
+import { auth, db } from './firebase';
+import { 
+  sendSignInLinkToEmail, 
+  isSignInWithEmailLink, 
+  signInWithEmailLink,
+  onAuthStateChanged,
+  signOut as firebaseSignOut
+} from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
-import emailjs from '@emailjs/browser';
-
-// Initialize EmailJS with your public key
-emailjs.init('QPiBFFlW7aGv6W0UP');
 
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
@@ -347,7 +349,6 @@ const RECOMMENDATIONS = [
   }
 ];
 
-// All available brands for autocomplete
 const ALL_AVAILABLE_BRANDS = [
   'Abercrombie & Fitch', 'Adidas', 'AG Jeans', 'Allbirds', 'Alo', 'American Giant', 'Anthropologie', 'Arc\'teryx', 'Ariat', 'Aritzia', 'Asics', 'Athleta', 'Away', 'Banana Republic', 'BIRKENSTOCK',
   'Bombas', 'Bonobos', 'Brooks Brothers', 'Burberry', 'Burlebo', 'Carhartt', 'Chloé', 'Christian Louboutin',
@@ -473,7 +474,6 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick }) {
           )}
         </div>
 
-        {/* Add to Bag Button */}
         <button
           onClick={handleAddToBag}
           className={`mt-3 w-full py-2 rounded-lg font-medium text-sm transition-all ${
@@ -537,7 +537,6 @@ function GenderPreference({ selectedGenders, onGenderChange }) {
   );
 }
 
-// Shopping Bag Modal
 function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippingProfile }) {
   const totalItems = bag.length;
   const totalValue = bag.reduce((sum, item) => sum + item.salePrice, 0);
@@ -546,7 +545,6 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
         <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-2xl font-bold text-neutral-900">Shopping Bag</h2>
@@ -559,7 +557,6 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
           </p>
         </div>
 
-        {/* Items List */}
         <div className="flex-1 overflow-y-auto p-6">
           {bag.length === 0 ? (
             <div className="text-center py-12">
@@ -603,7 +600,6 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
           )}
         </div>
 
-        {/* Shipping Helper */}
         {bag.length > 0 && shippingProfile.firstName && (
           <div className="p-6 bg-neutral-50 border-t border-neutral-200">
             <p className="text-sm font-medium text-neutral-700 mb-2">📦 Your Shipping Info (copy for checkout):</p>
@@ -616,7 +612,6 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
           </div>
         )}
 
-        {/* Footer */}
         {bag.length > 0 && (
           <div className="p-6 border-t border-neutral-200">
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -664,7 +659,6 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
   );
 }
 
-// Recommend Brand Modal
 function RecommendBrandModal({ onClose, onSubmit, brandName, setBrandName, email, setEmail, submitting, success }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -743,7 +737,6 @@ function RecommendBrandModal({ onClose, onSubmit, brandName, setBrandName, email
     </div>
   );
 }
-
 export default function App() {
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
@@ -762,54 +755,32 @@ export default function App() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedGenders, setSelectedGenders] = useState([]);
-
-  // NEW: Search, Sort, Filter
   const [searchQuery, setSearchQuery] = useState('');
   const [dealSort, setDealSort] = useState('discount');
   const [dealFilter, setDealFilter] = useState('all');
-
-  // Shopping Bag
   const [shoppingBag, setShoppingBag] = useState(() => {
     const saved = localStorage.getItem('shoppingBag');
     return saved ? JSON.parse(saved) : [];
   });
   const [showBagModal, setShowBagModal] = useState(false);
-
-  // Collections collapse state
   const [collapsedCollections, setCollapsedCollections] = useState([]);
-
-  const toggleCollectionCollapse = (collectionName) => {
-    setCollapsedCollections(prev =>
-      prev.includes(collectionName)
-        ? prev.filter(c => c !== collectionName)
-        : [...prev, collectionName]
-    );
-  };
-
-  // Brand Recommendation
   const [showRecommendModal, setShowRecommendModal] = useState(false);
   const [recommendBrand, setRecommendBrand] = useState('');
   const [recommendEmail, setRecommendEmail] = useState('');
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
-
-  // Legal page modals
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
 
-  // Email Code Sign-In
+  // Firebase Email Link Sign-In States
   const [showEmailSignIn, setShowEmailSignIn] = useState(false);
   const [emailForSignIn, setEmailForSignIn] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
-  const [generatedCode, setGeneratedCode] = useState('');
-  const [codeExpiry, setCodeExpiry] = useState(null);
-  const [codeSent, setCodeSent] = useState(false);
-  const [sendingCode, setSendingCode] = useState(false);
-  const [verifyingCode, setVerifyingCode] = useState(false);
-  const [emailSignInError, setEmailSignInError] = useState('');
+  const [sendingLink, setSendingLink] = useState(false);
+  const [linkSent, setLinkSent] = useState(false);
+  const [signingIn, setSigningIn] = useState(false);
+  const [authError, setAuthError] = useState('');
 
-  // Shipping Profile with Size Preferences
   const [shippingProfile, setShippingProfile] = useState(() => {
     const saved = localStorage.getItem('shippingProfile');
     const defaultProfile = {
@@ -821,7 +792,6 @@ export default function App() {
       city: '',
       state: '',
       zip: '',
-      // Size preferences
       shirtSize: '',
       pantsWaist: '',
       pantsInseam: '',
@@ -832,7 +802,6 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Merge with defaults to ensure all fields exist
         return { ...defaultProfile, ...parsed };
       } catch (error) {
         console.error('Error parsing shipping profile:', error);
@@ -842,7 +811,20 @@ export default function App() {
     return defaultProfile;
   });
 
-  // Load localStorage data immediately on mount (before auth resolves)
+  // Firebase email link configuration
+  const actionCodeSettings = {
+    url: 'https://www.brandsnobs.com',
+    handleCodeInApp: true,
+  };
+
+  const toggleCollectionCollapse = (collectionName) => {
+    setCollapsedCollections(prev =>
+      prev.includes(collectionName)
+        ? prev.filter(c => c !== collectionName)
+        : [...prev, collectionName]
+    );
+  };
+
   useEffect(() => {
     const savedBrands = localStorage.getItem('myBrands');
     const savedBag = localStorage.getItem('shoppingBag');
@@ -855,91 +837,68 @@ export default function App() {
     if (savedGenders) setSelectedGenders(JSON.parse(savedGenders));
   }, []);
 
-  // Handle redirect result (for mobile sign-in)
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          console.log('✅ Redirect sign-in successful:', result.user.email);
-        }
-      } catch (error) {
-        console.error('❌ Redirect sign-in error:', error);
-        if (error.code !== 'auth/popup-closed-by-user') {
-          alert('Sign in failed. Please try again.');
-        }
+  // Firebase Email Link Sign-In
+  const sendSignInLink = async () => {
+    if (!emailForSignIn || !emailForSignIn.includes('@')) {
+      setAuthError('Please enter a valid email address');
+      return;
+    }
+
+    setSendingLink(true);
+    setAuthError('');
+
+    try {
+      console.log('📧 Sending sign-in link to:', emailForSignIn);
+      
+      await sendSignInLinkToEmail(auth, emailForSignIn, actionCodeSettings);
+      
+      window.localStorage.setItem('emailForSignIn', emailForSignIn);
+      
+      console.log('✅ Sign-in link sent!');
+      setLinkSent(true);
+      
+    } catch (error) {
+      console.error('❌ Error sending link:', error);
+      if (error.code === 'auth/invalid-email') {
+        setAuthError('Invalid email address');
+      } else if (error.code === 'auth/too-many-requests') {
+        setAuthError('Too many attempts. Please try again later.');
+      } else {
+        setAuthError('Failed to send link. Please try again.');
       }
-    };
-    handleRedirectResult();
-  }, []);
+    } finally {
+      setSendingLink(false);
+    }
+  };
 
-  // Email link sign-in is deprecated - using code verification instead
-  // useEffect(() => {
-  //   const completeEmailLinkSignIn = async () => {
-  //     if (isSignInWithEmailLink(auth, window.location.href)) {
-  //       console.log('📧 Email link detected, completing sign-in...');
-  //       let email = window.localStorage.getItem('emailForSignIn');
-  //       if (!email) {
-  //         email = window.prompt('Please provide your email for confirmation');
-  //       }
-  //       
-  //       if (email) {
-  //         try {
-  //           const result = await signInWithEmailLink(auth, email, window.location.href);
-  //           console.log('✅ Email link sign-in successful:', result.user.email);
-  //           window.localStorage.removeItem('emailForSignIn');
-  //           window.history.replaceState({}, document.title, window.location.pathname);
-  //         } catch (error) {
-  //           console.error('❌ Email link sign-in error:', error);
-  //           alert('Sign in failed. The link may have expired. Please request a new one.');
-  //         }
-  //       }
-  //     }
-  //   };
-  //   completeEmailLinkSignIn();
-  // }, []);
-
-  // Handle auth state and Firebase sync
+  // Handle auth state with Firebase
   useEffect(() => {
-    // Check if user has verified email in localStorage
-    const verifiedEmail = localStorage.getItem('verified_email');
-    const userId = localStorage.getItem('user_id');
-    
-    if (verifiedEmail && userId) {
-      const userObj = {
-        email: verifiedEmail,
-        uid: userId,
-        emailVerified: true
-      };
-      
-      setUser(userObj);
-      
-      // Load user data from Firestore
-      const loadUserData = async () => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        console.log('✅ User signed in:', firebaseUser.email);
+        
+        setUser({
+          email: firebaseUser.email,
+          uid: firebaseUser.uid,
+          emailVerified: firebaseUser.emailVerified,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL
+        });
+
         try {
-          const userDocRef = doc(db, 'users', userId);
+          const userDocRef = doc(db, 'users', firebaseUser.uid);
           const userDoc = await getDoc(userDocRef);
           
           if (userDoc.exists()) {
             const data = userDoc.data();
-            const localBrands = JSON.parse(localStorage.getItem('myBrands') || '[]');
-            const firebaseBrands = data.brands || [];
             
-            // Smart merge: prefer whichever has more data
-            if (firebaseBrands.length > 0) {
-              if (localBrands.length > firebaseBrands.length) {
-                setMyBrands(localBrands);
-              } else {
-                setMyBrands(firebaseBrands);
-              }
-            } else if (localBrands.length > 0) {
-              setMyBrands(localBrands);
+            if (data.brands && data.brands.length > 0) {
+              setMyBrands(data.brands);
             }
-            
-            if (data.genderPreferences && data.genderPreferences.length > 0) {
+            if (data.genderPreferences) {
               setSelectedGenders(data.genderPreferences);
             }
-            if (data.shoppingBag && data.shoppingBag.length > 0) {
+            if (data.shoppingBag) {
               setShoppingBag(data.shoppingBag);
             }
             if (data.shippingProfile) {
@@ -949,24 +908,57 @@ export default function App() {
         } catch (error) {
           console.error('Error loading user data:', error);
         }
-      };
-      
-      loadUserData();
-    } else {
-      setUser(null);
-    }
+        
+      } else {
+        console.log('⚠️ No user signed in');
+        setUser(null);
+      }
+    });
+
+    // Check if this page load is from clicking an email link
+    const completeSignIn = async () => {
+      if (!isSignInWithEmailLink(auth, window.location.href)) {
+        return;
+      }
+
+      setSigningIn(true);
+
+      try {
+        let email = window.localStorage.getItem('emailForSignIn');
+        
+        if (!email) {
+          email = window.prompt('Please provide your email for confirmation');
+        }
+
+        const result = await signInWithEmailLink(auth, email, window.location.href);
+        
+        console.log('✅ Sign-in successful!', result.user);
+        
+        window.localStorage.removeItem('emailForSignIn');
+        
+        setShowEmailSignIn(false);
+        
+      } catch (error) {
+        console.error('❌ Sign-in error:', error);
+        setAuthError('Sign-in failed. Please request a new link.');
+      } finally {
+        setSigningIn(false);
+      }
+    };
+
+    completeSignIn();
+
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
     
     if (user) {
-      // Debounce: Only save 2 seconds after last change
       const timeoutId = setTimeout(() => {
         saveToCloud();
       }, 2000);
       
-      // Cleanup: Cancel previous timeout if myBrands changes again
       return () => clearTimeout(timeoutId);
     }
   }, [myBrands, user]);
@@ -1074,21 +1066,6 @@ export default function App() {
     }
   };
 
-  const loadUserData = async (userId) => {
-    try {
-      const userDoc = await getDoc(doc(db, 'users', userId));
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        if (data.brands) setMyBrands(data.brands);
-        if (data.genderPreferences) setSelectedGenders(data.genderPreferences);
-        if (data.shoppingBag) setShoppingBag(data.shoppingBag);
-        if (data.shippingProfile) setShippingProfile(data.shippingProfile);
-      }
-    } catch (error) {
-      console.error('Error loading user data:', error);
-    }
-  };
-
   const saveGenderPreferences = async () => {
     if (!user) return;
     try {
@@ -1106,7 +1083,6 @@ export default function App() {
       return;
     }
     
-    // Don't save if ALL data is empty
     if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0) {
       return;
     }
@@ -1145,250 +1121,25 @@ export default function App() {
   };
 
   const signIn = async () => {
-    // Show email sign-in modal instead of direct Google OAuth
     setShowEmailSignIn(true);
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      console.log('🔐 Starting Google sign-in process...');
-      
-      // Detect if user is on Safari
-      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-      
-      if (isSafari) {
-        // Safari: ONLY use popup (redirect causes "missing initial state" error)
-        console.log('🍎 Safari detected - using popup only');
-        try {
-          await signInWithPopup(auth, googleProvider);
-          console.log('✅ Popup sign-in successful!');
-          setShowEmailSignIn(false);
-          return;
-        } catch (popupError) {
-          console.error('❌ Popup sign-in failed:', popupError);
-          
-          if (popupError.code === 'auth/popup-blocked') {
-            alert('🚫 Pop-up blocked!\n\nPlease allow pop-ups for brandsnobs.com in Safari settings:\n\n1. Safari → Settings → Websites → Pop-up Windows\n2. Find brandsnobs.com → Select "Allow"\n3. Try signing in again');
-            return;
-          } else if (popupError.code === 'auth/popup-closed-by-user') {
-            // User cancelled - no error needed
-            console.log('User closed the popup');
-            return;
-          }
-          
-          throw popupError; // Re-throw other errors
-        }
-      } else {
-        // Non-Safari: Try popup first, then redirect
-        console.log('📱 Attempting popup sign-in...');
-        try {
-          await signInWithPopup(auth, googleProvider);
-          console.log('✅ Popup sign-in successful!');
-          setShowEmailSignIn(false);
-          return;
-        } catch (popupError) {
-          console.log('⚠️ Popup method failed:', popupError.code);
-          
-          // If popup was blocked or failed - use redirect (works on non-Safari)
-          if (
-            popupError.code === 'auth/popup-blocked' ||
-            popupError.code === 'auth/popup-closed-by-user' ||
-            popupError.code === 'auth/cancelled-popup-request' ||
-            popupError.code === 'auth/operation-not-supported-in-this-environment'
-          ) {
-            console.log('🔄 Switching to redirect sign-in...');
-            await signInWithRedirect(auth, googleProvider);
-            return;
-          }
-          
-          throw popupError; // Re-throw other errors
-        }
-      }
-    } catch (error) {
-      console.error('❌ Sign-in error:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      
-      let userMessage = 'Sign in failed. ';
-      
-      if (error.code === 'auth/unauthorized-domain') {
-        userMessage = '⚠️ Domain not authorized. Please contact support.';
-      } else if (error.code === 'auth/network-request-failed') {
-        userMessage = '⚠️ Network error. Please check your connection.';
-      } else if (error.code === 'auth/too-many-requests') {
-        userMessage = '⚠️ Too many attempts. Please wait a few minutes.';
-      } else {
-        userMessage += `Please try again. Error: ${error.code}`;
-      }
-      
-      alert(userMessage);
-    }
-  };
-
-  const sendVerificationCode = async () => {
-    if (!emailForSignIn || !emailForSignIn.includes('@')) {
-      setEmailSignInError('Please enter a valid email address');
-      return;
-    }
-
-    setSendingCode(true);
-    setEmailSignInError('');
-
-    try {
-      // Generate 6-digit code
-      const code = Math.floor(100000 + Math.random() * 900000).toString();
-      setGeneratedCode(code);
-      
-      // Set expiry to 10 minutes from now
-      const expiry = Date.now() + (10 * 60 * 1000);
-      setCodeExpiry(expiry);
-      
-      console.log('📧 Sending verification code to:', emailForSignIn);
-      
-      // Send via EmailJS
-      await emailjs.send(
-        'service_9b98jq6',
-        'template_vvw8gyu',
-        {
-          to_email: emailForSignIn,
-          verification_code: code
-        }
-      );
-      
-      console.log('✅ Verification code sent successfully');
-      setCodeSent(true);
-      
-    } catch (error) {
-      console.error('❌ Error sending verification code:', error);
-      setEmailSignInError('Failed to send code. Please try again.');
-    } finally {
-      setSendingCode(false);
-    }
-  };
-
-  const verifyCodeAndSignIn = async () => {
-    if (!verificationCode || verificationCode.length !== 6) {
-      setEmailSignInError('Please enter the 6-digit code');
-      return;
-    }
-
-    // Check if code expired
-    if (Date.now() > codeExpiry) {
-      setEmailSignInError('Code expired. Please request a new one.');
-      setCodeSent(false);
-      setVerificationCode('');
-      setGeneratedCode('');
-      return;
-    }
-
-    // Verify code matches
-    if (verificationCode !== generatedCode) {
-      setEmailSignInError('Invalid code. Please check and try again.');
-      return;
-    }
-
-    setVerifyingCode(true);
-    setEmailSignInError('');
-
-    try {
-      console.log('✅ Code verified! Signing in...');
-      
-      // Test if localStorage is available
-      try {
-        localStorage.setItem('test_storage', 'test');
-        localStorage.removeItem('test_storage');
-      } catch (storageError) {
-        console.error('localStorage blocked:', storageError);
-        setEmailSignInError('Storage blocked. Please disable Private Browsing and try again.');
-        return;
-      }
-      
-      // Store verified email in localStorage (normalize to lowercase and trim)
-      const normalizedEmail = emailForSignIn.toLowerCase().trim();
-      localStorage.setItem('verified_email', normalizedEmail);
-      localStorage.setItem('user_id', normalizedEmail);
-      
-      // CRITICAL: Immediate verification for Safari compatibility
-      const checkEmail = localStorage.getItem('verified_email');
-      if (!checkEmail) {
-        console.error('localStorage.setItem() failed, trying alternative method...');
-        localStorage.setItem('verified_email', JSON.stringify(normalizedEmail));
-        localStorage.setItem('user_id', JSON.stringify(normalizedEmail));
-      }
-      
-      // Create user object
-      const userObj = {
-        email: normalizedEmail,
-        uid: normalizedEmail,
-        emailVerified: true
-      };
-      
-      // Set user state
-      setUser(userObj);
-      
-      console.log('✅ Sign-in successful!');
-      
-      // Load data from Firestore immediately after sign-in
-      try {
-        const userDocRef = doc(db, 'users', normalizedEmail);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          
-          if (data.brands && data.brands.length > 0) {
-            console.log('Loading', data.brands.length, 'brands from Firestore');
-            setMyBrands(data.brands);
-          }
-          
-          if (data.genderPreferences && data.genderPreferences.length > 0) {
-            setSelectedGenders(data.genderPreferences);
-          }
-          if (data.shoppingBag && data.shoppingBag.length > 0) {
-            setShoppingBag(data.shoppingBag);
-          }
-          if (data.shippingProfile) {
-            setShippingProfile(data.shippingProfile);
-          }
-        }
-      } catch (firestoreError) {
-        console.error('Error loading from Firestore:', firestoreError);
-      }
-      
-      // Reset states
-      setShowEmailSignIn(false);
-      setCodeSent(false);
-      setVerificationCode('');
-      setGeneratedCode('');
-      setEmailForSignIn('');
-      
-    } catch (error) {
-      console.error('Sign-in error:', error);
-      setEmailSignInError(`Sign-in failed: ${error.message}`);
-    } finally {
-      setVerifyingCode(false);
-    }
   };
 
   const signOut = async () => {
     try {
-      localStorage.removeItem('verified_email');
-      localStorage.removeItem('user_id');
+      await firebaseSignOut(auth);
       setUser(null);
+      console.log('✅ Signed out');
     } catch (error) {
       console.error('Sign out error:', error);
     }
   };
 
-  // Smart device detection for links
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const handleDealClick = (url) => {
     if (isMobile) {
-      // Mobile: Open in same tab (natural mobile behavior)
       window.location.href = url;
     } else {
-      // Desktop: Open in new tab
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
@@ -1415,10 +1166,8 @@ export default function App() {
     setShowSuggestions(false);
   };
 
-  // Get unique user collections
   const userCollections = [...new Set(myBrands.map(b => b.collection).filter(Boolean))];
 
-  // Get brand logo/image from deals
   const getBrandImage = (brandName) => {
     const brandDeals = deals.filter(deal => 
       deal.merchant?.toLowerCase() === brandName.toLowerCase() ||
@@ -1426,7 +1175,6 @@ export default function App() {
     );
     return brandDeals.length > 0 ? brandDeals[0].image : null;
   };
-
 
   const handleBrandInputChange = (value) => {
     setNewBrandName(value);
@@ -1450,9 +1198,8 @@ export default function App() {
   };
 
   const addToBag = (deal) => {
-    // Check if already in bag
     if (shoppingBag.find(item => item.id === deal.id)) {
-      return; // Already in bag
+      return;
     }
     setShoppingBag([...shoppingBag, deal]);
   };
@@ -1468,7 +1215,6 @@ export default function App() {
   const checkoutAll = () => {
     if (shoppingBag.length === 0) return;
     
-    // Group items by merchant/retailer
     const byRetailer = {};
     shoppingBag.forEach(item => {
       const retailer = item.merchant || item.retailer || 'Unknown Store';
@@ -1485,14 +1231,12 @@ export default function App() {
     const retailerCount = Object.keys(byRetailer).length;
     const totalAmount = shoppingBag.reduce((sum, item) => sum + (item.salePrice || 0), 0);
 
-    // Create checkout summary
     const retailerSummary = Object.entries(byRetailer)
       .map(([retailer, data]) => 
         `  • ${retailer}: ${data.items.length} item${data.items.length > 1 ? 's' : ''} ($${data.total.toFixed(2)})`
       )
       .join('\n');
 
-    // Show pre-checkout modal with summary
     const proceed = confirm(
       `🛍️ Ready to checkout?\n\n` +
       `You're buying from ${retailerCount} store${retailerCount > 1 ? 's' : ''}:\n\n` +
@@ -1504,16 +1248,13 @@ export default function App() {
 
     if (!proceed) return;
 
-    // Open checkout tabs - use smart link handler
     Object.entries(byRetailer).forEach(([retailer, data], index) => {
       setTimeout(() => {
         handleDealClick(data.items[0].link);
       }, index * 500);
     });
 
-    // Clear the shopping bag after opening checkouts
     clearBag();
-    
     setShowBagModal(false);
   };
 
@@ -1523,7 +1264,6 @@ export default function App() {
     setRecommendSubmitting(true);
     
     try {
-      // Save recommendation to Firestore
       const recommendationRef = collection(db, 'brand_recommendations');
       await setDoc(doc(recommendationRef), {
         brandName: recommendBrand.trim(),
@@ -1534,25 +1274,6 @@ export default function App() {
       });
       
       console.log('✅ Recommendation saved to Firestore');
-      
-      // Send email notification via EmailJS
-      const emailParams = {
-        brand_name: recommendBrand.trim(),
-        user_email: user?.email || 'Anonymous',
-        submitter_email: recommendEmail.trim() || 'Not provided',
-        submitted_at: new Date().toLocaleString('en-US', {
-          dateStyle: 'medium',
-          timeStyle: 'short'
-        })
-      };
-      
-      await emailjs.send(
-        'service_9b98jq6',      // Your Service ID
-        'template_7sri3sr',     // Your Template ID
-        emailParams
-      );
-      
-      console.log('✅ Email sent successfully to admin@brandsnobs.com');
       setRecommendSuccess(true);
       setTimeout(() => {
         setShowRecommendModal(false);
@@ -1587,7 +1308,6 @@ export default function App() {
   const filteredDeals = React.useMemo(() => {
     let result = deals;
     
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(deal => 
@@ -1596,7 +1316,6 @@ export default function App() {
       );
     }
     
-    // Gender filter
     if (selectedGenders.length > 0) {
       result = result.filter(deal => {
         if (deal.gender) {
@@ -1606,14 +1325,12 @@ export default function App() {
       });
     }
     
-    // Discount filter
     if (dealFilter === '>30%') {
       result = result.filter(deal => parseInt(deal.discount) >= 30);
     } else if (dealFilter === '>50%') {
       result = result.filter(deal => parseInt(deal.discount) >= 50);
     }
     
-    // Size-based prioritization (boost matching sizes to top, don't filter out)
     const hasSizePreferences = shippingProfile?.shirtSize || shippingProfile?.shoeSize || 
                                 shippingProfile?.pantsWaist || shippingProfile?.pantsInseam || 
                                 shippingProfile?.dressSize;
@@ -1623,7 +1340,6 @@ export default function App() {
         const productLower = (deal.product || '').toLowerCase();
         let sizeMatchScore = 0;
         
-        // Check for size matches in product title
         if (shippingProfile.shirtSize && productLower.includes(`size ${shippingProfile.shirtSize.toLowerCase()}`)) sizeMatchScore += 3;
         if (shippingProfile.shirtSize && new RegExp(`\\b${shippingProfile.shirtSize.toLowerCase()}\\b`).test(productLower)) sizeMatchScore += 2;
         
@@ -1642,11 +1358,9 @@ export default function App() {
       });
     }
     
-    // Sorting
     const sorted = [...result];
     if (dealSort === 'discount') {
       sorted.sort((a, b) => {
-        // Prioritize size matches, then sort by discount
         if (a.sizeMatchScore !== b.sizeMatchScore) return (b.sizeMatchScore || 0) - (a.sizeMatchScore || 0);
         return parseInt(b.discount) - parseInt(a.discount);
       });
@@ -1670,11 +1384,9 @@ export default function App() {
     return sorted;
   }, [deals, searchQuery, selectedGenders, dealFilter, dealSort, shippingProfile]);
 
-  // Calculate which brand has the best average discount
   const hotBrand = React.useMemo(() => {
     if (myBrands.length === 0 || filteredDeals.length === 0) return null;
     
-    // Group deals by brand and calculate average discount
     const brandStats = {};
     filteredDeals.forEach(deal => {
       const brand = deal.merchant || deal.brand;
@@ -1691,7 +1403,6 @@ export default function App() {
       brandStats[brand].totalDiscount += parseInt(deal.discount || 0);
     });
     
-    // Calculate average and find best
     let bestBrand = null;
     let bestAvg = 0;
     
@@ -1718,7 +1429,6 @@ export default function App() {
       : 0,
     hotBrand: hotBrand
   };
-
   return (
     <div className="min-h-screen bg-neutral-50">
       <header className="bg-white border-b border-neutral-200 sticky top-0 z-50 shadow-sm">
@@ -1738,7 +1448,6 @@ export default function App() {
               </button>
             </div>
             <div className="flex items-center gap-3">
-              {/* Shopping Bag Button */}
               <button 
                 onClick={() => setShowBagModal(true)}
                 className="relative p-2 hover:bg-neutral-100 rounded-lg transition-colors"
@@ -1822,7 +1531,6 @@ export default function App() {
           <div>
             {myBrands.length > 0 && <GenderPreference selectedGenders={selectedGenders} onGenderChange={setSelectedGenders} />}
 
-            {/* Search, Sort, Filter Controls */}
             {myBrands.length > 0 && (
               <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-neutral-200 p-3 md:p-4 mb-4 md:mb-6">
                 <div className="flex flex-col md:flex-row gap-3 md:gap-4">
@@ -1865,7 +1573,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Stats Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">Brands Tracked</div>
@@ -1897,7 +1604,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* FTC Affiliate Disclosure */}
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
               <p className="text-sm text-blue-900">
                 <span className="font-semibold">💡 Affiliate Disclosure:</span> BrandSnobs participates in affiliate programs and earns commissions on purchases made through links on this site. This helps keep BrandSnobs free for everyone.
@@ -1920,7 +1626,6 @@ export default function App() {
               </div>
             )}
 
-            {/* No brands state */}
             {!dealsLoading && myBrands.length === 0 && (
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
                 <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
@@ -1933,10 +1638,8 @@ export default function App() {
               </div>
             )}
 
-            {/* Deals grouped by collection */}
             {!dealsLoading && !dealsError && myBrands.length > 0 && (
               <div>
-                {/* If searching/filtering, show flat list with header */}
                 {(searchQuery || dealFilter !== 'all') ? (
                   <div>
                     <p className="text-sm text-neutral-500 mb-4">{filteredDeals.length} deal{filteredDeals.length !== 1 ? 's' : ''} found</p>
@@ -1953,7 +1656,6 @@ export default function App() {
                     )}
                   </div>
                 ) : (
-                  /* Grouped by collection */
                   <div className="space-y-4">
                     {userCollections.length > 0 ? (
                       userCollections.map(collection => {
@@ -2004,13 +1706,11 @@ export default function App() {
                         );
                       })
                     ) : (
-                      /* Brands with no collection - show flat */
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
                         {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
                       </div>
                     )}
 
-                    {/* Uncollected brands deals */}
                     {myBrands.filter(b => !b.collection).length > 0 && (() => {
                       const uncollectedNames = myBrands.filter(b => !b.collection).map(b => b.name);
                       const uncollectedDeals = filteredDeals.filter(d => uncollectedNames.includes(d.brand));
@@ -2215,7 +1915,6 @@ export default function App() {
                     </div>
                   );
                 })}
-                {/* Brands with no collection assigned */}
                 {myBrands.filter(b => !b.collection).length > 0 && (
                   <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                     <h3 className="font-semibold text-lg text-neutral-800 mb-4">Uncategorized</h3>
@@ -2292,6 +1991,7 @@ export default function App() {
             </div>
           </div>
         )}
+
         {activeTab === 'profile' && (
           <div>
             <div className="mb-6">
@@ -2403,7 +2103,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Size Preferences */}
             <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 max-w-2xl mt-6">
               <h3 className="font-semibold text-lg mb-2">Size Preferences</h3>
               <p className="text-sm text-neutral-600 mb-6">
@@ -2505,7 +2204,6 @@ export default function App() {
         )}
       </div>
 
-      {/* Shopping Bag Modal */}
       {showBagModal && (
         <ShoppingBagModal
           bag={shoppingBag}
@@ -2517,7 +2215,6 @@ export default function App() {
         />
       )}
 
-      {/* Recommend Brand Modal */}
       {showEmailSignIn && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
@@ -2526,18 +2223,17 @@ export default function App() {
               <button onClick={() => {
                 setShowEmailSignIn(false);
                 setEmailForSignIn('');
-                setEmailSignInError('');
-                setCodeSent(false);
-                setVerificationCode('');
+                setAuthError('');
+                setLinkSent(false);
               }} className="text-neutral-400 hover:text-neutral-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            {!codeSent ? (
+            {!linkSent ? (
               <>
                 <p className="text-neutral-600 mb-6">
-                  Enter your email to receive a 6-digit verification code.
+                  Enter your email to receive a secure sign-in link.
                 </p>
 
                 <input
@@ -2546,74 +2242,54 @@ export default function App() {
                   value={emailForSignIn}
                   onChange={(e) => {
                     setEmailForSignIn(e.target.value);
-                    setEmailSignInError('');
+                    setAuthError('');
                   }}
-                  onKeyPress={(e) => e.key === 'Enter' && sendVerificationCode()}
+                  onKeyPress={(e) => e.key === 'Enter' && sendSignInLink()}
                   className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-4"
-                  disabled={sendingCode}
+                  disabled={sendingLink}
                 />
 
-                {emailSignInError && (
-                  <p className="text-red-600 text-sm mb-4">{emailSignInError}</p>
+                {authError && (
+                  <p className="text-red-600 text-sm mb-4">{authError}</p>
                 )}
 
                 <button
-                  onClick={sendVerificationCode}
-                  disabled={sendingCode}
+                  onClick={sendSignInLink}
+                  disabled={sendingLink}
                   className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
                 >
-                  {sendingCode ? 'Sending Code...' : 'Send Verification Code'}
+                  {sendingLink ? 'Sending Link...' : 'Send Sign-In Link'}
                 </button>
 
                 <p className="text-xs text-neutral-500 text-center mt-4">
-                  By signing in, you agree to sync your brands and collections across devices.
+                  No password needed. We'll email you a secure link to sign in.
                 </p>
               </>
             ) : (
               <>
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <p className="text-green-800 font-medium mb-2">Code sent! 📧</p>
-                  <p className="text-green-700 text-sm">We sent a 6-digit code to:</p>
+                  <p className="text-green-800 font-medium mb-2">Check your email! 📧</p>
+                  <p className="text-green-700 text-sm">We sent a sign-in link to:</p>
                   <p className="text-green-900 font-semibold">{emailForSignIn}</p>
                 </div>
 
-                <p className="text-neutral-600 mb-4 text-sm">
-                  Enter the code from your email. It expires in 10 minutes.
-                </p>
-
-                {emailSignInError && (
-                  <p className="text-red-600 text-sm mb-4">{emailSignInError}</p>
-                )}
-
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  maxLength={6}
-                  placeholder="000000"
-                  value={verificationCode}
-                  onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
-                  onKeyPress={(e) => e.key === 'Enter' && verificationCode.length === 6 && verifyCodeAndSignIn()}
-                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-3 text-center text-2xl font-mono tracking-widest"
-                />
-
-                <button
-                  onClick={verifyCodeAndSignIn}
-                  disabled={verifyingCode || verificationCode.length !== 6}
-                  className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
-                >
-                  {verifyingCode ? 'Verifying...' : 'Verify & Sign In'}
-                </button>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-800 text-sm font-medium mb-2">Next steps:</p>
+                  <ol className="text-blue-700 text-sm space-y-1 list-decimal list-inside">
+                    <li>Check your inbox (and spam folder)</li>
+                    <li>Click the link in the email</li>
+                    <li>You'll be signed in automatically!</li>
+                  </ol>
+                </div>
 
                 <button
                   onClick={() => {
-                    setCodeSent(false);
-                    setVerificationCode('');
-                    setEmailSignInError('');
+                    setLinkSent(false);
+                    setEmailForSignIn('');
                   }}
-                  className="text-neutral-600 hover:text-neutral-900 text-sm font-medium"
+                  className="text-neutral-600 hover:text-neutral-900 text-sm font-medium mt-4 w-full text-center"
                 >
-                  ← Didn't get it? Try again
+                  ← Use a different email
                 </button>
               </>
             )}
@@ -2634,7 +2310,6 @@ export default function App() {
         />
       )}
 
-      {/* Footer */}
       <footer className="bg-white border-t border-neutral-200 mt-12 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-4">
@@ -2655,7 +2330,6 @@ export default function App() {
         </div>
       </footer>
 
-      {/* Legal Page Modals */}
       {showHowItWorks && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
