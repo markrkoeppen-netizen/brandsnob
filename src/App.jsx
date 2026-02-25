@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
-import { auth, db } from './firebase';
-import { 
-  sendSignInLinkToEmail, 
-  isSignInWithEmailLink, 
-  signInWithEmailLink,
-  onAuthStateChanged,
-  signOut as firebaseSignOut
-} from 'firebase/auth';
+import { db } from './firebase';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 
 const CATEGORIES = [
@@ -298,54 +291,6 @@ const BRAND_COLLECTIONS = [
       { name: 'Samsonite', category: 'Accessories' },
       { name: 'Tumi', category: 'Accessories' }
     ]
-  }
-];
-
-const RECOMMENDATIONS = [
-  {
-    id: 1,
-    brand: 'Gucci',
-    reason: 'Luxury fashion lover',
-    product: 'GG Marmont Handbag',
-    price: 2350,
-    image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&h=400&fit=crop',
-    category: 'Fashion'
-  },
-  {
-    id: 2,
-    brand: 'Christian Louboutin',
-    reason: 'Designer shoe collector',
-    product: 'Pigalle Follies Pumps',
-    price: 775,
-    image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=400&h=400&fit=crop',
-    category: 'Footwear'
-  },
-  {
-    id: 3,
-    brand: 'Lululemon',
-    reason: 'Athleisure enthusiast',
-    product: 'Align High-Rise Leggings',
-    price: 98,
-    image: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400&h=400&fit=crop',
-    category: 'Fashion'
-  },
-  {
-    id: 4,
-    brand: 'Tory Burch',
-    reason: 'Contemporary style lover',
-    product: 'Miller Sandals',
-    price: 228,
-    image: 'https://images.unsplash.com/photo-1603487742131-4160ec999306?w=400&h=400&fit=crop',
-    category: 'Footwear'
-  },
-  {
-    id: 5,
-    brand: 'The North Face',
-    reason: 'Outdoor adventurer',
-    product: 'Nuptse Puffer Jacket',
-    price: 329,
-    image: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=400&h=400&fit=crop',
-    category: 'Outdoor'
   }
 ];
 
@@ -773,13 +718,11 @@ export default function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
 
-  // Firebase Email Link Sign-In States
-  const [showEmailSignIn, setShowEmailSignIn] = useState(false);
-  const [emailForSignIn, setEmailForSignIn] = useState('');
-  const [sendingLink, setSendingLink] = useState(false);
-  const [linkSent, setLinkSent] = useState(false);
+  // Simple Email-as-Username Auth States
+  const [showSignIn, setShowSignIn] = useState(false);
+  const [email, setEmail] = useState('');
   const [signingIn, setSigningIn] = useState(false);
-  const [authError, setAuthError] = useState('');
+  const [error, setError] = useState('');
 
   const [shippingProfile, setShippingProfile] = useState(() => {
     const saved = localStorage.getItem('shippingProfile');
@@ -811,12 +754,6 @@ export default function App() {
     return defaultProfile;
   });
 
-  // Firebase email link configuration
-  const actionCodeSettings = {
-    url: 'https://www.brandsnobs.com',
-    handleCodeInApp: true,
-  };
-
   const toggleCollectionCollapse = (collectionName) => {
     setCollapsedCollections(prev =>
       prev.includes(collectionName)
@@ -837,118 +774,104 @@ export default function App() {
     if (savedGenders) setSelectedGenders(JSON.parse(savedGenders));
   }, []);
 
-  // Firebase Email Link Sign-In
-  const sendSignInLink = async () => {
-    if (!emailForSignIn || !emailForSignIn.includes('@')) {
-      setAuthError('Please enter a valid email address');
+  // Simple email validation
+  const isValidEmail = (email) => {
+    return email && email.includes('@') && email.includes('.');
+  };
+
+  // Sign in with email (no verification)
+  const signIn = async () => {
+    if (!isValidEmail(email)) {
+      setError('Please enter a valid email address');
       return;
     }
 
-    setSendingLink(true);
-    setAuthError('');
+    setSigningIn(true);
+    setError('');
 
     try {
-      console.log('📧 Sending sign-in link to:', emailForSignIn);
-      
-      await sendSignInLinkToEmail(auth, emailForSignIn, actionCodeSettings);
-      
-      window.localStorage.setItem('emailForSignIn', emailForSignIn);
-      
-      console.log('✅ Sign-in link sent!');
-      setLinkSent(true);
-      
-    } catch (error) {
-      console.error('❌ Error sending link:', error);
-      if (error.code === 'auth/invalid-email') {
-        setAuthError('Invalid email address');
-      } else if (error.code === 'auth/too-many-requests') {
-        setAuthError('Too many attempts. Please try again later.');
+      const userEmail = email.toLowerCase().trim();
+      const userDocRef = doc(db, 'users', userEmail);
+      const userDoc = await getDoc(userDocRef);
+
+      if (userDoc.exists()) {
+        // Load existing data
+        const data = userDoc.data();
+        setMyBrands(data.brands || []);
+        setSelectedGenders(data.genderPreferences || []);
+        setShoppingBag(data.shoppingBag || []);
+        setShippingProfile(data.shippingProfile || {
+          firstName: '', lastName: '', email: '', phone: '',
+          address: '', city: '', state: '', zip: '',
+          shirtSize: '', pantsWaist: '', pantsInseam: '', shoeSize: '', dressSize: ''
+        });
+        console.log('✅ Loaded existing profile:', userEmail);
       } else {
-        setAuthError('Failed to send link. Please try again.');
+        // Create new profile
+        await setDoc(userDocRef, {
+          email: userEmail,
+          brands: [],
+          genderPreferences: [],
+          shoppingBag: [],
+          shippingProfile: {},
+          createdAt: new Date().toISOString()
+        });
+        console.log('✅ Created new profile:', userEmail);
       }
+
+      // Set user and save to localStorage
+      setUser({ email: userEmail });
+      localStorage.setItem('userEmail', userEmail);
+      setShowSignIn(false);
+      setEmail('');
+
+    } catch (error) {
+      console.error('Sign in error:', error);
+      setError('Failed to sign in. Please try again.');
     } finally {
-      setSendingLink(false);
+      setSigningIn(false);
     }
   };
 
-  // Handle auth state with Firebase
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        console.log('✅ User signed in:', firebaseUser.email);
-        
-        setUser({
-          email: firebaseUser.email,
-          uid: firebaseUser.uid,
-          emailVerified: firebaseUser.emailVerified,
-          displayName: firebaseUser.displayName,
-          photoURL: firebaseUser.photoURL
-        });
+  // Sign out
+  const signOut = () => {
+    setUser(null);
+    localStorage.removeItem('userEmail');
+    setMyBrands([]);
+    setSelectedGenders([]);
+    setShoppingBag([]);
+    console.log('✅ Signed out');
+  };
 
+  // Auto sign-in on page load
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('userEmail');
+    if (savedEmail) {
+      setEmail(savedEmail);
+      const autoSignIn = async () => {
         try {
-          const userDocRef = doc(db, 'users', firebaseUser.uid);
+          const userDocRef = doc(db, 'users', savedEmail);
           const userDoc = await getDoc(userDocRef);
           
           if (userDoc.exists()) {
             const data = userDoc.data();
-            
-            if (data.brands && data.brands.length > 0) {
-              setMyBrands(data.brands);
-            }
-            if (data.genderPreferences) {
-              setSelectedGenders(data.genderPreferences);
-            }
-            if (data.shoppingBag) {
-              setShoppingBag(data.shoppingBag);
-            }
-            if (data.shippingProfile) {
-              setShippingProfile(data.shippingProfile);
-            }
+            setMyBrands(data.brands || []);
+            setSelectedGenders(data.genderPreferences || []);
+            setShoppingBag(data.shoppingBag || []);
+            setShippingProfile(data.shippingProfile || {
+              firstName: '', lastName: '', email: '', phone: '',
+              address: '', city: '', state: '', zip: '',
+              shirtSize: '', pantsWaist: '', pantsInseam: '', shoeSize: '', dressSize: ''
+            });
+            setUser({ email: savedEmail });
+            console.log('✅ Auto signed in:', savedEmail);
           }
         } catch (error) {
-          console.error('Error loading user data:', error);
+          console.error('Auto sign-in error:', error);
         }
-        
-      } else {
-        console.log('⚠️ No user signed in');
-        setUser(null);
-      }
-    });
-
-    // Check if this page load is from clicking an email link
-    const completeSignIn = async () => {
-      if (!isSignInWithEmailLink(auth, window.location.href)) {
-        return;
-      }
-
-      setSigningIn(true);
-
-      try {
-        let email = window.localStorage.getItem('emailForSignIn');
-        
-        if (!email) {
-          email = window.prompt('Please provide your email for confirmation');
-        }
-
-        const result = await signInWithEmailLink(auth, email, window.location.href);
-        
-        console.log('✅ Sign-in successful!', result.user);
-        
-        window.localStorage.removeItem('emailForSignIn');
-        
-        setShowEmailSignIn(false);
-        
-      } catch (error) {
-        console.error('❌ Sign-in error:', error);
-        setAuthError('Sign-in failed. Please request a new link.');
-      } finally {
-        setSigningIn(false);
-      }
-    };
-
-    completeSignIn();
-
-    return () => unsubscribe();
+      };
+      autoSignIn();
+    }
   }, []);
 
   useEffect(() => {
@@ -1048,28 +971,10 @@ export default function App() {
     setRefreshing(false);
   };
 
-  const getTimeAgo = (timestamp) => {
-    if (!timestamp) return '';
-    const now = new Date();
-    const updated = new Date(timestamp);
-    const diffMs = now - updated;
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-
-    if (diffHours < 1) {
-      return `Updated ${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
-    } else if (diffHours < 24) {
-      return `Updated ${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
-    } else {
-      const diffDays = Math.floor(diffHours / 24);
-      return `Updated ${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
-    }
-  };
-
   const saveGenderPreferences = async () => {
     if (!user) return;
     try {
-      await setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'users', user.email), {
         genderPreferences: selectedGenders,
         updatedAt: new Date().toISOString()
       }, { merge: true });
@@ -1089,7 +994,7 @@ export default function App() {
     
     try {
       setSyncStatus('syncing');
-      await setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'users', user.email), {
         brands: myBrands,
         genderPreferences: selectedGenders,
         shoppingBag: shoppingBag,
@@ -1108,7 +1013,7 @@ export default function App() {
     if (!user) return;
     try {
       setSyncStatus('syncing');
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, 'users', user.email));
       if (userDoc.exists()) {
         setMyBrands(userDoc.data().brands || []);
         setSyncStatus('synced');
@@ -1117,20 +1022,6 @@ export default function App() {
     } catch (error) {
       console.error('Error restoring:', error);
       setSyncStatus('error');
-    }
-  };
-
-  const signIn = async () => {
-    setShowEmailSignIn(true);
-  };
-
-  const signOut = async () => {
-    try {
-      await firebaseSignOut(auth);
-      setUser(null);
-      console.log('✅ Signed out');
-    } catch (error) {
-      console.error('Sign out error:', error);
     }
   };
 
@@ -1479,16 +1370,11 @@ export default function App() {
                     className="flex items-center gap-2 hover:opacity-80 transition-opacity"
                   >
                     <div className="text-right hidden md:block">
-                      <p className="text-sm font-medium text-neutral-900">{user.displayName}</p>
-                      <p className="text-xs text-neutral-500">{user.email}</p>
+                      <p className="text-sm font-medium text-neutral-900">{user.email}</p>
                     </div>
-                    {user.photoURL ? (
-                      <img src={user.photoURL} alt={user.displayName} className="w-8 h-8 md:w-10 md:h-10 rounded-full border-2 border-transparent hover:border-neutral-300 transition-colors" />
-                    ) : (
-                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center font-semibold text-sm border-2 border-transparent hover:border-neutral-300 transition-colors">
-                        {user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center font-semibold text-sm border-2 border-transparent hover:border-neutral-300 transition-colors">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </div>
                   </button>
                   <button onClick={signOut} className="bg-neutral-100 text-neutral-900 p-2 md:px-4 md:py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">
                     <LogOut className="w-4 h-4" />
@@ -1496,7 +1382,7 @@ export default function App() {
                   </button>
                 </div>
               ) : (
-                <button onClick={signIn} className="bg-neutral-900 text-white px-3 md:px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2 text-sm">
+                <button onClick={() => setShowSignIn(true)} className="bg-neutral-900 text-white px-3 md:px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2 text-sm">
                   <LogIn className="w-4 h-4" />
                   <span className="hidden md:inline">Sign In</span>
                   <span className="md:hidden">Sign In</span>
@@ -1585,19 +1471,24 @@ export default function App() {
               <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                 <div className="text-sm text-neutral-500 mb-1">🔥 Hot Brand</div>
                 {stats.hotBrand ? (
-                  <div className="flex items-center gap-3">
-                    {getBrandImage(stats.hotBrand.name) && (
-                      <img 
-                        src={getBrandImage(stats.hotBrand.name)} 
-                        alt={stats.hotBrand.name}
-                        className="w-12 h-12 object-contain rounded-lg bg-neutral-50 p-1 flex-shrink-0"
-                      />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-display text-xl font-bold text-green-600 truncate">{stats.hotBrand.name}</div>
-                      <div className="text-sm text-neutral-600">{stats.hotBrand.avgDiscount}% avg • {stats.hotBrand.dealCount} deals</div>
+                  <button
+                    onClick={() => setSearchQuery(stats.hotBrand.name)}
+                    className="w-full text-left hover:bg-neutral-50 rounded-lg p-2 -m-2 transition-colors"
+                  >
+                    <div className="flex items-center gap-3">
+                      {getBrandImage(stats.hotBrand.name) && (
+                        <img 
+                          src={getBrandImage(stats.hotBrand.name)} 
+                          alt={stats.hotBrand.name}
+                          className="w-12 h-12 object-contain rounded-lg bg-neutral-50 p-1 flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-display text-xl font-bold text-green-600 truncate">{stats.hotBrand.name}</div>
+                        <div className="text-sm text-neutral-600">{stats.hotBrand.avgDiscount}% avg • {stats.hotBrand.dealCount} deals</div>
+                      </div>
                     </div>
-                  </div>
+                  </button>
                 ) : (
                   <div className="font-display text-xl font-bold text-neutral-400">Add brands</div>
                 )}
@@ -1744,7 +1635,6 @@ export default function App() {
             )}
           </div>
         )}
-
         {activeTab === 'brands' && (
           <div>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
@@ -2215,84 +2105,55 @@ export default function App() {
         />
       )}
 
-      {showEmailSignIn && (
+      {showSignIn && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold text-neutral-900">Sign In to BrandSnobs</h2>
               <button onClick={() => {
-                setShowEmailSignIn(false);
-                setEmailForSignIn('');
-                setAuthError('');
-                setLinkSent(false);
+                setShowSignIn(false);
+                setEmail('');
+                setError('');
               }} className="text-neutral-400 hover:text-neutral-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            {!linkSent ? (
-              <>
-                <p className="text-neutral-600 mb-6">
-                  Enter your email to receive a secure sign-in link.
-                </p>
+            <p className="text-neutral-600 mb-6">
+              Enter your email to access your brands on any device.
+            </p>
 
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={emailForSignIn}
-                  onChange={(e) => {
-                    setEmailForSignIn(e.target.value);
-                    setAuthError('');
-                  }}
-                  onKeyPress={(e) => e.key === 'Enter' && sendSignInLink()}
-                  className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-4"
-                  disabled={sendingLink}
-                />
+            <input
+              type="email"
+              placeholder="your@email.com"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
+              onKeyPress={(e) => e.key === 'Enter' && signIn()}
+              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-4"
+              disabled={signingIn}
+              autoFocus
+            />
 
-                {authError && (
-                  <p className="text-red-600 text-sm mb-4">{authError}</p>
-                )}
-
-                <button
-                  onClick={sendSignInLink}
-                  disabled={sendingLink}
-                  className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
-                >
-                  {sendingLink ? 'Sending Link...' : 'Send Sign-In Link'}
-                </button>
-
-                <p className="text-xs text-neutral-500 text-center mt-4">
-                  No password needed. We'll email you a secure link to sign in.
-                </p>
-              </>
-            ) : (
-              <>
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                  <p className="text-green-800 font-medium mb-2">Check your email! 📧</p>
-                  <p className="text-green-700 text-sm">We sent a sign-in link to:</p>
-                  <p className="text-green-900 font-semibold">{emailForSignIn}</p>
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <p className="text-blue-800 text-sm font-medium mb-2">Next steps:</p>
-                  <ol className="text-blue-700 text-sm space-y-1 list-decimal list-inside">
-                    <li>Check your inbox (and spam folder)</li>
-                    <li>Click the link in the email</li>
-                    <li>You'll be signed in automatically!</li>
-                  </ol>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setLinkSent(false);
-                    setEmailForSignIn('');
-                  }}
-                  className="text-neutral-600 hover:text-neutral-900 text-sm font-medium mt-4 w-full text-center"
-                >
-                  ← Use a different email
-                </button>
-              </>
+            {error && (
+              <p className="text-red-600 text-sm mb-4">{error}</p>
             )}
+
+            <button
+              onClick={signIn}
+              disabled={signingIn || !email}
+              className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
+            >
+              {signingIn ? 'Signing In...' : 'Continue'}
+            </button>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-blue-800">
+                💡 <span className="font-semibold">No password needed!</span> Same email = same brands on all devices.
+              </p>
+            </div>
           </div>
         </div>
       )}
@@ -2408,11 +2269,10 @@ export default function App() {
                 <li>Provide and improve our services</li>
                 <li>Show you relevant deals on your favorite brands</li>
                 <li>Sync your preferences across devices</li>
-                <li>Send verification codes for sign-in</li>
               </ul>
               
               <h3>Information Sharing</h3>
-              <p>We do NOT sell your personal information. We may share with affiliate networks to track purchases, email service providers to send verification codes, and analytics providers (aggregated data only).</p>
+              <p>We do NOT sell your personal information. We may share with affiliate networks to track purchases and analytics providers (aggregated data only).</p>
               
               <h3>Affiliate Disclosure</h3>
               <p>BrandSnobs participates in affiliate marketing programs. When you purchase through our links, we may earn a commission. This helps us keep BrandSnobs free.</p>
