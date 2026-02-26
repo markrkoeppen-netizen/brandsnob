@@ -151,7 +151,7 @@ const BRAND_COLLECTIONS = [
     brands: [
       { name: 'The North Face', category: 'Outdoor' },
       { name: 'Columbia', category: 'Outdoor' },
-      { name: 'Yeti', category: 'Outdoor' }
+      { name: 'Yeti', category: 'Outdoor' },
       { name: 'Pelagic', category: 'Outdoor' }
     ]
   },
