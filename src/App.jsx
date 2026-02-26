@@ -69,6 +69,7 @@ const BRAND_COLLECTIONS = [
       { name: 'Athleta', category: 'Fashion' },
       { name: 'Under Armour', category: 'Fashion' },
       { name: 'YoungLA', category: 'Fashion' }
+      { name: 'Gymshark', category: 'Fashion' }
     ]
   },
   {
@@ -151,6 +152,7 @@ const BRAND_COLLECTIONS = [
       { name: 'The North Face', category: 'Outdoor' },
       { name: 'Columbia', category: 'Outdoor' },
       { name: 'Yeti', category: 'Outdoor' }
+      { name: 'Pelagic', category: 'Outdoor' }
     ]
   },
   {
