@@ -68,7 +68,7 @@ const BRAND_COLLECTIONS = [
       { name: 'On Running', category: 'Footwear' },
       { name: 'Athleta', category: 'Fashion' },
       { name: 'Under Armour', category: 'Fashion' },
-      { name: 'YoungLA', category: 'Fashion' }
+      { name: 'YoungLA', category: 'Fashion' },
       { name: 'Gymshark', category: 'Fashion' }
     ]
   },
