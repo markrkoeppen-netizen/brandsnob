@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { db } from './firebase';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import emailjs from '@emailjs/browser';
+
+// Initialize EmailJS
+emailjs.init('Sd_bcL3te3ni6Yydo');
+
 
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
@@ -1155,6 +1160,7 @@ export default function App() {
     setRecommendSubmitting(true);
     
     try {
+      // Save to Firestore
       const recommendationRef = collection(db, 'brand_recommendations');
       await setDoc(doc(recommendationRef), {
         brandName: recommendBrand.trim(),
@@ -1165,6 +1171,25 @@ export default function App() {
       });
       
       console.log('✅ Recommendation saved to Firestore');
+      
+      // Send email via EmailJS
+      try {
+        await emailjs.send(
+          'service_s5lxkpl',
+          'template_brand_rec',
+          {
+            brand_name: recommendBrand.trim(),
+            submitter_email: recommendEmail.trim() || 'Not provided',
+            user_email: user?.email || 'Anonymous',
+            to_email: 'admin@brandsnobs.com'
+          },
+          'Sd_bcL3te3ni6Yydo'
+        );
+        console.log('✅ Email sent to admin@brandsnobs.com');
+      } catch (emailError) {
+        console.error('⚠️ Email failed but Firestore saved:', emailError);
+      }
+      
       setRecommendSuccess(true);
       setTimeout(() => {
         setShowRecommendModal(false);
