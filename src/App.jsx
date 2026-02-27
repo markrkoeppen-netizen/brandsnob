@@ -1383,25 +1383,18 @@ export default function App() {
 
   const shareWishlist = async () => {
     if (!shareRecipient.trim()) {
-      alert('Please enter an email or phone number');
+      alert('Please enter an email address');
       return;
     }
 
     setShareSending(true);
 
-    const wishlistHTML = wishlist.map(item => 
-      `<div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e5e5e5; border-radius: 8px;">
-        <img src="${item.image}" alt="${item.product}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;">
-        <h3 style="margin: 0 0 8px 0; font-size: 16px;">${item.product}</h3>
-        <p style="margin: 0; color: #666;"><strong>${item.brand}</strong></p>
-        <p style="margin: 8px 0; font-size: 18px; color: #16a34a;">
-          <strong>$${item.salePrice}</strong> 
-          <span style="text-decoration: line-through; color: #999; font-size: 14px;">$${item.originalPrice}</span>
-          <span style="color: #dc2626; font-weight: 600;"> ${item.discount} off</span>
-        </p>
-        <a href="${item.link}" style="display: inline-block; background: #171717; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; margin-top: 8px;">View Deal</a>
-      </div>`
-    ).join('');
+    // Create simple text format for wishlist
+    const wishlistText = wishlist.map((item, index) => 
+      `${index + 1}. ${item.product}\n   ${item.brand} - $${item.salePrice} (${item.discount} off)\n   ${item.link}`
+    ).join('\n\n');
+
+    const totalValue = wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
 
     try {
       await emailjs.send(
@@ -1409,11 +1402,12 @@ export default function App() {
         'template_vvw8gyu',
         {
           to_email: shareRecipient,
-          from_name: user?.email || 'Someone',
-          message: shareMessage || `Check out my wishlist from BrandSnobs!\n\n${wishlist.map(item => 
-            `${item.product} by ${item.brand} - $${item.salePrice} (${item.discount} off)\n${item.link}`
-          ).join('\n\n')}`,
-          brand_name: `${wishlist.length} items - $${wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2)} total`
+          brand_name: `Wishlist (${wishlist.length} items - $${totalValue} total)`,
+          submitter_email: shareRecipient,
+          user_email: user?.email || 'BrandSnobs User',
+          message: shareMessage 
+            ? `${shareMessage}\n\n=== MY WISHLIST ===\n\n${wishlistText}`
+            : `Check out my wishlist from BrandSnobs!\n\n${wishlistText}`
         },
         'Sd_bcL3te3ni6Yydo'
       );
@@ -1424,7 +1418,7 @@ export default function App() {
       setShareMessage('');
     } catch (error) {
       console.error('Share error:', error);
-      alert('Failed to share wishlist. Please try again.');
+      alert(`Failed to share wishlist: ${error.text || error.message}`);
     } finally {
       setShareSending(false);
     }
