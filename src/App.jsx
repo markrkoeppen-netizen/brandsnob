@@ -808,7 +808,7 @@ function WishlistModal({ wishlist, onClose, onRemove, onShare, onAddToBag }) {
   );
 }
 
-function ShareWishlistModal({ onClose, shareMethod, setShareMethod, shareRecipient, setShareRecipient, shareMessage, setShareMessage, onShare, shareSending }) {
+function ShareWishlistModal({ onClose, shareRecipient, setShareRecipient, shareMessage, setShareMessage, onShare, shareSending }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-md w-full p-6">
@@ -821,40 +821,14 @@ function ShareWishlistModal({ onClose, shareMethod, setShareMethod, shareRecipie
 
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">Share via</label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShareMethod('email')}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
-                  shareMethod === 'email'
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 text-neutral-700 hover:border-neutral-400'
-                }`}
-              >
-                Email
-              </button>
-              <button
-                onClick={() => setShareMethod('sms')}
-                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
-                  shareMethod === 'sms'
-                    ? 'border-neutral-900 bg-neutral-900 text-white'
-                    : 'border-neutral-300 text-neutral-700 hover:border-neutral-400'
-                }`}
-              >
-                Text
-              </button>
-            </div>
-          </div>
-
-          <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
-              {shareMethod === 'email' ? 'Email Address' : 'Phone Number'}
+              Email Address
             </label>
             <input
-              type={shareMethod === 'email' ? 'email' : 'tel'}
+              type="email"
               value={shareRecipient}
               onChange={(e) => setShareRecipient(e.target.value)}
-              placeholder={shareMethod === 'email' ? 'friend@example.com' : '(555) 123-4567'}
+              placeholder="friend@example.com"
               className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
             />
           </div>
@@ -879,7 +853,7 @@ function ShareWishlistModal({ onClose, shareMethod, setShareMethod, shareRecipie
             disabled={!shareRecipient.trim() || shareSending}
             className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {shareSending ? 'Sending...' : 'Share'}
+            {shareSending ? 'Sending...' : 'Share via Email'}
           </button>
           <button
             onClick={onClose}
@@ -935,7 +909,6 @@ export default function App() {
   });
   const [showWishlistModal, setShowWishlistModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const [shareMethod, setShareMethod] = useState('email');
   const [shareRecipient, setShareRecipient] = useState('');
   const [shareMessage, setShareMessage] = useState('');
   const [shareSending, setShareSending] = useState(false);
@@ -1365,14 +1338,18 @@ export default function App() {
 
     if (!proceed) return;
 
+    // Open all links first
     Object.entries(byRetailer).forEach(([retailer, data], index) => {
       setTimeout(() => {
         handleDealClick(data.items[0].link);
       }, index * 500);
     });
 
-    clearBag();
-    setShowBagModal(false);
+    // Wait for all tabs to open, then clear bag and close modal
+    setTimeout(() => {
+      clearBag();
+      setShowBagModal(false);
+    }, (retailerCount * 500) + 1000);
   };
 
   const addToWishlist = (deal) => {
@@ -1429,15 +1406,14 @@ export default function App() {
     try {
       await emailjs.send(
         'service_s5lxkpl',
-        shareMethod === 'email' ? 'template_wishlist' : 'template_wishlist_sms',
+        'template_vvw8gyu',
         {
-          to_email: shareMethod === 'email' ? shareRecipient : '',
-          to_phone: shareMethod === 'sms' ? shareRecipient : '',
+          to_email: shareRecipient,
           from_name: user?.email || 'Someone',
-          message: shareMessage || 'Check out my wishlist from BrandSnobs!',
-          wishlist_html: wishlistHTML,
-          wishlist_count: wishlist.length,
-          total_value: wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2)
+          message: shareMessage || `Check out my wishlist from BrandSnobs!\n\n${wishlist.map(item => 
+            `${item.product} by ${item.brand} - $${item.salePrice} (${item.discount} off)\n${item.link}`
+          ).join('\n\n')}`,
+          brand_name: `${wishlist.length} items - $${wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2)} total`
         },
         'Sd_bcL3te3ni6Yydo'
       );
@@ -2459,8 +2435,6 @@ export default function App() {
       {showShareModal && (
         <ShareWishlistModal
           onClose={() => setShowShareModal(false)}
-          shareMethod={shareMethod}
-          setShareMethod={setShareMethod}
           shareRecipient={shareRecipient}
           setShareRecipient={setShareRecipient}
           shareMessage={shareMessage}
