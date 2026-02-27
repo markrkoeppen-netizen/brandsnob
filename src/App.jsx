@@ -7,7 +7,6 @@ import emailjs from '@emailjs/browser';
 // Initialize EmailJS
 emailjs.init('Sd_bcL3te3ni6Yydo');
 
-
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
   'Watches', 'Cosmetics', 'Jewelry', 'Travel'
@@ -315,15 +314,20 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA'
 ];
 
-function LuxuryDealCard({ deal, onAddToBag, onDealClick }) {
+function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishlist, onRemoveFromWishlist }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
   const [addedToBag, setAddedToBag] = useState(false);
+  
+  const isInWishlist = wishlist?.some(item => item.id === deal.id) || false;
 
   const handleFavorite = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorited(!isFavorited);
+    if (isInWishlist) {
+      onRemoveFromWishlist(deal.id);
+    } else {
+      onAddToWishlist(deal);
+    }
   };
 
   const handleAddToBag = (e) => {
@@ -373,9 +377,9 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick }) {
 
         <button
           onClick={handleFavorite}
-          className={`absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isFavorited ? 'text-rose-500' : 'text-neutral-400'}`}
+          className={`absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isInWishlist ? 'text-rose-500' : 'text-neutral-400'}`}
         >
-          <Heart className="w-4 h-4 md:w-5 md:h-5" fill={isFavorited ? 'currentColor' : 'none'} />
+          <Heart className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? 'currentColor' : 'none'} />
         </button>
 
         <div className={`absolute inset-0 bg-neutral-900/80 backdrop-blur-sm items-center justify-center transition-opacity duration-300 hidden md:flex ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -689,6 +693,198 @@ function RecommendBrandModal({ onClose, onSubmit, brandName, setBrandName, email
     </div>
   );
 }
+
+function WishlistModal({ wishlist, onClose, onRemove, onShare, onAddToBag }) {
+  const totalValue = wishlist.reduce((sum, item) => sum + item.salePrice, 0);
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  const handleDealClick = (url) => {
+    if (isMobile) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="p-6 border-b border-neutral-200">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-2xl font-bold text-neutral-900">My Wishlist</h2>
+            <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          <p className="text-sm text-neutral-600">
+            {wishlist.length} item{wishlist.length !== 1 ? 's' : ''} • ${totalValue.toFixed(2)} total
+          </p>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-6">
+          {wishlist.length === 0 ? (
+            <div className="text-center py-12">
+              <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+              <p className="text-neutral-500">Your wishlist is empty</p>
+              <p className="text-sm text-neutral-400 mt-2">Click the heart icon on deals to save them here</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {wishlist.map(item => (
+                <div key={item.id} className="flex gap-4 bg-neutral-50 rounded-xl p-4">
+                  <img 
+                    src={item.image} 
+                    alt={item.product}
+                    className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80"
+                    onClick={() => handleDealClick(item.link)}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-neutral-500 mb-1">{item.brand}</p>
+                    <h3 className="font-medium text-neutral-900 line-clamp-2 text-sm mb-2 cursor-pointer hover:text-neutral-600" onClick={() => handleDealClick(item.link)}>
+                      {item.product}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-semibold text-neutral-900">${item.salePrice}</span>
+                      {item.originalPrice > item.salePrice && (
+                        <>
+                          <span className="text-xs text-neutral-400 line-through">${item.originalPrice}</span>
+                          <span className="text-xs text-green-600 font-medium">{item.discount} off</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => onAddToBag(item)}
+                        className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg hover:bg-neutral-800"
+                      >
+                        Add to Bag
+                      </button>
+                      <button
+                        onClick={() => handleDealClick(item.link)}
+                        className="text-xs bg-neutral-200 text-neutral-700 px-3 py-1 rounded-lg hover:bg-neutral-300"
+                      >
+                        View Deal
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onRemove(item.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {wishlist.length > 0 && (
+          <div className="p-6 border-t border-neutral-200">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm text-neutral-600">Total Value</p>
+                <p className="text-2xl font-bold text-neutral-900">${totalValue.toFixed(2)}</p>
+              </div>
+            </div>
+            <button
+              onClick={onShare}
+              className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-medium flex items-center justify-center gap-2"
+            >
+              <Upload className="w-5 h-5" />
+              Share Wishlist
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ShareWishlistModal({ onClose, shareMethod, setShareMethod, shareRecipient, setShareRecipient, shareMessage, setShareMessage, onShare, shareSending }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Share Your Wishlist</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="space-y-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">Share via</label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShareMethod('email')}
+                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                  shareMethod === 'email'
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-300 text-neutral-700 hover:border-neutral-400'
+                }`}
+              >
+                Email
+              </button>
+              <button
+                onClick={() => setShareMethod('sms')}
+                className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                  shareMethod === 'sms'
+                    ? 'border-neutral-900 bg-neutral-900 text-white'
+                    : 'border-neutral-300 text-neutral-700 hover:border-neutral-400'
+                }`}
+              >
+                Text
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              {shareMethod === 'email' ? 'Email Address' : 'Phone Number'}
+            </label>
+            <input
+              type={shareMethod === 'email' ? 'email' : 'tel'}
+              value={shareRecipient}
+              onChange={(e) => setShareRecipient(e.target.value)}
+              placeholder={shareMethod === 'email' ? 'friend@example.com' : '(555) 123-4567'}
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Message (optional)
+            </label>
+            <textarea
+              value={shareMessage}
+              onChange={(e) => setShareMessage(e.target.value)}
+              placeholder="Add a personal message..."
+              rows="3"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onShare}
+            disabled={!shareRecipient.trim() || shareSending}
+            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {shareSending ? 'Sending...' : 'Share'}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 export default function App() {
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
@@ -724,6 +920,18 @@ export default function App() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
+  
+  // Wishlist states
+  const [wishlist, setWishlist] = useState(() => {
+    const saved = localStorage.getItem('wishlist');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showWishlistModal, setShowWishlistModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareMethod, setShareMethod] = useState('email');
+  const [shareRecipient, setShareRecipient] = useState('');
+  const [shareMessage, setShareMessage] = useState('');
+  const [shareSending, setShareSending] = useState(false);
 
   // Simple Email-as-Username Auth States
   const [showSignIn, setShowSignIn] = useState(false);
@@ -807,6 +1015,7 @@ export default function App() {
         setMyBrands(data.brands || []);
         setSelectedGenders(data.genderPreferences || []);
         setShoppingBag(data.shoppingBag || []);
+        setWishlist(data.wishlist || []);
         setShippingProfile(data.shippingProfile || {
           firstName: '', lastName: '', email: '', phone: '',
           address: '', city: '', state: '', zip: '',
@@ -820,6 +1029,7 @@ export default function App() {
           brands: [],
           genderPreferences: [],
           shoppingBag: [],
+          wishlist: [],
           shippingProfile: {},
           createdAt: new Date().toISOString()
         });
@@ -865,6 +1075,7 @@ export default function App() {
             setMyBrands(data.brands || []);
             setSelectedGenders(data.genderPreferences || []);
             setShoppingBag(data.shoppingBag || []);
+            setWishlist(data.wishlist || []);
             setShippingProfile(data.shippingProfile || {
               firstName: '', lastName: '', email: '', phone: '',
               address: '', city: '', state: '', zip: '',
@@ -995,7 +1206,7 @@ export default function App() {
       return;
     }
     
-    if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0) {
+    if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0 && wishlist.length === 0) {
       return;
     }
     
@@ -1005,6 +1216,7 @@ export default function App() {
         brands: myBrands,
         genderPreferences: selectedGenders,
         shoppingBag: shoppingBag,
+        wishlist: wishlist,
         shippingProfile: shippingProfile,
         updatedAt: new Date().toISOString()
       }, { merge: true });
@@ -1154,6 +1366,85 @@ export default function App() {
 
     clearBag();
     setShowBagModal(false);
+  };
+
+  const addToWishlist = (deal) => {
+    if (wishlist.find(item => item.id === deal.id)) {
+      return;
+    }
+    const updated = [...wishlist, deal];
+    setWishlist(updated);
+    localStorage.setItem('wishlist', JSON.stringify(updated));
+    
+    if (user) {
+      setDoc(doc(db, 'users', user.email), {
+        wishlist: updated,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+  };
+
+  const removeFromWishlist = (dealId) => {
+    const updated = wishlist.filter(item => item.id !== dealId);
+    setWishlist(updated);
+    localStorage.setItem('wishlist', JSON.stringify(updated));
+    
+    if (user) {
+      setDoc(doc(db, 'users', user.email), {
+        wishlist: updated,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+  };
+
+  const shareWishlist = async () => {
+    if (!shareRecipient.trim()) {
+      alert('Please enter an email or phone number');
+      return;
+    }
+
+    setShareSending(true);
+
+    const wishlistHTML = wishlist.map(item => 
+      `<div style="margin-bottom: 20px; padding: 15px; border: 1px solid #e5e5e5; border-radius: 8px;">
+        <img src="${item.image}" alt="${item.product}" style="width: 100px; height: 100px; object-fit: cover; border-radius: 4px; margin-bottom: 10px;">
+        <h3 style="margin: 0 0 8px 0; font-size: 16px;">${item.product}</h3>
+        <p style="margin: 0; color: #666;"><strong>${item.brand}</strong></p>
+        <p style="margin: 8px 0; font-size: 18px; color: #16a34a;">
+          <strong>$${item.salePrice}</strong> 
+          <span style="text-decoration: line-through; color: #999; font-size: 14px;">$${item.originalPrice}</span>
+          <span style="color: #dc2626; font-weight: 600;"> ${item.discount} off</span>
+        </p>
+        <a href="${item.link}" style="display: inline-block; background: #171717; color: white; padding: 8px 16px; text-decoration: none; border-radius: 6px; margin-top: 8px;">View Deal</a>
+      </div>`
+    ).join('');
+
+    try {
+      await emailjs.send(
+        'service_s5lxkpl',
+        shareMethod === 'email' ? 'template_wishlist' : 'template_wishlist_sms',
+        {
+          to_email: shareMethod === 'email' ? shareRecipient : '',
+          to_phone: shareMethod === 'sms' ? shareRecipient : '',
+          from_name: user?.email || 'Someone',
+          message: shareMessage || 'Check out my wishlist from BrandSnobs!',
+          wishlist_html: wishlistHTML,
+          wishlist_count: wishlist.length,
+          total_value: wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2)
+        },
+        'Sd_bcL3te3ni6Yydo'
+      );
+
+      alert('Wishlist shared successfully!');
+      setShowShareModal(false);
+      setShareRecipient('');
+      setShareMessage('');
+    } catch (error) {
+      console.error('Share error:', error);
+      alert('Failed to share wishlist. Please try again.');
+    } finally {
+      setShareSending(false);
+    }
   };
 
   const submitBrandRecommendation = async () => {
@@ -1367,6 +1658,18 @@ export default function App() {
             </div>
             <div className="flex items-center gap-3">
               <button 
+                onClick={() => setShowWishlistModal(true)}
+                className="relative p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              >
+                <Heart className="w-6 h-6 text-neutral-700" />
+                {wishlist.length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                    {wishlist.length}
+                  </span>
+                )}
+              </button>
+
+              <button 
                 onClick={() => setShowBagModal(true)}
                 className="relative p-2 hover:bg-neutral-100 rounded-lg transition-colors"
               >
@@ -1569,7 +1872,7 @@ export default function App() {
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
+                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
                       </div>
                     )}
                   </div>
@@ -1615,7 +1918,7 @@ export default function App() {
                                   </div>
                                 ) : (
                                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                                    {collectionDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
+                                    {collectionDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
                                   </div>
                                 )}
                               </div>
@@ -1625,7 +1928,7 @@ export default function App() {
                       })
                     ) : (
                       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
+                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
                       </div>
                     )}
 
@@ -1649,7 +1952,7 @@ export default function App() {
                           {!isCollapsed && (
                             <div className="px-6 pb-6">
                               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                                {uncollectedDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} />)}
+                                {uncollectedDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
                               </div>
                             </div>
                           )}
@@ -2129,6 +2432,33 @@ export default function App() {
           onCheckout={checkoutAll}
           onClear={clearBag}
           shippingProfile={shippingProfile}
+        />
+      )}
+
+      {showWishlistModal && (
+        <WishlistModal
+          wishlist={wishlist}
+          onClose={() => setShowWishlistModal(false)}
+          onRemove={removeFromWishlist}
+          onShare={() => {
+            setShowWishlistModal(false);
+            setShowShareModal(true);
+          }}
+          onAddToBag={addToBag}
+        />
+      )}
+
+      {showShareModal && (
+        <ShareWishlistModal
+          onClose={() => setShowShareModal(false)}
+          shareMethod={shareMethod}
+          setShareMethod={setShareMethod}
+          shareRecipient={shareRecipient}
+          setShareRecipient={setShareRecipient}
+          shareMessage={shareMessage}
+          setShareMessage={setShareMessage}
+          onShare={shareWishlist}
+          shareSending={shareSending}
         />
       )}
 
