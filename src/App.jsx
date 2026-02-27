@@ -375,13 +375,6 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
           </div>
         )}
 
-        <button
-          onClick={handleFavorite}
-          className={`absolute top-2 right-2 md:top-4 md:right-4 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all duration-200 hover:bg-white hover:scale-110 ${isInWishlist ? 'text-rose-500' : 'text-neutral-400'}`}
-        >
-          <Heart className="w-4 h-4 md:w-5 md:h-5" fill={isInWishlist ? 'currentColor' : 'none'} />
-        </button>
-
         <div className={`absolute inset-0 bg-neutral-900/80 backdrop-blur-sm items-center justify-center transition-opacity duration-300 hidden md:flex ${isHovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <div className="bg-white px-6 py-3 rounded-full flex items-center gap-2 text-neutral-900 font-medium">
             <span>View Deal</span>
@@ -449,6 +442,20 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
               Add to Bag
             </span>
           )}
+        </button>
+
+        <button
+          onClick={handleFavorite}
+          className={`mt-2 w-full py-2 rounded-lg font-medium text-sm transition-all border ${
+            isInWishlist 
+              ? 'bg-rose-50 text-rose-600 border-rose-600' 
+              : 'bg-white text-neutral-600 border-neutral-300 hover:border-neutral-400'
+          }`}
+        >
+          <span className="flex items-center justify-center gap-2">
+            <Heart className="w-4 h-4" fill={isInWishlist ? 'currentColor' : 'none'} />
+            {isInWishlist ? 'Saved' : 'Save'}
+          </span>
         </button>
       </div>
     </div>
@@ -1469,12 +1476,13 @@ export default function App() {
       try {
         await emailjs.send(
           'service_s5lxkpl',
-          'template_brand_rec',
+          'template_vvw8gyu',
           {
             brand_name: recommendBrand.trim(),
             submitter_email: recommendEmail.trim() || 'Not provided',
             user_email: user?.email || 'Anonymous',
-            to_email: 'admin@brandsnobs.com'
+            to_email: 'admin@brandsnobs.com',
+            message: `New brand recommendation: ${recommendBrand.trim()}`
           },
           'Sd_bcL3te3ni6Yydo'
         );
