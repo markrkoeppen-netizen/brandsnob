@@ -1396,7 +1396,7 @@ export default function App() {
 
     const totalValue = wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
 
-    try:
+    try {
       await emailjs.send(
         'service_s5lxkpl',
         'template_7sri3sr',
