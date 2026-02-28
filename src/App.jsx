@@ -5,7 +5,7 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 
 import emailjs from '@emailjs/browser';
 
 // Initialize EmailJS
-emailjs.init('Sd_bcL3te3ni6Yydo');
+emailjs.init('QPiBFFlW7aGv6W0UP');
 
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
@@ -1398,7 +1398,7 @@ export default function App() {
 
     try {
       await emailjs.send(
-        'service_s5lxkpl',
+        'service_9b98jq6',
         'template_7sri3sr',
         {
           to_email: shareRecipient,
@@ -1409,7 +1409,7 @@ export default function App() {
             ? `${shareMessage}\n\n=== MY WISHLIST ===\n\n${wishlistText}`
             : `Check out my wishlist from BrandSnobs!\n\n${wishlistText}`
         },
-        'Sd_bcL3te3ni6Yydo'
+        'QPiBFFlW7aGv6W0UP'
       );
 
       alert('Wishlist shared successfully!');
@@ -1445,7 +1445,7 @@ export default function App() {
       // Send email via EmailJS
       try {
         await emailjs.send(
-          'service_s5lxkpl',
+          'service_9b98jq6',
           'template_7sri3sr',
           {
             brand_name: recommendBrand.trim(),
@@ -1454,7 +1454,7 @@ export default function App() {
             to_email: 'admin@brandsnobs.com',
             message: `New brand recommendation: ${recommendBrand.trim()}`
           },
-          'Sd_bcL3te3ni6Yydo'
+          'QPiBFFlW7aGv6W0UP'
         );
         console.log('✅ Email sent to admin@brandsnobs.com');
       } catch (emailError) {
