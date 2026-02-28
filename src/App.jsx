@@ -1396,10 +1396,10 @@ export default function App() {
 
     const totalValue = wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
 
-    try {
+    try:
       await emailjs.send(
         'service_s5lxkpl',
-        'template_vvw8gyu',
+        'template_7sri3sr',
         {
           to_email: shareRecipient,
           brand_name: `Wishlist (${wishlist.length} items - $${totalValue} total)`,
@@ -1446,7 +1446,7 @@ export default function App() {
       try {
         await emailjs.send(
           'service_s5lxkpl',
-          'template_vvw8gyu',
+          'template_7sri3sr',
           {
             brand_name: recommendBrand.trim(),
             submitter_email: recommendEmail.trim() || 'Not provided',
