@@ -76,6 +76,7 @@ const BRAND_COLLECTIONS = [
     name: 'Contemporary American',
     description: 'Modern American designers and lifestyle brands',
     brands: [
+      { name: 'Calvin Klein', category: 'Fashion' },
       { name: 'Donna Karan', category: 'Fashion' },
       { name: 'Free People', category: 'Fashion' },
       { name: 'Kate Spade', category: 'Accessories' },
@@ -186,6 +187,8 @@ const BRAND_COLLECTIONS = [
     brands: [
       { name: 'Estée Lauder', category: 'Cosmetics' },
       { name: 'Lush', category: 'Cosmetics' },
+      { name: 'Bubble', category: 'Cosmetics' },
+      { name: 'LANEIGE', category: 'Cosmetics' },
       { name: 'Dacor', category: 'Home' }
     ]
   },
@@ -225,7 +228,8 @@ const BRAND_COLLECTIONS = [
       { name: 'J.Crew', category: 'Fashion' },
       { name: 'Banana Republic', category: 'Fashion' },
       { name: 'Reformation', category: 'Fashion' },
-      { name: 'Aritzia', category: 'Fashion' }
+      { name: 'Aritzia', category: 'Fashion' },
+      { name: 'Zara', category: 'Fashion' }
     ]
   },
   {
@@ -233,6 +237,7 @@ const BRAND_COLLECTIONS = [
     name: 'Women\'s Fashion Forward',
     description: 'Trendy, Instagram-worthy brands',
     brands: [
+      { name: 'Aerie', category: 'Fashion' },
       { name: 'Reformation', category: 'Fashion' },
       { name: 'Aritzia', category: 'Fashion' },
       { name: 'Anthropologie', category: 'Fashion' },
@@ -248,6 +253,7 @@ const BRAND_COLLECTIONS = [
       { name: 'Bonobos', category: 'Fashion' },
       { name: 'Untuckit', category: 'Fashion' },
       { name: 'J.Crew', category: 'Fashion' },
+      { name: 'Mac Weldon', category: 'Fashion' },
       { name: 'Banana Republic', category: 'Fashion' },
       { name: 'Theory', category: 'Fashion' }
     ]
@@ -271,6 +277,7 @@ const BRAND_COLLECTIONS = [
     description: 'Quality denim and wardrobe essentials',
     brands: [
       { name: 'Levi\'s', category: 'Fashion' },
+      { name: 'Lucky', category: 'Fashion' },
       { name: 'AG Jeans', category: 'Fashion' },
       { name: 'Everlane', category: 'Fashion' },
       { name: 'Madewell', category: 'Fashion' }
@@ -290,6 +297,14 @@ const BRAND_COLLECTIONS = [
   },
   {
     id: 20,
+    name: 'Kids & Family',
+    description: 'Children\'s apparel and family favorites',
+    brands: [
+      { name: 'Shade Critters', category: 'Fashion' }
+    ]
+  },
+  {
+    id: 21,
     name: 'Travel & Luggage',
     description: 'Premium bags and travel gear',
     brands: [
@@ -301,17 +316,17 @@ const BRAND_COLLECTIONS = [
 ];
 
 const ALL_AVAILABLE_BRANDS = [
-  'Abercrombie & Fitch', 'Adidas', 'AG Jeans', 'Allbirds', 'Alo', 'American Giant', 'Anthropologie', 'Arc\'teryx', 'Ariat', 'Aritzia', 'Asics', 'Athleta', 'Away', 'Banana Republic', 'BIRKENSTOCK',
-  'Bombas', 'Bonobos', 'Brooks Brothers', 'Burberry', 'Burlebo', 'Carhartt', 'Chloé', 'Christian Louboutin',
+  'Abercrombie & Fitch', 'Adidas', 'Aerie', 'AG Jeans', 'Allbirds', 'Alo', 'American Giant', 'Anthropologie', 'Arc\'teryx', 'Ariat', 'Aritzia', 'Asics', 'Athleta', 'Away', 'Banana Republic', 'BIRKENSTOCK',
+  'Bombas', 'Bonobos', 'Brooks Brothers', 'Bubble', 'Burberry', 'Burlebo', 'Calvin Klein', 'Carhartt', 'Chloé', 'Christian Louboutin',
   'Chubbies', 'Cinch', 'Clarks', 'Coach', 'Cole Haan', 'Columbia', 'Converse', 'Costa', 'Crocs', 'Cruel Girl', 'Cult Gaia',
   'Dacor', 'Dolce & Gabbana', 'Donna Karan', 'Dr. Martens', 'Estée Lauder', 'Everlane', 'Fendi', 'Feragamo', 'Free People',
-  'Gorjana', 'Goyard', 'Gucci', 'Gymshark', 'Havaianas', 'Hermès', 'Hoka', 'J.Crew', 'Jimmy Choo', 'Justin Boots', 'Kate Spade', 'Kendra Scott', 'Kith', 'Lacoste',
-  'Levi\'s', 'Levi Strauss', 'Louis Vuitton', 'Lucchese', 'Lululemon', 'Lush', 'Madewell', 'Mammut', 'Marc Jacobs',
+  'Gorjana', 'Goyard', 'Gucci', 'Gymshark', 'Havaianas', 'Hermès', 'Hoka', 'J.Crew', 'Jimmy Choo', 'Justin Boots', 'Kate Spade', 'Kendra Scott', 'Kith', 'Lacoste', 'LANEIGE',
+  'Levi\'s', 'Levi Strauss', 'Louis Vuitton', 'Lucchese', 'Lucky', 'Lululemon', 'Lush', 'Mac Weldon', 'Madewell', 'Mammut', 'Marc Jacobs',
   'Michael Kors', 'New Balance', 'Nike', 'Oakley', 'OluKai', 'On Running', 'OOFOS', 'Oscar de la Renta', 'Outdoor Voices', 'Panhandle Slim', 'Patagonia', 'Pelagic', 'Peter Millar', 'Polo Ralph Lauren',
-  'Poncho Outdoors', 'Prada', 'Puma', 'Rag & Bone', 'Ray-Ban', 'Reebok', 'Reef', 'Reformation', 'REI Co-op', 'Rhone', 'Saint Laurent', 'Salomon', 'Samsonite', 'Sanuk', 'Spanx', 'Stetson', 'Stuart Weitzman', 'Sweaty Betty',
+  'Poncho Outdoors', 'Prada', 'Puma', 'Rag & Bone', 'Ray-Ban', 'Reebok', 'Reef', 'Reformation', 'REI Co-op', 'Rhone', 'Saint Laurent', 'Salomon', 'Samsonite', 'Sanuk', 'Shade Critters', 'Spanx', 'Stetson', 'Stuart Weitzman', 'Sweaty Betty',
   'Teva', 'The North Face', 'The Row', 'Theory', 'Thom Browne', 'Tiffany & Co.', 'Tom Ford', 'Tommy Bahama', 'Tony Lama',
   'Tory Burch', 'TravisMatthew', 'Trendia', 'Tumi', 'UGG', 'Under Armour', 'Untuckit', 'Vans', 'Vera Wang', 'Vince',
-  'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA'
+  'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
 ];
 
 function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishlist, onRemoveFromWishlist }) {
@@ -1757,6 +1772,16 @@ export default function App() {
                       <option value="price-high">Price: High</option>
                       <option value="brand">Brand A-Z</option>
                     </select>
+                    <button 
+                      onClick={() => {
+                        setShowAddBrand(true);
+                        setActiveTab('brands');
+                      }}
+                      className="bg-neutral-900 text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-sm whitespace-nowrap"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="hidden md:inline">Add Brand</span>
+                    </button>
                   </div>
                 </div>
                 {searchQuery && (
@@ -1830,7 +1855,13 @@ export default function App() {
                 <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
                 <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No brands yet</h3>
                 <p className="text-neutral-500 mb-4">Add brands to collections to start seeing deals!</p>
-                <button onClick={() => setActiveTab('brands')} className="bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition-colors inline-flex items-center gap-2">
+                <button 
+                  onClick={() => {
+                    setShowAddBrand(true);
+                    setActiveTab('brands');
+                  }}
+                  className="bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition-colors inline-flex items-center gap-2"
+                >
                   <Plus className="w-5 h-5" />
                   Add Brands
                 </button>
