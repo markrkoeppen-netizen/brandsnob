@@ -1276,6 +1276,513 @@ function ShareWishlistModal({ onClose, shareRecipient, setShareRecipient, shareM
     </div>
   );
 }
+
+// ── NEW COMPONENTS (Part 4) ────────────────────────────────
+// ============================================================
+// APP-PART-4-SIMPLE-AUTH.jsx
+// Contains:
+//   1. WishlistsManagerModal  (NEW — replaces old WishlistModal)
+//   2. Updated ShareWishlistModal (copy-link + wishlist picker)
+//   3. All modal renders to paste into the return() of App
+//   4. Fixed saveToCloud (was referencing old `wishlist` variable)
+//   5. Sign-in modal render
+// ============================================================
+
+// ─────────────────────────────────────────────────────────────
+// 1. WishlistsManagerModal
+//    Shows all wishlists, lets user pick one to view/manage,
+//    create new ones, delete them, and share them.
+// ─────────────────────────────────────────────────────────────
+function WishlistsManagerModal({
+  wishlists,
+  onClose,
+  onRemoveItem,
+  onDeleteWishlist,
+  onCreateNew,
+  onShare,
+  onAddToBag,
+  shippingProfile,
+}) {
+  const [selectedWishlistId, setSelectedWishlistId] = useState(
+    wishlists.length > 0 ? wishlists[0].id : null
+  );
+  const [view, setView] = useState('list'); // 'list' | 'detail'
+
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  const handleDealClick = (url) => {
+    if (isMobile) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Helper: get size label for a wishlist item based on its category
+  const getSizeLabel = (item) => {
+    if (!shippingProfile) return null;
+    const category = (item.category || '').toLowerCase();
+    const brand = (item.brand || '').toLowerCase();
+
+    // Footwear check
+    const isFootwear =
+      category === 'footwear' ||
+      ['shoe', 'boot', 'sneaker', 'sandal', 'heel', 'loafer'].some(k =>
+        (item.product || '').toLowerCase().includes(k)
+      );
+    if (isFootwear && shippingProfile.shoeSize) {
+      return `Shoe: ${shippingProfile.shoeSize}`;
+    }
+
+    // Dress check
+    if (category === 'dress' || (item.product || '').toLowerCase().includes('dress')) {
+      if (shippingProfile.dressSize) return `Dress: ${shippingProfile.dressSize}`;
+    }
+
+    // Pants check
+    if (['pant', 'jean', 'denim', 'trouser', 'short'].some(k =>
+      (item.product || '').toLowerCase().includes(k)
+    )) {
+      if (shippingProfile.pantsWaist && shippingProfile.pantsInseam) {
+        return `${shippingProfile.pantsWaist}W × ${shippingProfile.pantsInseam}L`;
+      }
+      if (shippingProfile.pantsWaist) return `Waist: ${shippingProfile.pantsWaist}`;
+    }
+
+    // Default: shirt size
+    if (shippingProfile.shirtSize) return `Size: ${shippingProfile.shirtSize}`;
+
+    return null;
+  };
+
+  const selectedWishlist = wishlists.find(w => w.id === selectedWishlistId);
+  const totalItems = wishlists.reduce((sum, w) => sum + w.items.length, 0);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+
+        {/* Header */}
+        <div className="p-6 border-b border-neutral-200">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-2xl font-bold text-neutral-900">
+              {view === 'detail' && selectedWishlist
+                ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setView('list')}
+                      className="text-neutral-400 hover:text-neutral-700 mr-1"
+                    >
+                      ←
+                    </button>
+                    <span>{selectedWishlist.emoji} {selectedWishlist.name}</span>
+                  </div>
+                )
+                : 'My Wishlists'
+              }
+            </h2>
+            <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          {view === 'list' && (
+            <p className="text-sm text-neutral-500">
+              {wishlists.length} wishlist{wishlists.length !== 1 ? 's' : ''} · {totalItems} item{totalItems !== 1 ? 's' : ''}
+            </p>
+          )}
+          {view === 'detail' && selectedWishlist && (
+            <p className="text-sm text-neutral-500">
+              {selectedWishlist.items.length} item{selectedWishlist.items.length !== 1 ? 's' : ''} ·{' '}
+              {selectedWishlist.privacy === 'link-only' ? '🔗 Link Only' : '🔒 Private'}
+            </p>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6">
+
+          {/* ── LIST VIEW ── */}
+          {view === 'list' && (
+            <div className="space-y-3">
+              {wishlists.length === 0 ? (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-500">No wishlists yet</p>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    Create one to start saving deals
+                  </p>
+                </div>
+              ) : (
+                wishlists.map(wishlist => {
+                  const preview = wishlist.items.slice(0, 3);
+                  const totalValue = wishlist.items
+                    .reduce((sum, i) => sum + i.salePrice, 0)
+                    .toFixed(2);
+
+                  return (
+                    <div
+                      key={wishlist.id}
+                      className="border border-neutral-200 rounded-xl p-4 hover:border-neutral-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <button
+                          onClick={() => {
+                            setSelectedWishlistId(wishlist.id);
+                            setView('detail');
+                          }}
+                          className="flex items-center gap-2 text-left"
+                        >
+                          <span className="text-2xl">{wishlist.emoji}</span>
+                          <div>
+                            <p className="font-semibold text-neutral-900">{wishlist.name}</p>
+                            <p className="text-xs text-neutral-500">
+                              {wishlist.items.length} item{wishlist.items.length !== 1 ? 's' : ''}
+                              {wishlist.items.length > 0 && ` · $${totalValue}`}
+                            </p>
+                          </div>
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          {/* Share button */}
+                          <button
+                            onClick={() => onShare(wishlist.id)}
+                            className="p-1.5 text-neutral-400 hover:text-neutral-700 transition-colors"
+                            title="Share wishlist"
+                          >
+                            <Upload className="w-4 h-4" />
+                          </button>
+                          {/* Delete button */}
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Delete "${wishlist.name}"? This can't be undone.`)) {
+                                onDeleteWishlist(wishlist.id);
+                                if (selectedWishlistId === wishlist.id) {
+                                  const remaining = wishlists.filter(w => w.id !== wishlist.id);
+                                  setSelectedWishlistId(remaining.length > 0 ? remaining[0].id : null);
+                                }
+                              }
+                            }}
+                            className="p-1.5 text-neutral-400 hover:text-red-500 transition-colors"
+                            title="Delete wishlist"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Preview images */}
+                      {preview.length > 0 && (
+                        <div className="flex gap-2 mt-3">
+                          {preview.map(item => (
+                            <img
+                              key={item.id}
+                              src={item.image}
+                              alt={item.product}
+                              className="w-14 h-14 object-cover rounded-lg border border-neutral-200 cursor-pointer hover:opacity-80"
+                              onClick={() => handleDealClick(item.link)}
+                            />
+                          ))}
+                          {wishlist.items.length > 3 && (
+                            <div className="w-14 h-14 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs text-neutral-500 font-medium">
+                              +{wishlist.items.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* ── DETAIL VIEW ── */}
+          {view === 'detail' && selectedWishlist && (
+            <div>
+              {selectedWishlist.items.length === 0 ? (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-500">This wishlist is empty</p>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    Click the heart icon on deals to save them here
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {selectedWishlist.items.map(item => {
+                    const sizeLabel = getSizeLabel(item);
+                    return (
+                      <div key={item.id} className="flex gap-4 bg-neutral-50 rounded-xl p-4">
+                        <img
+                          src={item.image}
+                          alt={item.product}
+                          className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 flex-shrink-0"
+                          onClick={() => handleDealClick(item.link)}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-neutral-500 mb-0.5">{item.brand}</p>
+                          <h3
+                            className="font-medium text-neutral-900 line-clamp-2 text-sm mb-1 cursor-pointer hover:text-neutral-600"
+                            onClick={() => handleDealClick(item.link)}
+                          >
+                            {item.product}
+                          </h3>
+
+                          {/* Size label */}
+                          {sizeLabel && (
+                            <span className="inline-block text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full mb-1.5">
+                              Your {sizeLabel}
+                            </span>
+                          )}
+
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-semibold text-neutral-900">${item.salePrice}</span>
+                            {item.originalPrice > item.salePrice && (
+                              <>
+                                <span className="text-xs text-neutral-400 line-through">
+                                  ${item.originalPrice}
+                                </span>
+                                <span className="text-xs text-green-600 font-medium">
+                                  {item.discount} off
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => onAddToBag(item)}
+                              className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg hover:bg-neutral-800"
+                            >
+                              Add to Bag
+                            </button>
+                            <button
+                              onClick={() => handleDealClick(item.link)}
+                              className="text-xs bg-neutral-200 text-neutral-700 px-3 py-1 rounded-lg hover:bg-neutral-300"
+                            >
+                              View Deal
+                            </button>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => onRemoveItem(selectedWishlist.id, item.id)}
+                          className="text-red-400 hover:text-red-600 flex-shrink-0"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-neutral-200">
+          {view === 'detail' && selectedWishlist && selectedWishlist.items.length > 0 && (
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm text-neutral-600">Total Value</p>
+                <p className="text-xl font-bold text-neutral-900">
+                  ${selectedWishlist.items.reduce((s, i) => s + i.salePrice, 0).toFixed(2)}
+                </p>
+              </div>
+              <button
+                onClick={() => onShare(selectedWishlist.id)}
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+              >
+                <Upload className="w-4 h-4" />
+                Share
+              </button>
+            </div>
+          )}
+          <button
+            onClick={onCreateNew}
+            className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-neutral-300 rounded-xl text-neutral-600 hover:border-neutral-400 hover:text-neutral-900 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Create New Wishlist
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// 2. Updated ShareWishlistModal
+//    Adds: Copy Link button, wishlist selector dropdown
+// ─────────────────────────────────────────────────────────────
+function ShareWishlistModal({
+  onClose,
+  wishlists,
+  shareWishlistId,
+  setShareWishlistId,
+  shareRecipient,
+  setShareRecipient,
+  shareMessage,
+  setShareMessage,
+  onShare,
+  shareSending,
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const selectedWishlist = wishlists.find(w => w.id === shareWishlistId) || wishlists[0];
+  const shareLink = selectedWishlist
+    ? `${window.location.origin}/wishlist/${selectedWishlist.shareId}`
+    : '';
+
+  const handleCopyLink = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for browsers that block clipboard
+      const ta = document.createElement('textarea');
+      ta.value = shareLink;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Share Wishlist</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="space-y-4 mb-6">
+
+          {/* Wishlist picker (only shown when multiple wishlists exist) */}
+          {wishlists.length > 1 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Which Wishlist?
+              </label>
+              <select
+                value={shareWishlistId || ''}
+                onChange={(e) => setShareWishlistId(e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+              >
+                {wishlists.map(w => (
+                  <option key={w.id} value={w.id}>
+                    {w.emoji} {w.name} ({w.items.length} items)
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Privacy notice */}
+          {selectedWishlist && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${
+              selectedWishlist.privacy === 'private'
+                ? 'bg-amber-50 border border-amber-200 text-amber-800'
+                : 'bg-blue-50 border border-blue-200 text-blue-800'
+            }`}>
+              <span className="text-base">{selectedWishlist.privacy === 'private' ? '🔒' : '🔗'}</span>
+              <p>
+                {selectedWishlist.privacy === 'private'
+                  ? 'This wishlist is set to Private. Only you can view it — sharing the link won\'t work until you change the privacy setting.'
+                  : 'This wishlist is Link Only — anyone with the link can view it.'}
+              </p>
+            </div>
+          )}
+
+          {/* Copy link */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Share Link
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={shareLink}
+                readOnly
+                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-xs bg-neutral-50 text-neutral-600 font-mono overflow-hidden"
+              />
+              <button
+                onClick={handleCopyLink}
+                disabled={selectedWishlist?.privacy === 'private'}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  copied
+                    ? 'bg-green-600 text-white'
+                    : 'bg-neutral-900 text-white hover:bg-neutral-800'
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                {copied ? (
+                  <><Check className="w-4 h-4" /> Copied!</>
+                ) : (
+                  'Copy'
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Email share */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Or Share via Email
+            </label>
+            <input
+              type="email"
+              value={shareRecipient}
+              onChange={(e) => setShareRecipient(e.target.value)}
+              placeholder="friend@example.com"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Message (optional)
+            </label>
+            <textarea
+              value={shareMessage}
+              onChange={(e) => setShareMessage(e.target.value)}
+              placeholder="Add a personal message…"
+              rows="3"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onShare}
+            disabled={!shareRecipient.trim() || shareSending}
+            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+          >
+            {shareSending ? 'Sending…' : 'Send Email'}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ─────────────────────────────────────────────────────────────
+
 export default function App() {
   // Helper function to generate unique share IDs
   const generateShareId = () => {
@@ -1689,7 +2196,7 @@ export default function App() {
       return;
     }
     
-    if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0 && wishlist.length === 0) {
+    if (myBrands.length === 0 && shoppingBag.length === 0 && selectedGenders.length === 0 && wishlists.length === 0) {
       return;
     }
     
@@ -1699,7 +2206,8 @@ export default function App() {
         brands: myBrands,
         genderPreferences: selectedGenders,
         shoppingBag: shoppingBag,
-        wishlist: wishlist,
+        wishlists: wishlists,
+        activeWishlistId: activeWishlistId,
         shippingProfile: shippingProfile,
         updatedAt: new Date().toISOString()
       }, { merge: true });
@@ -2267,6 +2775,7 @@ export default function App() {
       : 0,
     hotBrand: hotBrand
   };
+
   // ============================================================
   // APP-PART-3-SIMPLE-AUTH.jsx
   // Contains: Header, Tab Navigation, Deals Tab, Brands Tab,
@@ -2986,562 +3495,9 @@ export default function App() {
           </div>
         )}
       </main>
-    </div>
-  );
-// ============================================================
-// APP-PART-4-SIMPLE-AUTH.jsx
-// Contains:
-//   1. WishlistsManagerModal  (NEW — replaces old WishlistModal)
-//   2. Updated ShareWishlistModal (copy-link + wishlist picker)
-//   3. All modal renders to paste into the return() of App
-//   4. Fixed saveToCloud (was referencing old `wishlist` variable)
-//   5. Sign-in modal render
-// ============================================================
-
-// ─────────────────────────────────────────────────────────────
-// 1. WishlistsManagerModal
-//    Shows all wishlists, lets user pick one to view/manage,
-//    create new ones, delete them, and share them.
-// ─────────────────────────────────────────────────────────────
-function WishlistsManagerModal({
-  wishlists,
-  onClose,
-  onRemoveItem,
-  onDeleteWishlist,
-  onCreateNew,
-  onShare,
-  onAddToBag,
-  shippingProfile,
-}) {
-  const [selectedWishlistId, setSelectedWishlistId] = useState(
-    wishlists.length > 0 ? wishlists[0].id : null
-  );
-  const [view, setView] = useState('list'); // 'list' | 'detail'
-
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-  const handleDealClick = (url) => {
-    if (isMobile) {
-      window.location.href = url;
-    } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
-  };
-
-  // Helper: get size label for a wishlist item based on its category
-  const getSizeLabel = (item) => {
-    if (!shippingProfile) return null;
-    const category = (item.category || '').toLowerCase();
-    const brand = (item.brand || '').toLowerCase();
-
-    // Footwear check
-    const isFootwear =
-      category === 'footwear' ||
-      ['shoe', 'boot', 'sneaker', 'sandal', 'heel', 'loafer'].some(k =>
-        (item.product || '').toLowerCase().includes(k)
-      );
-    if (isFootwear && shippingProfile.shoeSize) {
-      return `Shoe: ${shippingProfile.shoeSize}`;
-    }
-
-    // Dress check
-    if (category === 'dress' || (item.product || '').toLowerCase().includes('dress')) {
-      if (shippingProfile.dressSize) return `Dress: ${shippingProfile.dressSize}`;
-    }
-
-    // Pants check
-    if (['pant', 'jean', 'denim', 'trouser', 'short'].some(k =>
-      (item.product || '').toLowerCase().includes(k)
-    )) {
-      if (shippingProfile.pantsWaist && shippingProfile.pantsInseam) {
-        return `${shippingProfile.pantsWaist}W × ${shippingProfile.pantsInseam}L`;
-      }
-      if (shippingProfile.pantsWaist) return `Waist: ${shippingProfile.pantsWaist}`;
-    }
-
-    // Default: shirt size
-    if (shippingProfile.shirtSize) return `Size: ${shippingProfile.shirtSize}`;
-
-    return null;
-  };
-
-  const selectedWishlist = wishlists.find(w => w.id === selectedWishlistId);
-  const totalItems = wishlists.reduce((sum, w) => sum + w.items.length, 0);
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
-
-        {/* Header */}
-        <div className="p-6 border-b border-neutral-200">
-          <div className="flex items-center justify-between mb-1">
-            <h2 className="text-2xl font-bold text-neutral-900">
-              {view === 'detail' && selectedWishlist
-                ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setView('list')}
-                      className="text-neutral-400 hover:text-neutral-700 mr-1"
-                    >
-                      ←
-                    </button>
-                    <span>{selectedWishlist.emoji} {selectedWishlist.name}</span>
-                  </div>
-                )
-                : 'My Wishlists'
-              }
-            </h2>
-            <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-          {view === 'list' && (
-            <p className="text-sm text-neutral-500">
-              {wishlists.length} wishlist{wishlists.length !== 1 ? 's' : ''} · {totalItems} item{totalItems !== 1 ? 's' : ''}
-            </p>
-          )}
-          {view === 'detail' && selectedWishlist && (
-            <p className="text-sm text-neutral-500">
-              {selectedWishlist.items.length} item{selectedWishlist.items.length !== 1 ? 's' : ''} ·{' '}
-              {selectedWishlist.privacy === 'link-only' ? '🔗 Link Only' : '🔒 Private'}
-            </p>
-          )}
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-6">
-
-          {/* ── LIST VIEW ── */}
-          {view === 'list' && (
-            <div className="space-y-3">
-              {wishlists.length === 0 ? (
-                <div className="text-center py-12">
-                  <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                  <p className="text-neutral-500">No wishlists yet</p>
-                  <p className="text-sm text-neutral-400 mt-1">
-                    Create one to start saving deals
-                  </p>
-                </div>
-              ) : (
-                wishlists.map(wishlist => {
-                  const preview = wishlist.items.slice(0, 3);
-                  const totalValue = wishlist.items
-                    .reduce((sum, i) => sum + i.salePrice, 0)
-                    .toFixed(2);
-
-                  return (
-                    <div
-                      key={wishlist.id}
-                      className="border border-neutral-200 rounded-xl p-4 hover:border-neutral-300 transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-2">
-                        <button
-                          onClick={() => {
-                            setSelectedWishlistId(wishlist.id);
-                            setView('detail');
-                          }}
-                          className="flex items-center gap-2 text-left"
-                        >
-                          <span className="text-2xl">{wishlist.emoji}</span>
-                          <div>
-                            <p className="font-semibold text-neutral-900">{wishlist.name}</p>
-                            <p className="text-xs text-neutral-500">
-                              {wishlist.items.length} item{wishlist.items.length !== 1 ? 's' : ''}
-                              {wishlist.items.length > 0 && ` · $${totalValue}`}
-                            </p>
-                          </div>
-                        </button>
-
-                        <div className="flex items-center gap-2">
-                          {/* Share button */}
-                          <button
-                            onClick={() => onShare(wishlist.id)}
-                            className="p-1.5 text-neutral-400 hover:text-neutral-700 transition-colors"
-                            title="Share wishlist"
-                          >
-                            <Upload className="w-4 h-4" />
-                          </button>
-                          {/* Delete button */}
-                          <button
-                            onClick={() => {
-                              if (window.confirm(`Delete "${wishlist.name}"? This can't be undone.`)) {
-                                onDeleteWishlist(wishlist.id);
-                                if (selectedWishlistId === wishlist.id) {
-                                  const remaining = wishlists.filter(w => w.id !== wishlist.id);
-                                  setSelectedWishlistId(remaining.length > 0 ? remaining[0].id : null);
-                                }
-                              }
-                            }}
-                            className="p-1.5 text-neutral-400 hover:text-red-500 transition-colors"
-                            title="Delete wishlist"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Preview images */}
-                      {preview.length > 0 && (
-                        <div className="flex gap-2 mt-3">
-                          {preview.map(item => (
-                            <img
-                              key={item.id}
-                              src={item.image}
-                              alt={item.product}
-                              className="w-14 h-14 object-cover rounded-lg border border-neutral-200 cursor-pointer hover:opacity-80"
-                              onClick={() => handleDealClick(item.link)}
-                            />
-                          ))}
-                          {wishlist.items.length > 3 && (
-                            <div className="w-14 h-14 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs text-neutral-500 font-medium">
-                              +{wishlist.items.length - 3}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          )}
-
-          {/* ── DETAIL VIEW ── */}
-          {view === 'detail' && selectedWishlist && (
-            <div>
-              {selectedWishlist.items.length === 0 ? (
-                <div className="text-center py-12">
-                  <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                  <p className="text-neutral-500">This wishlist is empty</p>
-                  <p className="text-sm text-neutral-400 mt-1">
-                    Click the heart icon on deals to save them here
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {selectedWishlist.items.map(item => {
-                    const sizeLabel = getSizeLabel(item);
-                    return (
-                      <div key={item.id} className="flex gap-4 bg-neutral-50 rounded-xl p-4">
-                        <img
-                          src={item.image}
-                          alt={item.product}
-                          className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 flex-shrink-0"
-                          onClick={() => handleDealClick(item.link)}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-neutral-500 mb-0.5">{item.brand}</p>
-                          <h3
-                            className="font-medium text-neutral-900 line-clamp-2 text-sm mb-1 cursor-pointer hover:text-neutral-600"
-                            onClick={() => handleDealClick(item.link)}
-                          >
-                            {item.product}
-                          </h3>
-
-                          {/* Size label */}
-                          {sizeLabel && (
-                            <span className="inline-block text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full mb-1.5">
-                              Your {sizeLabel}
-                            </span>
-                          )}
-
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold text-neutral-900">${item.salePrice}</span>
-                            {item.originalPrice > item.salePrice && (
-                              <>
-                                <span className="text-xs text-neutral-400 line-through">
-                                  ${item.originalPrice}
-                                </span>
-                                <span className="text-xs text-green-600 font-medium">
-                                  {item.discount} off
-                                </span>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => onAddToBag(item)}
-                              className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg hover:bg-neutral-800"
-                            >
-                              Add to Bag
-                            </button>
-                            <button
-                              onClick={() => handleDealClick(item.link)}
-                              className="text-xs bg-neutral-200 text-neutral-700 px-3 py-1 rounded-lg hover:bg-neutral-300"
-                            >
-                              View Deal
-                            </button>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => onRemoveItem(selectedWishlist.id, item.id)}
-                          className="text-red-400 hover:text-red-600 flex-shrink-0"
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-6 border-t border-neutral-200">
-          {view === 'detail' && selectedWishlist && selectedWishlist.items.length > 0 && (
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <p className="text-sm text-neutral-600">Total Value</p>
-                <p className="text-xl font-bold text-neutral-900">
-                  ${selectedWishlist.items.reduce((s, i) => s + i.salePrice, 0).toFixed(2)}
-                </p>
-              </div>
-              <button
-                onClick={() => onShare(selectedWishlist.id)}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
-              >
-                <Upload className="w-4 h-4" />
-                Share
-              </button>
-            </div>
-          )}
-          <button
-            onClick={onCreateNew}
-            className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-neutral-300 rounded-xl text-neutral-600 hover:border-neutral-400 hover:text-neutral-900 transition-colors text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" />
-            Create New Wishlist
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// 2. Updated ShareWishlistModal
-//    Adds: Copy Link button, wishlist selector dropdown
-// ─────────────────────────────────────────────────────────────
-function ShareWishlistModal({
-  onClose,
-  wishlists,
-  shareWishlistId,
-  setShareWishlistId,
-  shareRecipient,
-  setShareRecipient,
-  shareMessage,
-  setShareMessage,
-  onShare,
-  shareSending,
-}) {
-  const [copied, setCopied] = useState(false);
-
-  const selectedWishlist = wishlists.find(w => w.id === shareWishlistId) || wishlists[0];
-  const shareLink = selectedWishlist
-    ? `${window.location.origin}/wishlist/${selectedWishlist.shareId}`
-    : '';
-
-  const handleCopyLink = async () => {
-    if (!shareLink) return;
-    try {
-      await navigator.clipboard.writeText(shareLink);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Fallback for browsers that block clipboard
-      const ta = document.createElement('textarea');
-      ta.value = shareLink;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-neutral-900">Share Wishlist</h3>
-          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="space-y-4 mb-6">
-
-          {/* Wishlist picker (only shown when multiple wishlists exist) */}
-          {wishlists.length > 1 && (
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-2">
-                Which Wishlist?
-              </label>
-              <select
-                value={shareWishlistId || ''}
-                onChange={(e) => setShareWishlistId(e.target.value)}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
-              >
-                {wishlists.map(w => (
-                  <option key={w.id} value={w.id}>
-                    {w.emoji} {w.name} ({w.items.length} items)
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {/* Privacy notice */}
-          {selectedWishlist && (
-            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${
-              selectedWishlist.privacy === 'private'
-                ? 'bg-amber-50 border border-amber-200 text-amber-800'
-                : 'bg-blue-50 border border-blue-200 text-blue-800'
-            }`}>
-              <span className="text-base">{selectedWishlist.privacy === 'private' ? '🔒' : '🔗'}</span>
-              <p>
-                {selectedWishlist.privacy === 'private'
-                  ? 'This wishlist is set to Private. Only you can view it — sharing the link won\'t work until you change the privacy setting.'
-                  : 'This wishlist is Link Only — anyone with the link can view it.'}
-              </p>
-            </div>
-          )}
-
-          {/* Copy link */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Share Link
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={shareLink}
-                readOnly
-                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-xs bg-neutral-50 text-neutral-600 font-mono overflow-hidden"
-              />
-              <button
-                onClick={handleCopyLink}
-                disabled={selectedWishlist?.privacy === 'private'}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  copied
-                    ? 'bg-green-600 text-white'
-                    : 'bg-neutral-900 text-white hover:bg-neutral-800'
-                } disabled:opacity-40 disabled:cursor-not-allowed`}
-              >
-                {copied ? (
-                  <><Check className="w-4 h-4" /> Copied!</>
-                ) : (
-                  'Copy'
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Email share */}
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Or Share via Email
-            </label>
-            <input
-              type="email"
-              value={shareRecipient}
-              onChange={(e) => setShareRecipient(e.target.value)}
-              placeholder="friend@example.com"
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Message (optional)
-            </label>
-            <textarea
-              value={shareMessage}
-              onChange={(e) => setShareMessage(e.target.value)}
-              placeholder="Add a personal message…"
-              rows="3"
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={onShare}
-            disabled={!shareRecipient.trim() || shareSending}
-            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
-          >
-            {shareSending ? 'Sending…' : 'Send Email'}
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
-          >
-            Close
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-// ─────────────────────────────────────────────────────────────
-// 3. FIXED saveToCloud
-//    Paste this over the existing saveToCloud in Part 2.
-//    Bug: was referencing `wishlist` (old single-list variable)
-//    instead of `wishlists` (new array).
-// ─────────────────────────────────────────────────────────────
-/*
-
-  const saveToCloud = async () => {
-    if (!user) return;
-
-    if (
-      myBrands.length === 0 &&
-      shoppingBag.length === 0 &&
-      selectedGenders.length === 0 &&
-      wishlists.length === 0          // ← FIXED: was `wishlist.length`
-    ) return;
-
-    try {
-      setSyncStatus('syncing');
-      await setDoc(doc(db, 'users', user.email), {
-        brands: myBrands,
-        genderPreferences: selectedGenders,
-        shoppingBag: shoppingBag,
-        wishlists: wishlists,           // ← FIXED: was `wishlist`
-        activeWishlistId: activeWishlistId,
-        shippingProfile: shippingProfile,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-      setSyncStatus('synced');
-      setTimeout(() => setSyncStatus('idle'), 2000);
-    } catch (error) {
-      console.error('saveToCloud error:', error);
-      setSyncStatus('error');
-    }
-  };
-
-*/
-
-
-// ─────────────────────────────────────────────────────────────
-// 4. MODAL RENDERS
-//    Paste all of these inside the return() of App, just before
-//    the closing </div> tag of the outermost wrapper.
-//    They replace / supplement the existing modal renders.
-// ─────────────────────────────────────────────────────────────
-
-/*
 
       {/* ── Sign-in modal ──────────────────────────────────── */}
-/*      {showSignIn && (
+      {showSignIn && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6">
             <div className="flex items-center justify-between mb-6">
@@ -3583,7 +3539,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Shopping bag modal ─────────────────────────────── */}
-/*      {showBagModal && (
+      {showBagModal && (
         <ShoppingBagModal
           bag={shoppingBag}
           onClose={() => setShowBagModal(false)}
@@ -3595,7 +3551,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Wishlists manager modal ────────────────────────── */}
-/*      {showWishlistModal && (
+      {showWishlistModal && (
         <WishlistsManagerModal
           wishlists={wishlists}
           onClose={() => setShowWishlistModal(false)}
@@ -3616,7 +3572,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Create wishlist modal ──────────────────────────── */}
-/*      {showCreateWishlistModal && (
+      {showCreateWishlistModal && (
         <CreateWishlistModal
           onClose={() => setShowCreateWishlistModal(false)}
           onCreate={createWishlist}
@@ -3624,7 +3580,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Add-to-wishlist modal (multi-wishlist picker) ──── */}
-/*      {showAddToWishlistModal && (
+      {showAddToWishlistModal && (
         <AddToWishlistModal
           onClose={() => {
             setShowAddToWishlistModal(false);
@@ -3641,7 +3597,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Share wishlist modal ───────────────────────────── */}
-/*      {showShareModal && (
+      {showShareModal && (
         <ShareWishlistModal
           onClose={() => {
             setShowShareModal(false);
@@ -3661,7 +3617,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Recommend brand modal ──────────────────────────── */}
-/*      {showRecommendModal && (
+      {showRecommendModal && (
         <RecommendBrandModal
           onClose={() => {
             setShowRecommendModal(false);
@@ -3680,7 +3636,7 @@ function ShareWishlistModal({
       )}
 
       {/* ── Name collection prompt ─────────────────────────── */}
-/*      {showNameCollectionPrompt && (
+      {showNameCollectionPrompt && (
         <NameCollectionModal
           onClose={() => setShowNameCollectionPrompt(false)}
           onRename={(name) => {
@@ -3691,4 +3647,6 @@ function ShareWishlistModal({
         />
       )}
 
-*/
+    </div>
+  );
+}
