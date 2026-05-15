@@ -329,6 +329,152 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
 ];
 
+function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, setBrandSearchQuery, brandSuggestions, showSuggestions, setShowSuggestions }) {
+  const topCollections = [
+    { id: 3, name: 'Athletic & Athleisure', emoji: '⚡' },
+    { id: 1, name: 'Luxury Fashion Icons', emoji: '👑' },
+    { id: 7, name: 'Outdoor & Adventure', emoji: '🏔️' },
+    { id: 4, name: 'Contemporary American', emoji: '🇺🇸' },
+    { id: 14, name: 'Contemporary Chic', emoji: '✨' }
+  ];
+
+  const handleBrandSelect = (brand) => {
+    setBrandSearchQuery(brand);
+    setShowSuggestions(false);
+    onAddBrand(brand);
+  };
+
+  const handleRequestBrand = () => {
+    onRequestBrand(brandSearchQuery);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gradient-to-br from-neutral-50 to-neutral-100 z-40 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="max-w-2xl w-full py-8">
+        <div className="text-center mb-8">
+          <ShoppingBag className="w-20 h-20 text-neutral-900 mx-auto mb-6" />
+          <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-3">
+            Welcome to BrandSnobs
+          </h1>
+          <p className="text-xl md:text-2xl text-neutral-600 font-light tracking-wide">
+            YOU LIKE WHAT YOU LIKE
+          </p>
+          <p className="text-neutral-500 mt-4 max-w-md mx-auto">
+            Track deals from your favorite brands. We'll show you sales from across the web.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 p-6 md:p-8 mb-8">
+          <h2 className="text-xl font-semibold text-neutral-900 mb-4 text-center">
+            Add Your First Brand
+          </h2>
+          
+          <div className="relative">
+            <div className="relative">
+              <Search className="absolute left-4 top-3.5 w-5 h-5 text-neutral-400" />
+              <input
+                type="text"
+                value={brandSearchQuery}
+                onChange={(e) => {
+                  setBrandSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                placeholder="Search for a brand... (e.g., Nike, Gucci, Patagonia)"
+                className="w-full pl-12 pr-4 py-3 border-2 border-neutral-300 rounded-xl text-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                autoFocus
+                onFocus={() => brandSearchQuery && setShowSuggestions(brandSuggestions.length > 0)}
+              />
+            </div>
+
+            {showSuggestions && brandSuggestions.length > 0 && (
+              <div className="absolute z-10 w-full mt-2 bg-white border-2 border-neutral-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
+                {brandSuggestions.map((brand, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleBrandSelect(brand)}
+                    className="w-full text-left px-4 py-3 hover:bg-neutral-100 transition-colors border-b border-neutral-100 last:border-b-0 font-medium text-neutral-900"
+                  >
+                    {brand}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {brandSearchQuery && brandSuggestions.length === 0 && showSuggestions && (
+              <div className="absolute z-10 w-full mt-2 bg-white border-2 border-neutral-300 rounded-xl shadow-lg p-6">
+                <p className="text-neutral-600 mb-4 text-center">
+                  Can't find <strong>"{brandSearchQuery}"</strong>?
+                </p>
+                <button
+                  onClick={handleRequestBrand}
+                  className="w-full bg-neutral-900 text-white py-3 px-6 rounded-xl hover:bg-neutral-800 transition-colors font-semibold flex items-center justify-center gap-2"
+                >
+                  <TrendingUp className="w-5 h-5" />
+                  Request This Brand
+                </button>
+                <p className="text-xs text-neutral-500 text-center mt-3">
+                  ⚡ We'll add it in less than 24 hours and notify you!
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="text-center">
+          <p className="text-neutral-600 mb-6 font-medium">Or start with a collection:</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {topCollections.map((collection) => (
+              <button
+                key={collection.id}
+                onClick={() => onLoadCollection(collection.name)}
+                className="bg-white hover:bg-neutral-900 hover:text-white border-2 border-neutral-200 hover:border-neutral-900 text-neutral-900 py-4 px-6 rounded-xl transition-all font-semibold text-sm flex items-center justify-center gap-2"
+              >
+                <span className="text-2xl">{collection.emoji}</span>
+                <span>{collection.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FetchingDealsAnimation() {
+  return (
+    <div className="fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-4">
+      <div className="text-center">
+        <div className="mb-8 relative">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-32 h-32 border-4 border-neutral-200 rounded-full"></div>
+          </div>
+          <div className="absolute inset-0 flex items-center justify-center animate-spin">
+            <div className="w-32 h-32 border-4 border-neutral-900 rounded-full border-t-transparent"></div>
+          </div>
+          <div className="relative z-10 pt-8">
+            <div className="animate-bounce">
+              <ShoppingBag className="w-16 h-16 text-neutral-900 mx-auto" />
+            </div>
+          </div>
+        </div>
+        
+        <h2 className="font-display text-3xl font-bold text-neutral-900 mb-3">
+          Fetching Your Deals...
+        </h2>
+        <p className="text-neutral-600 text-lg mb-6">
+          Strutting down the runway of savings 💃
+        </p>
+        
+        <div className="flex items-center justify-center gap-2 text-neutral-400">
+          <div className="w-2 h-2 bg-neutral-900 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
+          <div className="w-2 h-2 bg-neutral-900 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-2 h-2 bg-neutral-900 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishlist, onRemoveFromWishlist }) {
   const [isHovered, setIsHovered] = useState(false);
   const [addedToBag, setAddedToBag] = useState(false);
@@ -916,6 +1062,7 @@ export default function App() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
+  const [fetchingDeals, setFetchingDeals] = useState(false);
   
   // Wishlist states
   const [wishlist, setWishlist] = useState(() => {
@@ -1249,26 +1396,44 @@ export default function App() {
     }
   };
 
-  const addBrand = () => {
-    if (!newBrandName.trim()) return;
+  const addBrand = (brandNameOverride = null) => {
+    const brandName = brandNameOverride || newBrandName.trim();
+    if (!brandName) return;
     
     const collection = showNewCollection 
       ? newCollectionName.trim() 
       : newBrandCollection;
     
-    if (!collection) return;
+    if (!collection && !brandNameOverride) return;
+    
+    const isFirstBrand = myBrands.length === 0;
     
     setMyBrands([...myBrands, {
       id: Date.now(),
-      name: newBrandName.trim(),
-      collection: collection
+      name: brandName,
+      collection: collection || 'Uncategorized'
     }]);
+    
     setNewBrandName('');
     setNewBrandCollection('');
     setNewCollectionName('');
     setShowNewCollection(false);
     setShowAddBrand(false);
     setShowSuggestions(false);
+    
+    // Show fetching animation for first brand
+    if (isFirstBrand) {
+      setFetchingDeals(true);
+      setTimeout(() => {
+        setFetchingDeals(false);
+        setActiveTab('deals');
+      }, 2500);
+    }
+  };
+
+  const handleOnboardingBrandRequest = (brandName) => {
+    setRecommendBrand(brandName);
+    setShowRecommendModal(true);
   };
 
   const userCollections = [...new Set(myBrands.map(b => b.collection).filter(Boolean))];
@@ -1495,7 +1660,16 @@ export default function App() {
     setMyBrands(myBrands.filter(b => b.id !== id));
   };
 
-  const loadCollection = (collection) => {
+  const loadCollection = (collectionInput) => {
+    // Handle both object (from recommendations tab) and string (from onboarding)
+    const collection = typeof collectionInput === 'string' 
+      ? BRAND_COLLECTIONS.find(c => c.name === collectionInput)
+      : collectionInput;
+    
+    if (!collection) return;
+    
+    const isFirstBrands = myBrands.length === 0;
+    
     const newBrands = collection.brands.filter(
       collBrand => !myBrands.some(myBrand => myBrand.name === collBrand.name)
     ).map(brand => ({
@@ -1503,8 +1677,19 @@ export default function App() {
       name: brand.name,
       collection: collection.name
     }));
+    
     setMyBrands([...myBrands, ...newBrands]);
-    setActiveTab('brands');
+    
+    // Show fetching animation if these are first brands
+    if (isFirstBrands) {
+      setFetchingDeals(true);
+      setTimeout(() => {
+        setFetchingDeals(false);
+        setActiveTab('deals');
+      }, 2500);
+    } else {
+      setActiveTab('brands');
+    }
   };
 
   const filteredDeals = React.useMemo(() => {
@@ -1851,21 +2036,16 @@ export default function App() {
             )}
 
             {!dealsLoading && myBrands.length === 0 && (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
-                <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No brands yet</h3>
-                <p className="text-neutral-500 mb-4">Add brands to collections to start seeing deals!</p>
-                <button 
-                  onClick={() => {
-                    setShowAddBrand(true);
-                    setActiveTab('brands');
-                  }}
-                  className="bg-neutral-900 text-white px-6 py-3 rounded-lg hover:bg-neutral-800 transition-colors inline-flex items-center gap-2"
-                >
-                  <Plus className="w-5 h-5" />
-                  Add Brands
-                </button>
-              </div>
+              <OnboardingScreen
+                onAddBrand={addBrand}
+                onLoadCollection={loadCollection}
+                onRequestBrand={handleOnboardingBrandRequest}
+                brandSearchQuery={newBrandName}
+                setBrandSearchQuery={setNewBrandName}
+                brandSuggestions={brandSuggestions}
+                showSuggestions={showSuggestions}
+                setShowSuggestions={setShowSuggestions}
+              />
             )}
 
             {!dealsLoading && !dealsError && myBrands.length > 0 && (
@@ -2432,6 +2612,8 @@ export default function App() {
           </div>
         )}
       </div>
+
+      {fetchingDeals && <FetchingDealsAnimation />}
 
       {showBagModal && (
         <ShoppingBagModal
