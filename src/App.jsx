@@ -2021,14 +2021,79 @@ export default function App() {
             {myBrands.length > 0 && (
               <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-neutral-200 p-3 md:p-4 mb-4 md:mb-6">
                 <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+                  {/* Add Brand Search */}
+                  <div className="flex-1 relative">
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">Add Brand</label>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-2.5 w-4 h-4 md:w-5 md:h-5 text-neutral-400" />
+                      <input
+                        type="text"
+                        value={newBrandName}
+                        onChange={(e) => handleBrandInputChange(e.target.value)}
+                        placeholder="Search to add brand..."
+                        className="w-full pl-9 md:pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm md:text-base"
+                        onFocus={() => newBrandName && setShowSuggestions(true)}
+                      />
+                      {newBrandName && (
+                        <button onClick={() => { setNewBrandName(''); setShowSuggestions(false); }} className="absolute right-3 top-2.5 text-neutral-400">
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Brand suggestions dropdown */}
+                    {showSuggestions && brandSuggestions.length > 0 && (
+                      <div className="absolute z-20 w-full mt-1 bg-white border-2 border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        {brandSuggestions.map((brand, index) => (
+                          <button
+                            key={index}
+                            onClick={() => {
+                              selectBrandSuggestion(brand);
+                              addBrand(brand);
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-neutral-100 transition-colors border-b border-neutral-100 last:border-b-0 font-medium text-neutral-900"
+                          >
+                            {brand}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Request This Brand prompt */}
+                    {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
+                      <div className="absolute z-20 w-full mt-1 bg-white border-2 border-neutral-300 rounded-lg shadow-lg p-4">
+                        <p className="text-neutral-600 text-sm mb-3">
+                          Can't find <strong>"{newBrandName}"</strong>?
+                        </p>
+                        <button
+                          onClick={() => {
+                            setRecommendBrand(newBrandName);
+                            setShowRecommendModal(true);
+                            setNewBrandName('');
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                          Request This Brand
+                        </button>
+                        <p className="text-xs text-neutral-500 text-center mt-2">
+                          ⚡ We'll add it in less than 24 hours!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Search Products */}
                   <div className="flex-1">
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">Search Products</label>
                     <div className="relative">
                       <Search className="absolute left-3 top-2.5 w-4 h-4 md:w-5 md:h-5 text-neutral-400" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search products or brands..."
+                        placeholder="Search your deals..."
                         className="w-full pl-9 md:pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm md:text-base"
                       />
                       {searchQuery && (
@@ -2038,6 +2103,8 @@ export default function App() {
                       )}
                     </div>
                   </div>
+                  
+                  {/* Filters */}
                   <div className="flex gap-2 md:gap-3">
                     <select value={dealFilter} onChange={(e) => setDealFilter(e.target.value)} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none">
                       <option value="all">All Deals</option>
@@ -2050,16 +2117,6 @@ export default function App() {
                       <option value="price-high">Price: High</option>
                       <option value="brand">Brand A-Z</option>
                     </select>
-                    <button 
-                      onClick={() => {
-                        setShowAddBrand(true);
-                        setActiveTab('brands');
-                      }}
-                      className="bg-neutral-900 text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-sm whitespace-nowrap"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span className="hidden md:inline">Add Brand</span>
-                    </button>
                   </div>
                 </div>
                 {searchQuery && (
