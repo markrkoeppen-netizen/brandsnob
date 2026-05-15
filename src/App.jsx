@@ -1218,64 +1218,6 @@ function WishlistModal({ wishlist, onClose, onRemove, onShare, onAddToBag }) {
   );
 }
 
-function ShareWishlistModal({ onClose, shareRecipient, setShareRecipient, shareMessage, setShareMessage, onShare, shareSending }) {
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold text-neutral-900">Share Your Wishlist</h3>
-          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <div className="space-y-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Email Address
-            </label>
-            <input
-              type="email"
-              value={shareRecipient}
-              onChange={(e) => setShareRecipient(e.target.value)}
-              placeholder="friend@example.com"
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-neutral-700 mb-2">
-              Message (optional)
-            </label>
-            <textarea
-              value={shareMessage}
-              onChange={(e) => setShareMessage(e.target.value)}
-              placeholder="Add a personal message..."
-              rows="3"
-              className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <button
-            onClick={onShare}
-            disabled={!shareRecipient.trim() || shareSending}
-            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {shareSending ? 'Sending...' : 'Share via Email'}
-          </button>
-          <button
-            onClick={onClose}
-            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── NEW COMPONENTS (Part 4) ────────────────────────────────
 // ============================================================
