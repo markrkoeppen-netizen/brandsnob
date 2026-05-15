@@ -330,18 +330,22 @@ const ALL_AVAILABLE_BRANDS = [
 ];
 
 function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions }) {
-  const topCollections = [
-    { id: 3, name: 'Athletic & Athleisure', emoji: '⚡' },
-    { id: 1, name: 'Luxury Fashion Icons', emoji: '👑' },
-    { id: 7, name: 'Outdoor & Adventure', emoji: '🏔️' },
-    { id: 4, name: 'Contemporary American', emoji: '🇺🇸' },
-    { id: 14, name: 'Contemporary Chic', emoji: '✨' }
+  const popularBrands = [
+    { name: 'Alo', emoji: '🧘' },
+    { name: 'Burberry', emoji: '🧥' },
+    { name: 'Cole Haan', emoji: '👞' },
+    { name: 'Dolce & Gabbana', emoji: '👗' },
+    { name: 'Everlane', emoji: '👕' }
   ];
 
   const handleBrandSelect = (brand) => {
     onBrandSearchChange(brand);
     setShowSuggestions(false);
     onAddBrand(brand);
+  };
+
+  const handlePopularBrandClick = (brandName) => {
+    onAddBrand(brandName);
   };
 
   const handleRequestBrand = () => {
@@ -418,16 +422,16 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
         </div>
 
         <div className="text-center">
-          <p className="text-neutral-600 mb-6 font-medium">Or start with a collection:</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {topCollections.map((collection) => (
+          <p className="text-neutral-600 mb-6 font-medium">Or start with our most popular brands:</p>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
+            {popularBrands.map((brand) => (
               <button
-                key={collection.id}
-                onClick={() => onLoadCollection(collection.name)}
-                className="bg-white hover:bg-neutral-900 hover:text-white border-2 border-neutral-200 hover:border-neutral-900 text-neutral-900 py-4 px-6 rounded-xl transition-all font-semibold text-sm flex items-center justify-center gap-2"
+                key={brand.name}
+                onClick={() => handlePopularBrandClick(brand.name)}
+                className="bg-white hover:bg-neutral-900 hover:text-white border-2 border-neutral-200 hover:border-neutral-900 text-neutral-900 py-4 px-4 rounded-xl transition-all font-semibold text-sm flex flex-col items-center justify-center gap-2"
               >
-                <span className="text-2xl">{collection.emoji}</span>
-                <span>{collection.name}</span>
+                <span className="text-2xl">{brand.emoji}</span>
+                <span className="text-xs md:text-sm">{brand.name}</span>
               </button>
             ))}
           </div>
@@ -1451,7 +1455,7 @@ export default function App() {
         brand.toLowerCase().includes(value.toLowerCase())
       ).slice(0, 5);
       setBrandSuggestions(filtered);
-      setShowSuggestions(filtered.length > 0);
+      setShowSuggestions(true); // Always show dropdown when typing (even if empty, to show request brand)
     } else {
       setBrandSuggestions([]);
       setShowSuggestions(false);
