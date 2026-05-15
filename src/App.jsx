@@ -329,7 +329,7 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
 ];
 
-function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, setBrandSearchQuery, brandSuggestions, showSuggestions, setShowSuggestions }) {
+function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions }) {
   const topCollections = [
     { id: 3, name: 'Athletic & Athleisure', emoji: '⚡' },
     { id: 1, name: 'Luxury Fashion Icons', emoji: '👑' },
@@ -339,7 +339,7 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
   ];
 
   const handleBrandSelect = (brand) => {
-    setBrandSearchQuery(brand);
+    onBrandSearchChange(brand);
     setShowSuggestions(false);
     onAddBrand(brand);
   };
@@ -375,10 +375,7 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
               <input
                 type="text"
                 value={brandSearchQuery}
-                onChange={(e) => {
-                  setBrandSearchQuery(e.target.value);
-                  setShowSuggestions(true);
-                }}
+                onChange={(e) => onBrandSearchChange(e.target.value)}
                 placeholder="Search for a brand... (e.g., Nike, Gucci, Patagonia)"
                 className="w-full pl-12 pr-4 py-3 border-2 border-neutral-300 rounded-xl text-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 autoFocus
@@ -2041,7 +2038,7 @@ export default function App() {
                 onLoadCollection={loadCollection}
                 onRequestBrand={handleOnboardingBrandRequest}
                 brandSearchQuery={newBrandName}
-                setBrandSearchQuery={setNewBrandName}
+                onBrandSearchChange={handleBrandInputChange}
                 brandSuggestions={brandSuggestions}
                 showSuggestions={showSuggestions}
                 setShowSuggestions={setShowSuggestions}
