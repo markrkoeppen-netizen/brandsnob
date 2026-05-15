@@ -476,6 +476,65 @@ function FetchingDealsAnimation() {
   );
 }
 
+function NameCollectionModal({ onClose, onRename, initialName = '' }) {
+  const [collectionName, setCollectionName] = useState(initialName);
+  
+  const handleSubmit = () => {
+    if (collectionName.trim()) {
+      onRename(collectionName.trim());
+      onClose();
+    }
+  };
+  
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Name Your Collection</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <p className="text-neutral-600 mb-4">
+          You have multiple brands! Give them a collection name so you can organize them.
+        </p>
+        
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Collection Name
+          </label>
+          <input
+            type="text"
+            value={collectionName}
+            onChange={(e) => setCollectionName(e.target.value)}
+            placeholder="e.g., Athletic Gear, Luxury Favorites..."
+            className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+            autoFocus
+          />
+        </div>
+        
+        <div className="flex gap-3">
+          <button
+            onClick={handleSubmit}
+            disabled={!collectionName.trim()}
+            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Save Collection Name
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
+          >
+            Skip for Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishlist, onRemoveFromWishlist }) {
   const [isHovered, setIsHovered] = useState(false);
   const [addedToBag, setAddedToBag] = useState(false);
@@ -1064,6 +1123,12 @@ export default function App() {
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
   const [fetchingDeals, setFetchingDeals] = useState(false);
+  const [editingCollection, setEditingCollection] = useState(null);
+  const [editingCollectionName, setEditingCollectionName] = useState('');
+  const [showNameCollectionPrompt, setShowNameCollectionPrompt] = useState(false);
+  const [hasShownUncategorizedPrompt, setHasShownUncategorizedPrompt] = useState(() => {
+    return localStorage.getItem('hasShownUncategorizedPrompt') === 'true';
+  });
   
   // Wishlist states
   const [wishlist, setWishlist] = useState(() => {
@@ -1238,6 +1303,16 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
     
+    // Check if we should show the "Name your collection" prompt
+    if (!hasShownUncategorizedPrompt) {
+      const uncategorizedBrands = myBrands.filter(b => b.collection === 'Uncategorized');
+      if (uncategorizedBrands.length === 2) {
+        setShowNameCollectionPrompt(true);
+        setHasShownUncategorizedPrompt(true);
+        localStorage.setItem('hasShownUncategorizedPrompt', 'true');
+      }
+    }
+    
     if (user) {
       const timeoutId = setTimeout(() => {
         saveToCloud();
@@ -1245,7 +1320,7 @@ export default function App() {
       
       return () => clearTimeout(timeoutId);
     }
-  }, [myBrands, user]);
+  }, [myBrands, user, hasShownUncategorizedPrompt]);
 
   useEffect(() => {
     localStorage.setItem('shoppingBag', JSON.stringify(shoppingBag));
@@ -1430,6 +1505,23 @@ export default function App() {
         setActiveTab('deals');
       }, 2500);
     }
+  };
+
+  const renameCollection = (oldName, newName) => {
+    if (!newName.trim() || newName === oldName) {
+      setEditingCollection(null);
+      return;
+    }
+    
+    const updatedBrands = myBrands.map(brand => 
+      brand.collection === oldName 
+        ? { ...brand, collection: newName.trim() }
+        : brand
+    );
+    
+    setMyBrands(updatedBrands);
+    setEditingCollection(null);
+    setEditingCollectionName('');
   };
 
   const handleOnboardingBrandRequest = (brandName) => {
@@ -2221,6 +2313,26 @@ export default function App() {
                         ))}
                       </div>
                     )}
+                    {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg p-4">
+                        <p className="text-neutral-600 text-sm mb-3">
+                          Can't find <strong>"{newBrandName}"</strong>?
+                        </p>
+                        <button
+                          onClick={() => {
+                            setRecommendBrand(newBrandName);
+                            setShowRecommendModal(true);
+                          }}
+                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                          Request This Brand
+                        </button>
+                        <p className="text-xs text-neutral-500 text-center mt-2">
+                          ⚡ We'll add it in less than 24 hours!
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   <div>
@@ -2299,7 +2411,34 @@ export default function App() {
                   return (
                     <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-lg text-neutral-800">{collection}</h3>
+                        {editingCollection === collection ? (
+                          <input
+                            type="text"
+                            value={editingCollectionName}
+                            onChange={(e) => setEditingCollectionName(e.target.value)}
+                            onBlur={() => renameCollection(collection, editingCollectionName)}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                renameCollection(collection, editingCollectionName);
+                              } else if (e.key === 'Escape') {
+                                setEditingCollection(null);
+                              }
+                            }}
+                            className="font-semibold text-lg text-neutral-800 border-b-2 border-neutral-900 focus:outline-none bg-transparent"
+                            autoFocus
+                          />
+                        ) : (
+                          <button
+                            onClick={() => {
+                              setEditingCollection(collection);
+                              setEditingCollectionName(collection);
+                            }}
+                            className="font-semibold text-lg text-neutral-800 hover:text-neutral-600 flex items-center gap-2 group"
+                          >
+                            <span>{collection}</span>
+                            <span className="text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm">✏️</span>
+                          </button>
+                        )}
                         <span className="text-sm text-neutral-500">{brandsInCollection.length} brand{brandsInCollection.length !== 1 ? 's' : ''}</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -2715,6 +2854,13 @@ export default function App() {
           setEmail={setRecommendEmail}
           submitting={recommendSubmitting}
           success={recommendSuccess}
+        />
+      )}
+
+      {showNameCollectionPrompt && (
+        <NameCollectionModal
+          onClose={() => setShowNameCollectionPrompt(false)}
+          onRename={(newName) => renameCollection('Uncategorized', newName)}
         />
       )}
 
