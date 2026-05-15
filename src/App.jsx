@@ -535,6 +535,195 @@ function NameCollectionModal({ onClose, onRename, initialName = '' }) {
   );
 }
 
+function CreateWishlistModal({ onClose, onCreate }) {
+  const [wishlistType, setWishlistType] = useState('template'); // 'template' or 'custom'
+  const [selectedTemplate, setSelectedTemplate] = useState('mylist');
+  const [customName, setCustomName] = useState('');
+  const [privacy, setPrivacy] = useState('link-only');
+
+  const templates = [
+    { id: 'mylist', name: 'My Wishlist', occasion: 'custom', emoji: '⭐' },
+    { id: 'birthday', name: 'Birthday', occasion: 'birthday', emoji: '🎂' },
+    { id: 'holiday', name: 'Holiday', occasion: 'holiday', emoji: '🎄' }
+  ];
+
+  const handleCreate = () => {
+    if (wishlistType === 'custom') {
+      if (!customName.trim()) {
+        alert('Please enter a wishlist name');
+        return;
+      }
+      onCreate(customName.trim(), 'custom', '✏️', privacy);
+    } else {
+      const template = templates.find(t => t.id === selectedTemplate);
+      onCreate(template.name, template.occasion, template.emoji, privacy);
+    }
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Create New Wishlist</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="mb-6">
+          <div className="flex gap-2 mb-4">
+            <button
+              onClick={() => setWishlistType('template')}
+              className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                wishlistType === 'template'
+                  ? 'border-neutral-900 bg-neutral-900 text-white'
+                  : 'border-neutral-300 text-neutral-700 hover:border-neutral-400'
+              }`}
+            >
+              Templates
+            </button>
+            <button
+              onClick={() => setWishlistType('custom')}
+              className={`flex-1 py-2 px-4 rounded-lg border-2 transition-all ${
+                wishlistType === 'custom'
+                  ? 'border-neutral-900 bg-neutral-900 text-white'
+                  : 'border-neutral-300 text-neutral-700 hover:border-neutral-400'
+              }`}
+            >
+              Custom
+            </button>
+          </div>
+
+          {wishlistType === 'template' ? (
+            <div className="space-y-2">
+              {templates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => setSelectedTemplate(template.id)}
+                  className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                    selectedTemplate === template.id
+                      ? 'border-neutral-900 bg-neutral-50'
+                      : 'border-neutral-200 hover:border-neutral-300'
+                  }`}
+                >
+                  <span className="text-2xl mr-3">{template.emoji}</span>
+                  <span className="font-medium">{template.name}</span>
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Wishlist Name
+              </label>
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="e.g., Dream Sneaker Collection"
+                className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                autoFocus
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-neutral-700 mb-2">
+            Privacy
+          </label>
+          <p className="text-xs text-neutral-500 mb-3">Who can view this wishlist?</p>
+          <div className="space-y-2">
+            <button
+              onClick={() => setPrivacy('link-only')}
+              className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                privacy === 'link-only'
+                  ? 'border-neutral-900 bg-neutral-50'
+                  : 'border-neutral-200 hover:border-neutral-300'
+              }`}
+            >
+              <div className="font-medium">🔗 Link Only</div>
+              <div className="text-xs text-neutral-500">Only people with the link can view</div>
+            </button>
+            <button
+              onClick={() => setPrivacy('private')}
+              className={`w-full text-left p-3 rounded-lg border-2 transition-all ${
+                privacy === 'private'
+                  ? 'border-neutral-900 bg-neutral-50'
+                  : 'border-neutral-200 hover:border-neutral-300'
+              }`}
+            >
+              <div className="font-medium">🔒 Private</div>
+              <div className="text-xs text-neutral-500">Only you can view</div>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleCreate}
+            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors"
+          >
+            Create Wishlist
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AddToWishlistModal({ onClose, wishlists, pendingItem, onAddToWishlist, onCreateNew }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Add to Wishlist</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <p className="text-neutral-600 mb-4">
+          Choose which wishlist to add <strong>{pendingItem?.product}</strong> to:
+        </p>
+
+        <div className="space-y-2 mb-4 max-h-64 overflow-y-auto">
+          {wishlists.map((wishlist) => (
+            <button
+              key={wishlist.id}
+              onClick={() => onAddToWishlist(wishlist.id, pendingItem)}
+              className="w-full text-left p-3 rounded-lg border-2 border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 transition-all"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xl mr-2">{wishlist.emoji}</span>
+                  <span className="font-medium">{wishlist.name}</span>
+                </div>
+                <span className="text-sm text-neutral-500">{wishlist.items.length} items</span>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <button
+          onClick={onCreateNew}
+          className="w-full bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center justify-center gap-2"
+        >
+          <Plus className="w-5 h-5" />
+          Create New Wishlist
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishlist, onRemoveFromWishlist }) {
   const [isHovered, setIsHovered] = useState(false);
   const [addedToBag, setAddedToBag] = useState(false);
@@ -1088,6 +1277,11 @@ function ShareWishlistModal({ onClose, shareRecipient, setShareRecipient, shareM
   );
 }
 export default function App() {
+  // Helper function to generate unique share IDs
+  const generateShareId = () => {
+    return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
   const [myBrands, setMyBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
@@ -1130,13 +1324,44 @@ export default function App() {
     return localStorage.getItem('hasShownUncategorizedPrompt') === 'true';
   });
   
-  // Wishlist states
-  const [wishlist, setWishlist] = useState(() => {
-    const saved = localStorage.getItem('wishlist');
-    return saved ? JSON.parse(saved) : [];
+  // Wishlist states - Updated for multiple wishlists
+  const [wishlists, setWishlists] = useState(() => {
+    const saved = localStorage.getItem('wishlists');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    // Check for old single wishlist format and migrate
+    const oldWishlist = localStorage.getItem('wishlist');
+    if (oldWishlist) {
+      const oldItems = JSON.parse(oldWishlist);
+      if (oldItems.length > 0) {
+        // Migrate to new format
+        const migratedWishlist = {
+          id: 'wishlist_' + Date.now(),
+          name: 'My Wishlist',
+          occasion: 'custom',
+          emoji: '⭐',
+          privacy: 'link-only',
+          shareId: generateShareId(),
+          items: oldItems,
+          createdAt: Date.now()
+        };
+        localStorage.removeItem('wishlist'); // Clean up old format
+        return [migratedWishlist];
+      }
+    }
+    return [];
+  });
+  const [activeWishlistId, setActiveWishlistId] = useState(() => {
+    const saved = localStorage.getItem('activeWishlistId');
+    return saved || null;
   });
   const [showWishlistModal, setShowWishlistModal] = useState(false);
+  const [showCreateWishlistModal, setShowCreateWishlistModal] = useState(false);
+  const [showAddToWishlistModal, setShowAddToWishlistModal] = useState(false);
+  const [pendingWishlistItem, setPendingWishlistItem] = useState(null);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [shareWishlistId, setShareWishlistId] = useState(null);
   const [shareRecipient, setShareRecipient] = useState('');
   const [shareMessage, setShareMessage] = useState('');
   const [shareSending, setShareSending] = useState(false);
@@ -1223,7 +1448,28 @@ export default function App() {
         setMyBrands(data.brands || []);
         setSelectedGenders(data.genderPreferences || []);
         setShoppingBag(data.shoppingBag || []);
-        setWishlist(data.wishlist || []);
+        
+        // Handle wishlist migration
+        if (data.wishlists) {
+          // New format
+          setWishlists(data.wishlists);
+          setActiveWishlistId(data.activeWishlistId || (data.wishlists.length > 0 ? data.wishlists[0].id : null));
+        } else if (data.wishlist && data.wishlist.length > 0) {
+          // Old format - migrate
+          const migratedWishlist = {
+            id: 'wishlist_' + Date.now(),
+            name: 'My Wishlist',
+            occasion: 'custom',
+            emoji: '⭐',
+            privacy: 'link-only',
+            shareId: generateShareId(),
+            items: data.wishlist,
+            createdAt: Date.now()
+          };
+          setWishlists([migratedWishlist]);
+          setActiveWishlistId(migratedWishlist.id);
+        }
+        
         setShippingProfile(data.shippingProfile || {
           firstName: '', lastName: '', email: '', phone: '',
           address: '', city: '', state: '', zip: '',
@@ -1283,7 +1529,26 @@ export default function App() {
             setMyBrands(data.brands || []);
             setSelectedGenders(data.genderPreferences || []);
             setShoppingBag(data.shoppingBag || []);
-            setWishlist(data.wishlist || []);
+            
+            // Handle wishlist migration
+            if (data.wishlists) {
+              setWishlists(data.wishlists);
+              setActiveWishlistId(data.activeWishlistId || (data.wishlists.length > 0 ? data.wishlists[0].id : null));
+            } else if (data.wishlist && data.wishlist.length > 0) {
+              const migratedWishlist = {
+                id: 'wishlist_' + Date.now(),
+                name: 'My Wishlist',
+                occasion: 'custom',
+                emoji: '⭐',
+                privacy: 'link-only',
+                shareId: generateShareId(),
+                items: data.wishlist,
+                createdAt: Date.now()
+              };
+              setWishlists([migratedWishlist]);
+              setActiveWishlistId(migratedWishlist.id);
+            }
+            
             setShippingProfile(data.shippingProfile || {
               firstName: '', lastName: '', email: '', phone: '',
               address: '', city: '', state: '', zip: '',
@@ -1625,49 +1890,142 @@ export default function App() {
     }, (retailerCount * 500) + 1000);
   };
 
+  // Save wishlists to localStorage and cloud
+  useEffect(() => {
+    localStorage.setItem('wishlists', JSON.stringify(wishlists));
+    localStorage.setItem('activeWishlistId', activeWishlistId || '');
+    
+    if (user) {
+      const timeoutId = setTimeout(() => {
+        setDoc(doc(db, 'users', user.email), {
+          wishlists: wishlists,
+          activeWishlistId: activeWishlistId,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }, 2000);
+      
+      return () => clearTimeout(timeoutId);
+    }
+  }, [wishlists, activeWishlistId, user]);
+
+  // Create new wishlist
+  const createWishlist = (name, occasion, emoji, privacy = 'link-only') => {
+    const newWishlist = {
+      id: 'wishlist_' + Date.now(),
+      name: name.trim(),
+      occasion: occasion,
+      emoji: emoji,
+      privacy: privacy,
+      shareId: generateShareId(),
+      items: [],
+      createdAt: Date.now()
+    };
+    
+    setWishlists([...wishlists, newWishlist]);
+    setActiveWishlistId(newWishlist.id);
+    return newWishlist;
+  };
+
+  // Delete wishlist
+  const deleteWishlist = (wishlistId) => {
+    const updated = wishlists.filter(w => w.id !== wishlistId);
+    setWishlists(updated);
+    
+    if (activeWishlistId === wishlistId) {
+      setActiveWishlistId(updated.length > 0 ? updated[0].id : null);
+    }
+  };
+
+  // Update wishlist privacy
+  const updateWishlistPrivacy = (wishlistId, privacy) => {
+    const updated = wishlists.map(w => 
+      w.id === wishlistId ? { ...w, privacy } : w
+    );
+    setWishlists(updated);
+  };
+
+  // Add item to wishlist (shows modal to choose which wishlist)
   const addToWishlist = (deal) => {
-    if (wishlist.find(item => item.id === deal.id)) {
-      return;
-    }
-    const updated = [...wishlist, deal];
-    setWishlist(updated);
-    localStorage.setItem('wishlist', JSON.stringify(updated));
-    
-    if (user) {
-      setDoc(doc(db, 'users', user.email), {
-        wishlist: updated,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-    }
-  };
-
-  const removeFromWishlist = (dealId) => {
-    const updated = wishlist.filter(item => item.id !== dealId);
-    setWishlist(updated);
-    localStorage.setItem('wishlist', JSON.stringify(updated));
-    
-    if (user) {
-      setDoc(doc(db, 'users', user.email), {
-        wishlist: updated,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+    if (wishlists.length === 0) {
+      // No wishlists exist, create default and add
+      const newWishlist = createWishlist('My Wishlist', 'custom', '⭐', 'link-only');
+      const updated = wishlists.map(w => 
+        w.id === newWishlist.id ? { ...w, items: [...w.items, deal] } : w
+      );
+      setWishlists(updated);
+    } else if (wishlists.length === 1) {
+      // Only one wishlist, add directly
+      const updated = wishlists.map(w => {
+        if (w.items.find(item => item.id === deal.id)) return w;
+        return { ...w, items: [...w.items, deal] };
+      });
+      setWishlists(updated);
+    } else {
+      // Multiple wishlists, show selection modal
+      setPendingWishlistItem(deal);
+      setShowAddToWishlistModal(true);
     }
   };
 
+  // Add item to specific wishlist
+  const addToSpecificWishlist = (wishlistId, deal) => {
+    const updated = wishlists.map(w => {
+      if (w.id !== wishlistId) return w;
+      if (w.items.find(item => item.id === deal.id)) return w;
+      return { ...w, items: [...w.items, deal] };
+    });
+    setWishlists(updated);
+    setPendingWishlistItem(null);
+    setShowAddToWishlistModal(false);
+  };
+
+  // Remove item from wishlist
+  const removeFromWishlist = (wishlistId, dealId) => {
+    const updated = wishlists.map(w => 
+      w.id === wishlistId 
+        ? { ...w, items: w.items.filter(item => item.id !== dealId) }
+        : w
+    );
+    setWishlists(updated);
+  };
+
+  // Check if item is in any wishlist
+  const isInWishlist = (dealId) => {
+    return wishlists.some(w => w.items.some(item => item.id === dealId));
+  };
+
+  // Get active wishlist
+  const getActiveWishlist = () => {
+    if (!activeWishlistId && wishlists.length > 0) {
+      setActiveWishlistId(wishlists[0].id);
+      return wishlists[0];
+    }
+    return wishlists.find(w => w.id === activeWishlistId) || wishlists[0] || null;
+  };
+
+  // Share wishlist via email
   const shareWishlist = async () => {
     if (!shareRecipient.trim()) {
       alert('Please enter an email address');
       return;
     }
 
+    const wishlistToShare = wishlists.find(w => w.id === shareWishlistId);
+    if (!wishlistToShare) {
+      alert('Wishlist not found');
+      return;
+    }
+
     setShareSending(true);
 
     // Create simple text format for wishlist
-    const wishlistText = wishlist.map((item, index) => 
+    const wishlistText = wishlistToShare.items.map((item, index) => 
       `${index + 1}. ${item.product}\n   ${item.brand} - $${item.salePrice} (${item.discount} off)\n   ${item.link}`
     ).join('\n\n');
 
-    const totalValue = wishlist.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
+    const totalValue = wishlistToShare.items.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
+
+    const shareLink = `${window.location.origin}/wishlist/${wishlistToShare.shareId}`;
 
     try {
       await emailjs.send(
@@ -1675,12 +2033,12 @@ export default function App() {
         'template_7sri3sr',
         {
           to_email: shareRecipient,
-          brand_name: `Wishlist (${wishlist.length} items - $${totalValue} total)`,
+          brand_name: `${wishlistToShare.emoji} ${wishlistToShare.name} (${wishlistToShare.items.length} items - $${totalValue} total)`,
           submitter_email: shareRecipient,
           user_email: user?.email || 'BrandSnobs User',
           message: shareMessage 
-            ? `${shareMessage}\n\n=== MY WISHLIST ===\n\n${wishlistText}`
-            : `Check out my wishlist from BrandSnobs!\n\n${wishlistText}`
+            ? `${shareMessage}\n\n=== ${wishlistToShare.name.toUpperCase()} ===\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
+            : `Check out my ${wishlistToShare.name} from BrandSnobs!\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
         },
         'QPiBFFlW7aGv6W0UP'
       );
@@ -1909,910 +2267,1323 @@ export default function App() {
       : 0,
     hotBrand: hotBrand
   };
+  // ============================================================
+  // APP-PART-3-SIMPLE-AUTH.jsx
+  // Contains: Header, Tab Navigation, Deals Tab, Brands Tab,
+  //           Profile Tab, Recommendations Tab
+  // ============================================================
+
+  // ── Total wishlist item count (across ALL wishlists) ────────
+  const totalWishlistItems = wishlists.reduce((sum, w) => sum + w.items.length, 0);
+
   return (
     <div className="min-h-screen bg-neutral-50">
-      <header className="bg-white border-b border-neutral-200 sticky top-0 z-50 shadow-sm">
-        <div className="pt-safe">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-              >
-                <ShoppingBag className="w-8 h-8 text-neutral-900" />
-                <div className="text-left">
-                  <h1 className="font-display text-2xl font-bold text-neutral-900">BrandSnobs</h1>
-                  <p className="text-xs text-neutral-500 tracking-wide">YOU LIKE WHAT YOU LIKE</p>
-                </div>
-              </button>
-            </div>
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setShowWishlistModal(true)}
-                className="relative p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                <Heart className="w-6 h-6 text-neutral-700" />
-                {wishlist.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
-                    {wishlist.length}
-                  </span>
-                )}
-              </button>
 
-              <button 
-                onClick={() => setShowBagModal(true)}
-                className="relative p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-              >
-                <ShoppingBag className="w-6 h-6 text-neutral-700" />
-                {shoppingBag.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-neutral-900 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
-                    {shoppingBag.length}
-                  </span>
-                )}
-              </button>
+      {/* ── Onboarding ───────────────────────────────────────── */}
+      {myBrands.length === 0 && !fetchingDeals && (
+        <OnboardingScreen
+          onAddBrand={(brand) => {
+            setNewBrandName(brand);
+            addBrand(brand);
+          }}
+          onLoadCollection={loadCollection}
+          onRequestBrand={handleOnboardingBrandRequest}
+          brandSearchQuery={newBrandName}
+          onBrandSearchChange={handleBrandInputChange}
+          brandSuggestions={brandSuggestions}
+          showSuggestions={showSuggestions}
+          setShowSuggestions={setShowSuggestions}
+        />
+      )}
 
-              {syncStatus === 'syncing' && (
-                <div className="flex items-center gap-2 text-blue-600">
-                  <Cloud className="w-5 h-5 animate-pulse" />
-                  <span className="text-sm">Syncing...</span>
-                </div>
+      {/* ── Fetching animation ───────────────────────────────── */}
+      {fetchingDeals && <FetchingDealsAnimation />}
+
+      {/* ── Header ───────────────────────────────────────────── */}
+      <header className="bg-white border-b border-neutral-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <ShoppingBag className="w-7 h-7 text-neutral-900" />
+            <span className="font-display text-xl font-bold text-neutral-900 tracking-tight">
+              BrandSnobs
+            </span>
+          </div>
+
+          {/* Right actions */}
+          <div className="flex items-center gap-2">
+
+            {/* Sync status */}
+            {user && syncStatus === 'syncing' && (
+              <span className="text-xs text-neutral-400 flex items-center gap-1">
+                <RefreshCw className="w-3 h-3 animate-spin" /> Saving…
+              </span>
+            )}
+            {user && syncStatus === 'synced' && (
+              <span className="text-xs text-green-600 flex items-center gap-1">
+                <Cloud className="w-3 h-3" /> Saved
+              </span>
+            )}
+
+            {/* Shopping bag */}
+            <button
+              onClick={() => setShowBagModal(true)}
+              className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              <ShoppingBag className="w-6 h-6" />
+              {shoppingBag.length > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-neutral-900 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-semibold">
+                  {shoppingBag.length}
+                </span>
               )}
-              {syncStatus === 'synced' && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <Cloud className="w-5 h-5" />
-                  <span className="text-sm">Synced</span>
-                </div>
+            </button>
+
+            {/* Wishlist heart — shows total across ALL wishlists */}
+            <button
+              onClick={() => setShowWishlistModal(true)}
+              className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+            >
+              <Heart
+                className="w-6 h-6"
+                fill={totalWishlistItems > 0 ? 'currentColor' : 'none'}
+                color={totalWishlistItems > 0 ? '#e11d48' : 'currentColor'}
+              />
+              {totalWishlistItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-semibold">
+                  {totalWishlistItems}
+                </span>
               )}
-              {user ? (
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={() => setActiveTab('profile')}
-                    className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                  >
-                    <div className="text-right hidden md:block">
-                      <p className="text-sm font-medium text-neutral-900">{user.email}</p>
-                    </div>
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center font-semibold text-sm border-2 border-transparent hover:border-neutral-300 transition-colors">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </div>
-                  </button>
-                  <button onClick={signOut} className="bg-neutral-100 text-neutral-900 p-2 md:px-4 md:py-2 rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2">
-                    <LogOut className="w-4 h-4" />
-                    <span className="hidden md:inline">Sign Out</span>
-                  </button>
-                </div>
-              ) : (
-                <button onClick={() => setShowSignIn(true)} className="bg-neutral-900 text-white px-3 md:px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-2 text-sm">
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden md:inline">Sign In</span>
-                  <span className="md:hidden">Sign In</span>
+            </button>
+
+            {/* Auth */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-neutral-500 hidden sm:block truncate max-w-[120px]">
+                  {user.email}
+                </span>
+                <button
+                  onClick={signOut}
+                  className="p-2 text-neutral-500 hover:text-neutral-700"
+                  title="Sign out"
+                >
+                  <LogOut className="w-5 h-5" />
                 </button>
-              )}
-            </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowSignIn(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Sign In</span>
+              </button>
+            )}
           </div>
         </div>
-        </div>
-      </header>
 
-      <div className="bg-white border-b border-neutral-200">
-        <div className="max-w-7xl mx-auto px-2 md:px-4">
-          <div className="flex overflow-x-auto scrollbar-hide">
-            {['deals', 'brands', 'recommendations', 'profile'].map(tab => (
+        {/* ── Tab navigation ───────────────────────────────── */}
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-hide">
+            {[
+              { id: 'deals', label: 'Deals', count: filteredDeals.length },
+              { id: 'brands', label: 'My Brands', count: myBrands.length },
+              { id: 'profile', label: 'Profile' },
+              { id: 'recommendations', label: 'Discover' }
+            ].map(tab => (
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-shrink-0 py-3 md:py-4 px-3 md:px-4 border-b-2 transition-colors font-medium text-xs md:text-sm capitalize whitespace-nowrap ${activeTab === tab ? 'border-neutral-900 text-neutral-900' : 'border-transparent text-neutral-500 hover:text-neutral-700'}`}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                  activeTab === tab.id
+                    ? 'border-neutral-900 text-neutral-900'
+                    : 'border-transparent text-neutral-500 hover:text-neutral-700'
+                }`}
               >
-                {tab}
-                {tab === 'deals' && filteredDeals.length > 0 && ` (${filteredDeals.length})`}
-                {tab === 'brands' && myBrands.length > 0 && ` (${myBrands.length})`}
+                {tab.label}
+                {tab.count !== undefined && tab.count > 0 && (
+                  <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                    activeTab === tab.id
+                      ? 'bg-neutral-900 text-white'
+                      : 'bg-neutral-200 text-neutral-600'
+                  }`}>
+                    {tab.count}
+                  </span>
+                )}
               </button>
             ))}
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* ── Main content ─────────────────────────────────────── */}
+      <main className="max-w-7xl mx-auto px-4 py-6">
+
+        {/* ══════════════════════════════════════════════════════
+            DEALS TAB
+        ══════════════════════════════════════════════════════ */}
         {activeTab === 'deals' && (
           <div>
-            {myBrands.length > 0 && <GenderPreference selectedGenders={selectedGenders} onGenderChange={setSelectedGenders} />}
-
+            {/* Stats bar */}
             {myBrands.length > 0 && (
-              <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border border-neutral-200 p-3 md:p-4 mb-4 md:mb-6">
-                <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                  {/* Add Brand Search */}
-                  <div className="flex-1 relative">
-                    <label className="block text-xs font-medium text-neutral-600 mb-1">Add Brand</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                  <p className="text-2xl font-bold text-neutral-900">{stats.totalBrands}</p>
+                  <p className="text-xs text-neutral-500 mt-1">Brands Tracked</p>
+                </div>
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                  <p className="text-2xl font-bold text-neutral-900">{stats.totalDeals}</p>
+                  <p className="text-xs text-neutral-500 mt-1">Live Deals</p>
+                </div>
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                  <p className="text-2xl font-bold text-neutral-900">{stats.avgDiscount}%</p>
+                  <p className="text-xs text-neutral-500 mt-1">Avg. Discount</p>
+                </div>
+                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                  <p className="text-2xl font-bold text-neutral-900 truncate">
+                    {stats.hotBrand ? stats.hotBrand.name.split(' ')[0] : '—'}
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    {stats.hotBrand ? `Hottest (${stats.hotBrand.avgDiscount}% avg)` : 'No deals yet'}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Gender filter */}
+            {myBrands.length > 0 && (
+              <GenderPreference
+                selectedGenders={selectedGenders}
+                onGenderChange={setSelectedGenders}
+              />
+            )}
+
+            {/* Search + sort/filter bar */}
+            {myBrands.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search deals or brands…"
+                    className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-2.5 text-neutral-400 hover:text-neutral-600"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <select
+                    value={dealSort}
+                    onChange={(e) => setDealSort(e.target.value)}
+                    className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+                  >
+                    <option value="discount">Best Discount</option>
+                    <option value="price-low">Price: Low–High</option>
+                    <option value="price-high">Price: High–Low</option>
+                    <option value="brand">Brand A–Z</option>
+                  </select>
+
+                  <select
+                    value={dealFilter}
+                    onChange={(e) => setDealFilter(e.target.value)}
+                    className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+                  >
+                    <option value="all">All Discounts</option>
+                    <option value=">30%">30%+ Off</option>
+                    <option value=">50%">50%+ Off</option>
+                  </select>
+
+                  <button
+                    onClick={refreshDeals}
+                    disabled={refreshing}
+                    className="p-2 border border-neutral-300 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors"
+                    title="Refresh deals"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Deal cards grid */}
+            {dealsLoading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-neutral-400">
+                <RefreshCw className="w-8 h-8 animate-spin mb-4" />
+                <p className="text-sm">Loading deals…</p>
+              </div>
+            ) : dealsError ? (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center">
+                <p className="text-red-700 font-medium">{dealsError}</p>
+                <button
+                  onClick={refreshDeals}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : filteredDeals.length === 0 && myBrands.length > 0 ? (
+              <div className="text-center py-24 text-neutral-400">
+                <Tag className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium text-neutral-600">No deals found</p>
+                <p className="text-sm mt-1">
+                  {searchQuery ? 'Try a different search term.' : 'Check back soon — deals are updated regularly.'}
+                </p>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="mt-4 px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm hover:bg-neutral-800"
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            ) : (
+              <>
+                {lastUpdated && (
+                  <p className="text-xs text-neutral-400 mb-4">
+                    Last updated: {new Date(lastUpdated).toLocaleDateString('en-US', {
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    })}
+                  </p>
+                )}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                  {filteredDeals.map(deal => (
+                    <LuxuryDealCard
+                      key={deal.id}
+                      deal={deal}
+                      onAddToBag={addToBag}
+                      onDealClick={handleDealClick}
+                      // isInWishlist uses the new cross-wishlist check
+                      wishlist={wishlists.flatMap(w => w.items)}
+                      onAddToWishlist={addToWishlist}
+                      onRemoveFromWishlist={(dealId) => {
+                        // Remove from whichever wishlist contains it
+                        const containing = wishlists.find(w => w.items.some(i => i.id === dealId));
+                        if (containing) removeFromWishlist(containing.id, dealId);
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════════════════
+            BRANDS TAB
+        ══════════════════════════════════════════════════════ */}
+        {activeTab === 'brands' && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-neutral-900">My Brands</h2>
+              <button
+                onClick={() => setShowAddBrand(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+              >
+                <Plus className="w-4 h-4" />
+                Add Brand
+              </button>
+            </div>
+
+            {/* Collections */}
+            {userCollections.map(collectionName => {
+              const brandsInCollection = myBrands.filter(b => b.collection === collectionName);
+              const isCollapsed = collapsedCollections.includes(collectionName);
+
+              return (
+                <div key={collectionName} className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    {editingCollection === collectionName ? (
+                      <div className="flex items-center gap-2 flex-1">
+                        <input
+                          type="text"
+                          value={editingCollectionName}
+                          onChange={(e) => setEditingCollectionName(e.target.value)}
+                          className="flex-1 px-3 py-1 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900"
+                          autoFocus
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') renameCollection(collectionName, editingCollectionName);
+                          }}
+                        />
+                        <button
+                          onClick={() => renameCollection(collectionName, editingCollectionName)}
+                          className="text-xs px-3 py-1 bg-neutral-900 text-white rounded-lg"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingCollection(null)}
+                          className="text-xs px-3 py-1 bg-neutral-200 text-neutral-700 rounded-lg"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingCollection(collectionName);
+                          setEditingCollectionName(collectionName);
+                        }}
+                        className="text-lg font-semibold text-neutral-900 hover:text-neutral-600 transition-colors text-left"
+                      >
+                        {collectionName}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => toggleCollectionCollapse(collectionName)}
+                      className="p-1 text-neutral-400 hover:text-neutral-600"
+                    >
+                      {isCollapsed
+                        ? <ChevronDown className="w-5 h-5" />
+                        : <ChevronUp className="w-5 h-5" />
+                      }
+                    </button>
+                  </div>
+
+                  {!isCollapsed && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      {brandsInCollection.map(brand => {
+                        const brandImage = getBrandImage(brand.name);
+                        const brandDealCount = deals.filter(d =>
+                          (d.brand || '').toLowerCase() === brand.name.toLowerCase()
+                        ).length;
+
+                        return (
+                          <div
+                            key={brand.id}
+                            className="bg-white rounded-xl border border-neutral-200 p-4 relative group hover:border-neutral-300 transition-colors"
+                          >
+                            <button
+                              onClick={() => removeBrand(brand.id)}
+                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-red-500"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                            {brandImage ? (
+                              <img
+                                src={brandImage}
+                                alt={brand.name}
+                                className="w-12 h-12 object-cover rounded-lg mb-3 mx-auto"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 bg-neutral-100 rounded-lg mb-3 mx-auto flex items-center justify-center">
+                                <ShoppingBag className="w-6 h-6 text-neutral-400" />
+                              </div>
+                            )}
+                            <p className="text-sm font-medium text-neutral-900 text-center truncate">
+                              {brand.name}
+                            </p>
+                            <p className="text-xs text-neutral-500 text-center mt-1">
+                              {brandDealCount} deal{brandDealCount !== 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {myBrands.length === 0 && (
+              <div className="text-center py-16 text-neutral-400">
+                <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                <p className="text-lg font-medium text-neutral-600">No brands yet</p>
+                <p className="text-sm mt-1">Add your favorite brands to start tracking deals.</p>
+              </div>
+            )}
+
+            {/* Add Brand panel */}
+            {showAddBrand && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-neutral-900">Add a Brand</h3>
+                    <button
+                      onClick={() => {
+                        setShowAddBrand(false);
+                        setNewBrandName('');
+                        setNewBrandCollection('');
+                        setShowSuggestions(false);
+                      }}
+                      className="text-neutral-400 hover:text-neutral-600"
+                    >
+                      <X className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Brand search */}
+                  <div className="mb-4 relative">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Brand Name
+                    </label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-2.5 w-4 h-4 md:w-5 md:h-5 text-neutral-400" />
+                      <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
                       <input
                         type="text"
                         value={newBrandName}
                         onChange={(e) => handleBrandInputChange(e.target.value)}
-                        placeholder="Search to add brand..."
-                        className="w-full pl-9 md:pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm md:text-base"
-                        onFocus={() => newBrandName && setShowSuggestions(true)}
+                        placeholder="Search brands…"
+                        className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                        autoFocus
                       />
-                      {newBrandName && (
-                        <button onClick={() => { setNewBrandName(''); setShowSuggestions(false); }} className="absolute right-3 top-2.5 text-neutral-400">
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
-                    
-                    {/* Brand suggestions dropdown */}
+
                     {showSuggestions && brandSuggestions.length > 0 && (
-                      <div className="absolute z-20 w-full mt-1 bg-white border-2 border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {brandSuggestions.map((brand, index) => (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                        {brandSuggestions.map((brand, i) => (
                           <button
-                            key={index}
-                            onClick={() => {
-                              selectBrandSuggestion(brand);
-                              addBrand(brand);
-                            }}
-                            className="w-full text-left px-4 py-2 hover:bg-neutral-100 transition-colors border-b border-neutral-100 last:border-b-0 font-medium text-neutral-900"
+                            key={i}
+                            onClick={() => selectBrandSuggestion(brand)}
+                            className="w-full text-left px-4 py-2.5 hover:bg-neutral-100 transition-colors text-sm font-medium text-neutral-900 border-b border-neutral-100 last:border-b-0"
                           >
                             {brand}
                           </button>
                         ))}
                       </div>
                     )}
-                    
-                    {/* Request This Brand prompt */}
+
                     {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
-                      <div className="absolute z-20 w-full mt-1 bg-white border-2 border-neutral-300 rounded-lg shadow-lg p-4">
-                        <p className="text-neutral-600 text-sm mb-3">
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg p-4 text-center">
+                        <p className="text-sm text-neutral-600 mb-3">
                           Can't find <strong>"{newBrandName}"</strong>?
                         </p>
                         <button
-                          onClick={() => {
-                            setRecommendBrand(newBrandName);
-                            setShowRecommendModal(true);
-                            setNewBrandName('');
-                            setShowSuggestions(false);
-                          }}
-                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                          onClick={() => handleOnboardingBrandRequest(newBrandName)}
+                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 text-sm font-medium"
                         >
-                          <TrendingUp className="w-4 h-4" />
                           Request This Brand
                         </button>
-                        <p className="text-xs text-neutral-500 text-center mt-2">
-                          ⚡ We'll add it in less than 24 hours!
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Search Products */}
-                  <div className="flex-1">
-                    <label className="block text-xs font-medium text-neutral-600 mb-1">Search Products</label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-2.5 w-4 h-4 md:w-5 md:h-5 text-neutral-400" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search your deals..."
-                        className="w-full pl-9 md:pl-10 pr-3 py-2 border border-neutral-300 rounded-lg text-sm md:text-base"
-                      />
-                      {searchQuery && (
-                        <button onClick={() => setSearchQuery('')} className="absolute right-3 top-2.5 text-neutral-400">
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Filters */}
-                  <div className="flex gap-2 md:gap-3">
-                    <select value={dealFilter} onChange={(e) => setDealFilter(e.target.value)} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none">
-                      <option value="all">All Deals</option>
-                      <option value=">30%">30%+ Off</option>
-                      <option value=">50%">50%+ Off</option>
-                    </select>
-                    <select value={dealSort} onChange={(e) => setDealSort(e.target.value)} className="px-3 py-2 border border-neutral-300 rounded-lg text-sm flex-1 md:flex-none">
-                      <option value="discount">Best Deals</option>
-                      <option value="price-low">Price: Low</option>
-                      <option value="price-high">Price: High</option>
-                      <option value="brand">Brand A-Z</option>
-                    </select>
-                  </div>
-                </div>
-                {searchQuery && (
-                  <div className="mt-3 text-sm text-neutral-600">
-                    Found {filteredDeals.length} result{filteredDeals.length !== 1 ? 's' : ''} for "{searchQuery}"
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                <div className="text-sm text-neutral-500 mb-1">Brands Tracked</div>
-                <div className="font-display text-3xl font-bold text-neutral-900">{stats.totalBrands}</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                <div className="text-sm text-neutral-500 mb-1">Active Deals</div>
-                <div className="font-display text-3xl font-bold text-neutral-900">{stats.totalDeals}</div>
-              </div>
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                <div className="text-sm text-neutral-500 mb-1">🔥 Hot Brand</div>
-                {stats.hotBrand ? (
-                  <button
-                    onClick={() => setSearchQuery(stats.hotBrand.name)}
-                    className="w-full text-left hover:bg-neutral-50 rounded-lg p-2 -m-2 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
-                      {getBrandImage(stats.hotBrand.name) && (
-                        <img 
-                          src={getBrandImage(stats.hotBrand.name)} 
-                          alt={stats.hotBrand.name}
-                          className="w-12 h-12 object-contain rounded-lg bg-neutral-50 p-1 flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-display text-xl font-bold text-green-600 truncate">{stats.hotBrand.name}</div>
-                        <div className="text-sm text-neutral-600">{stats.hotBrand.avgDiscount}% avg • {stats.hotBrand.dealCount} deals</div>
-                      </div>
-                    </div>
-                  </button>
-                ) : (
-                  <div className="font-display text-xl font-bold text-neutral-400">Add brands</div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-              <p className="text-sm text-blue-900">
-                <span className="font-semibold">💡 Affiliate Disclosure:</span> BrandSnobs participates in affiliate programs and earns commissions on purchases made through links on this site. This helps keep BrandSnobs free for everyone.
-              </p>
-            </div>
-
-            {dealsLoading && (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
-                <RefreshCw className="w-12 h-12 text-neutral-600 mx-auto mb-4 animate-spin" />
-                <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">Loading deals...</h3>
-                <p className="text-neutral-500">Fetching the latest deals from your brands</p>
-              </div>
-            )}
-
-            {dealsError && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-6 mb-6">
-                <h3 className="font-semibold text-red-800 mb-2">Error Loading Deals</h3>
-                <p className="text-red-600 mb-4">{dealsError}</p>
-                <button onClick={refreshDeals} className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">Try Again</button>
-              </div>
-            )}
-
-            {!dealsLoading && myBrands.length === 0 && (
-              <OnboardingScreen
-                onAddBrand={addBrand}
-                onLoadCollection={loadCollection}
-                onRequestBrand={handleOnboardingBrandRequest}
-                brandSearchQuery={newBrandName}
-                onBrandSearchChange={handleBrandInputChange}
-                brandSuggestions={brandSuggestions}
-                showSuggestions={showSuggestions}
-                setShowSuggestions={setShowSuggestions}
-              />
-            )}
-
-            {!dealsLoading && !dealsError && myBrands.length > 0 && (
-              <div>
-                {(searchQuery || dealFilter !== 'all') ? (
-                  <div>
-                    <p className="text-sm text-neutral-500 mb-4">{filteredDeals.length} deal{filteredDeals.length !== 1 ? 's' : ''} found</p>
-                    {filteredDeals.length === 0 ? (
-                      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
-                        <Tag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                        <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No deals found</h3>
-                        <p className="text-neutral-500">Try adjusting your search or filters</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {userCollections.length > 0 ? (
-                      userCollections.map(collection => {
-                        const collectionBrandNames = myBrands
-                          .filter(b => b.collection === collection)
-                          .map(b => b.name);
-                        const collectionDeals = filteredDeals.filter(d =>
-                          collectionBrandNames.includes(d.brand)
-                        );
-                        const isCollapsed = collapsedCollections.includes(collection);
-
-                        return (
-                          <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-                            <button
-                              onClick={() => toggleCollectionCollapse(collection)}
-                              className="w-full flex items-center justify-between p-6 hover:bg-neutral-50 transition-colors"
-                            >
-                              <div className="text-left">
-                                <h3 className="font-display text-xl font-bold text-neutral-900">{collection}</h3>
-                                <p className="text-sm text-neutral-500 mt-0.5">
-                                  {collectionBrandNames.length} brand{collectionBrandNames.length !== 1 ? 's' : ''} · {collectionDeals.length} deal{collectionDeals.length !== 1 ? 's' : ''}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <span className="text-sm text-neutral-500 hidden md:block">
-                                  {isCollapsed ? 'Show deals' : 'Hide deals'}
-                                </span>
-                                {isCollapsed
-                                  ? <ChevronDown className="w-5 h-5 text-neutral-500" />
-                                  : <ChevronUp className="w-5 h-5 text-neutral-500" />
-                                }
-                              </div>
-                            </button>
-                            {!isCollapsed && (
-                              <div className="px-6 pb-6">
-                                {collectionDeals.length === 0 ? (
-                                  <div className="bg-neutral-50 rounded-xl border border-neutral-200 p-6 text-center">
-                                    <p className="text-neutral-500 text-sm">No deals found for this collection right now.</p>
-                                  </div>
-                                ) : (
-                                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                                    {collectionDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                        {filteredDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
-                      </div>
-                    )}
-
-                    {myBrands.filter(b => !b.collection).length > 0 && (() => {
-                      const uncollectedNames = myBrands.filter(b => !b.collection).map(b => b.name);
-                      const uncollectedDeals = filteredDeals.filter(d => uncollectedNames.includes(d.brand));
-                      if (uncollectedDeals.length === 0) return null;
-                      const isCollapsed = collapsedCollections.includes('__uncollected__');
-                      return (
-                        <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
-                          <button
-                            onClick={() => toggleCollectionCollapse('__uncollected__')}
-                            className="w-full flex items-center justify-between p-6 hover:bg-neutral-50 transition-colors"
-                          >
-                            <div className="text-left">
-                              <h3 className="font-display text-xl font-bold text-neutral-900">Other Brands</h3>
-                              <p className="text-sm text-neutral-500 mt-0.5">{uncollectedDeals.length} deal{uncollectedDeals.length !== 1 ? 's' : ''}</p>
-                            </div>
-                            {isCollapsed ? <ChevronDown className="w-5 h-5 text-neutral-500" /> : <ChevronUp className="w-5 h-5 text-neutral-500" />}
-                          </button>
-                          {!isCollapsed && (
-                            <div className="px-6 pb-6">
-                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-                                {uncollectedDeals.map(deal => <LuxuryDealCard key={deal.id} deal={deal} onAddToBag={addToBag} onDealClick={handleDealClick} wishlist={wishlist} onAddToWishlist={addToWishlist} onRemoveFromWishlist={removeFromWishlist} />)}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-        {activeTab === 'brands' && (
-          <div>
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-6">
-              <div>
-                <h2 className="font-display text-2xl font-bold text-neutral-900">My Brands</h2>
-                <p className="text-neutral-600 text-sm md:text-base">Track deals from your favorite brands</p>
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {user && (
-                  <>
-                    <button onClick={saveToCloud} disabled={syncStatus === 'syncing'} className="bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-1.5 disabled:opacity-50 text-sm">
-                      <Cloud className="w-4 h-4" />
-                      <span className="hidden md:inline">Save</span>
-                    </button>
-                    <button onClick={restoreFromCloud} disabled={syncStatus === 'syncing'} className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-1.5 disabled:opacity-50 text-sm">
-                      <CloudOff className="w-4 h-4" />
-                      <span className="hidden md:inline">Restore</span>
-                    </button>
-                  </>
-                )}
-                <button onClick={() => setShowAddBrand(!showAddBrand)} className="bg-neutral-900 text-white px-3 py-2 rounded-lg hover:bg-neutral-800 transition-colors flex items-center gap-1.5 text-sm">
-                  <Plus className="w-4 h-4" />
-                  Add Brand
-                </button>
-                <button onClick={() => setShowRecommendModal(true)} className="bg-neutral-200 text-neutral-700 px-3 py-2 rounded-lg hover:bg-neutral-300 transition-colors flex items-center gap-1.5 text-sm">
-                  <TrendingUp className="w-4 h-4" />
-                  <span className="hidden md:inline">Recommend</span>
-                  <span className="md:hidden">Suggest</span>
-                </button>
-              </div>
-            </div>
-
-            {!user && (
-              <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
-                <p className="text-blue-800"><strong>💡 Pro tip:</strong> Sign in to sync your brands across all your devices!</p>
-              </div>
-            )}
-
-            {showAddBrand && (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 mb-6">
-                <h3 className="font-semibold text-lg mb-4">Add New Brand</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">Brand Name</label>
-                    <input
-                      type="text"
-                      value={newBrandName}
-                      onChange={(e) => handleBrandInputChange(e.target.value)}
-                      placeholder="Start typing to see suggestions..."
-                      className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                      onKeyPress={(e) => e.key === 'Enter' && addBrand()}
-                      onFocus={() => newBrandName && setShowSuggestions(brandSuggestions.length > 0)}
-                    />
-                    {showSuggestions && brandSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                        {brandSuggestions.map((brand, index) => (
-                          <button
-                            key={index}
-                            onClick={() => selectBrandSuggestion(brand)}
-                            className="w-full text-left px-4 py-2 hover:bg-neutral-100 transition-colors border-b border-neutral-100 last:border-b-0"
-                          >
-                            <div className="font-medium text-neutral-900">{brand}</div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-lg shadow-lg p-4">
-                        <p className="text-neutral-600 text-sm mb-3">
-                          Can't find <strong>"{newBrandName}"</strong>?
-                        </p>
-                        <button
-                          onClick={() => {
-                            setRecommendBrand(newBrandName);
-                            setShowRecommendModal(true);
-                          }}
-                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 transition-colors font-medium text-sm flex items-center justify-center gap-2"
-                        >
-                          <TrendingUp className="w-4 h-4" />
-                          Request This Brand
-                        </button>
-                        <p className="text-xs text-neutral-500 text-center mt-2">
-                          ⚡ We'll add it in less than 24 hours!
-                        </p>
                       </div>
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">Collection</label>
+                  {/* Collection picker */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-neutral-700 mb-2">
+                      Add to Collection
+                    </label>
                     {!showNewCollection ? (
-                      <div className="space-y-2">
+                      <>
                         <select
                           value={newBrandCollection}
                           onChange={(e) => setNewBrandCollection(e.target.value)}
-                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900 mb-2"
                         >
-                          <option value="">Select a collection...</option>
-                          {userCollections.map(col => (
-                            <option key={col} value={col}>{col}</option>
+                          <option value="">Choose a collection…</option>
+                          {userCollections.map(c => (
+                            <option key={c} value={c}>{c}</option>
                           ))}
                         </select>
                         <button
                           onClick={() => setShowNewCollection(true)}
-                          className="text-sm text-neutral-600 hover:text-neutral-900 flex items-center gap-1"
+                          className="text-sm text-neutral-600 underline hover:text-neutral-900"
                         >
-                          <Plus className="w-4 h-4" />
-                          Create new collection
+                          + Create new collection
                         </button>
-                      </div>
+                      </>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="flex gap-2">
                         <input
                           type="text"
                           value={newCollectionName}
                           onChange={(e) => setNewCollectionName(e.target.value)}
-                          placeholder="e.g., Athletic Gear, Luxury Bags..."
-                          className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                          placeholder="Collection name…"
+                          className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900"
                           autoFocus
                         />
-                        {userCollections.length > 0 && (
-                          <button
-                            onClick={() => setShowNewCollection(false)}
-                            className="text-sm text-neutral-600 hover:text-neutral-900"
-                          >
-                            ← Choose existing collection
-                          </button>
-                        )}
+                        <button
+                          onClick={() => setShowNewCollection(false)}
+                          className="text-sm text-neutral-500 hover:text-neutral-700"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     )}
                   </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={addBrand}
-                    disabled={!newBrandName.trim() || (!newBrandCollection && !newCollectionName.trim())}
-                    className="bg-neutral-900 text-white px-6 py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Add Brand
-                  </button>
-                  <button
-                    onClick={() => { setShowAddBrand(false); setShowNewCollection(false); }}
-                    className="bg-neutral-200 text-neutral-700 px-6 py-2 rounded-lg hover:bg-neutral-300 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
 
-            {myBrands.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-12 text-center">
-                <ShoppingBag className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
-                <h3 className="font-display text-xl font-semibold text-neutral-700 mb-2">No brands added yet</h3>
-                <p className="text-neutral-500">Click "Add Brand" and create your first collection to get started!</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {userCollections.map(collection => {
-                  const brandsInCollection = myBrands.filter(b => b.collection === collection);
-                  if (brandsInCollection.length === 0) return null;
-                  return (
-                    <div key={collection} className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        {editingCollection === collection ? (
-                          <input
-                            type="text"
-                            value={editingCollectionName}
-                            onChange={(e) => setEditingCollectionName(e.target.value)}
-                            onBlur={() => renameCollection(collection, editingCollectionName)}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                renameCollection(collection, editingCollectionName);
-                              } else if (e.key === 'Escape') {
-                                setEditingCollection(null);
-                              }
-                            }}
-                            className="font-semibold text-lg text-neutral-800 border-b-2 border-neutral-900 focus:outline-none bg-transparent"
-                            autoFocus
-                          />
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setEditingCollection(collection);
-                              setEditingCollectionName(collection);
-                            }}
-                            className="font-semibold text-lg text-neutral-800 hover:text-neutral-600 flex items-center gap-2 group"
-                          >
-                            <span>{collection}</span>
-                            <span className="text-neutral-400 opacity-0 group-hover:opacity-100 transition-opacity text-sm">✏️</span>
-                          </button>
-                        )}
-                        <span className="text-sm text-neutral-500">{brandsInCollection.length} brand{brandsInCollection.length !== 1 ? 's' : ''}</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                        {brandsInCollection.map(brand => {
-                          const brandImage = getBrandImage(brand.name);
-                          return (
-                            <div key={brand.id} className="flex items-center gap-3 bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200 hover:shadow-sm transition-shadow">
-                              {brandImage && (
-                                <img 
-                                  src={brandImage} 
-                                  alt={brand.name}
-                                  className="w-10 h-10 object-contain rounded-lg bg-white p-1"
-                                />
-                              )}
-                              <span className="font-medium text-neutral-800 flex-1">{brand.name}</span>
-                              <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
-                                <X className="w-5 h-5" />
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-                {myBrands.filter(b => !b.collection).length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6">
-                    <h3 className="font-semibold text-lg text-neutral-800 mb-4">Uncategorized</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {myBrands.filter(b => !b.collection).map(brand => {
-                        const brandImage = getBrandImage(brand.name);
-                        return (
-                          <div key={brand.id} className="flex items-center gap-3 bg-neutral-50 px-4 py-3 rounded-xl border border-neutral-200 hover:shadow-sm transition-shadow">
-                            {brandImage && (
-                              <img 
-                                src={brandImage} 
-                                alt={brand.name}
-                                className="w-10 h-10 object-contain rounded-lg bg-white p-1"
-                              />
-                            )}
-                            <span className="font-medium text-neutral-800 flex-1">{brand.name}</span>
-                            <button onClick={() => removeBrand(brand.id)} className="text-red-500 hover:text-red-700 transition-colors">
-                              <X className="w-5 h-5" />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'recommendations' && (
-          <div>
-            <div className="mb-6">
-              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">Recommended Brands</h2>
-              <p className="text-neutral-600">Discover curated brand collections for every style</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {BRAND_COLLECTIONS.map(collection => (
-                <div key={collection.id} className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden hover:shadow-lg transition-shadow">
-                  <div className="bg-gradient-to-r from-neutral-900 to-neutral-700 p-6 text-white">
-                    <h3 className="font-display text-2xl font-bold mb-2">{collection.name}</h3>
-                    <p className="text-neutral-200">{collection.description}</p>
-                  </div>
-                  <div className="p-6">
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-neutral-700 mb-3">Included Brands:</h4>
-                      <div className="space-y-2">
-                        {collection.brands.map((brand, idx) => {
-                          const brandImage = getBrandImage(brand.name);
-                          return (
-                            <div key={idx} className="flex items-center gap-3 bg-neutral-50 px-3 py-2 rounded-lg hover:bg-neutral-100 transition-colors">
-                              {brandImage && (
-                                <img 
-                                  src={brandImage} 
-                                  alt={brand.name}
-                                  className="w-8 h-8 object-contain rounded bg-white p-1"
-                                />
-                              )}
-                              <span className="font-medium text-neutral-800">{brand.name}</span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
+                  <div className="flex gap-3">
                     <button
-                      onClick={() => loadCollection(collection)}
-                      className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors font-semibold"
+                      onClick={() => addBrand()}
+                      disabled={!newBrandName.trim() || (!newBrandCollection && !newCollectionName.trim())}
+                      className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      Add All to My Brands
+                      Add Brand
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAddBrand(false);
+                        setNewBrandName('');
+                        setNewBrandCollection('');
+                        setShowSuggestions(false);
+                      }}
+                      className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
+                    >
+                      Cancel
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
+        {/* ══════════════════════════════════════════════════════
+            PROFILE TAB
+        ══════════════════════════════════════════════════════ */}
         {activeTab === 'profile' && (
-          <div>
-            <div className="mb-6">
-              <h2 className="font-display text-2xl font-bold text-neutral-900 mb-2">My Profile</h2>
-              <p className="text-neutral-600">Save your shipping info for faster checkout</p>
-            </div>
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-neutral-900 mb-6">Your Profile</h2>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 max-w-2xl">
-              <h3 className="font-semibold text-lg mb-4">Shipping Information</h3>
-              <p className="text-sm text-neutral-600 mb-6">
-                This info will be displayed when you checkout, making it easy to copy and paste into each retailer's site.
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Shipping Info</h3>
+              <p className="text-sm text-neutral-500 mb-4">
+                Saved here so you can copy it quickly at checkout.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">First Name</label>
-                  <input
-                    type="text"
-                    value={shippingProfile.firstName}
-                    onChange={(e) => setShippingProfile({...shippingProfile, firstName: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="John"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Last Name</label>
-                  <input
-                    type="text"
-                    value={shippingProfile.lastName}
-                    onChange={(e) => setShippingProfile({...shippingProfile, lastName: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="Doe"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    value={shippingProfile.email}
-                    onChange={(e) => setShippingProfile({...shippingProfile, email: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="john.doe@example.com"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Phone</label>
-                  <input
-                    type="tel"
-                    value={shippingProfile.phone}
-                    onChange={(e) => setShippingProfile({...shippingProfile, phone: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="(555) 123-4567"
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Address</label>
-                  <input
-                    type="text"
-                    value={shippingProfile.address}
-                    onChange={(e) => setShippingProfile({...shippingProfile, address: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="123 Main Street"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">City</label>
-                  <input
-                    type="text"
-                    value={shippingProfile.city}
-                    onChange={(e) => setShippingProfile({...shippingProfile, city: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="Spring"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">State</label>
-                  <input
-                    type="text"
-                    value={shippingProfile.state}
-                    onChange={(e) => setShippingProfile({...shippingProfile, state: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="TX"
-                    maxLength="2"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">ZIP Code</label>
-                  <input
-                    type="text"
-                    value={shippingProfile.zip}
-                    onChange={(e) => setShippingProfile({...shippingProfile, zip: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                    placeholder="77389"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800">
-                  <strong>💡 Tip:</strong> Your shipping info is saved locally and will appear in a convenient copy-paste box when you checkout!
-                </p>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { key: 'firstName', label: 'First Name', placeholder: 'Jane' },
+                  { key: 'lastName', label: 'Last Name', placeholder: 'Doe' },
+                  { key: 'email', label: 'Email', placeholder: 'jane@example.com' },
+                  { key: 'phone', label: 'Phone', placeholder: '(555) 000-0000' },
+                  { key: 'address', label: 'Address', placeholder: '123 Main St', fullWidth: true },
+                  { key: 'city', label: 'City', placeholder: 'New York' },
+                  { key: 'state', label: 'State', placeholder: 'NY' },
+                  { key: 'zip', label: 'Zip Code', placeholder: '10001' },
+                ].map(field => (
+                  <div key={field.key} className={field.fullWidth ? 'col-span-2' : ''}>
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">
+                      {field.label}
+                    </label>
+                    <input
+                      type="text"
+                      value={shippingProfile[field.key] || ''}
+                      onChange={(e) => setShippingProfile({ ...shippingProfile, [field.key]: e.target.value })}
+                      placeholder={field.placeholder}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 max-w-2xl mt-6">
-              <h3 className="font-semibold text-lg mb-2">Size Preferences</h3>
-              <p className="text-sm text-neutral-600 mb-6">
-                Help us show you the most relevant deals by saving your sizes
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Your Sizes</h3>
+              <p className="text-sm text-neutral-500 mb-4">
+                We'll highlight deals that match your size.
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Shirt Size</label>
-                  <select
-                    value={shippingProfile.shirtSize}
-                    onChange={(e) => setShippingProfile({...shippingProfile, shirtSize: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                  >
-                    <option value="">Select size...</option>
-                    <option value="XS">XS</option>
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                    <option value="XXL">XXL</option>
-                    <option value="XXXL">XXXL</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Shoe Size (US)</label>
-                  <select
-                    value={shippingProfile.shoeSize}
-                    onChange={(e) => setShippingProfile({...shippingProfile, shoeSize: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                  >
-                    <option value="">Select size...</option>
-                    {Array.from({length: 20}, (_, i) => i + 5).map(size => (
-                      <option key={size} value={size}>{size}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Pants Waist (inches)</label>
-                  <select
-                    value={shippingProfile.pantsWaist}
-                    onChange={(e) => setShippingProfile({...shippingProfile, pantsWaist: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                  >
-                    <option value="">Select waist...</option>
-                    {Array.from({length: 24}, (_, i) => (i + 24)).map(size => (
-                      <option key={size} value={size}>{size}"</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Pants Inseam (inches)</label>
-                  <select
-                    value={shippingProfile.pantsInseam}
-                    onChange={(e) => setShippingProfile({...shippingProfile, pantsInseam: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                  >
-                    <option value="">Select inseam...</option>
-                    {Array.from({length: 11}, (_, i) => (i + 28)).map(size => (
-                      <option key={size} value={size}>{size}"</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-neutral-700 mb-2">Dress Size</label>
-                  <select
-                    value={shippingProfile.dressSize}
-                    onChange={(e) => setShippingProfile({...shippingProfile, dressSize: e.target.value})}
-                    className="w-full px-4 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                  >
-                    <option value="">Select size...</option>
-                    <option value="00">00</option>
-                    <option value="0">0</option>
-                    <option value="2">2</option>
-                    <option value="4">4</option>
-                    <option value="6">6</option>
-                    <option value="8">8</option>
-                    <option value="10">10</option>
-                    <option value="12">12</option>
-                    <option value="14">14</option>
-                    <option value="16">16</option>
-                    <option value="18">18</option>
-                    <option value="20">20</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <p className="text-sm text-green-800">
-                  <strong>✨ Smart Filtering:</strong> We'll prioritize showing you deals that match your sizes
-                </p>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { key: 'shirtSize', label: 'Shirt Size', placeholder: 'M' },
+                  { key: 'shoeSize', label: 'Shoe Size', placeholder: '10' },
+                  { key: 'pantsWaist', label: 'Pants Waist', placeholder: '32' },
+                  { key: 'pantsInseam', label: 'Pants Inseam', placeholder: '30' },
+                  { key: 'dressSize', label: 'Dress Size', placeholder: '8' },
+                ].map(field => (
+                  <div key={field.key}>
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">
+                      {field.label}
+                    </label>
+                    <input
+                      type="text"
+                      value={shippingProfile[field.key] || ''}
+                      onChange={(e) => setShippingProfile({ ...shippingProfile, [field.key]: e.target.value })}
+                      placeholder={field.placeholder}
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         )}
+
+        {/* ══════════════════════════════════════════════════════
+            RECOMMENDATIONS / DISCOVER TAB
+        ══════════════════════════════════════════════════════ */}
+        {activeTab === 'recommendations' && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-neutral-900">Discover Brands</h2>
+              <button
+                onClick={() => setShowRecommendModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-sm font-medium"
+              >
+                <TrendingUp className="w-4 h-4" />
+                Request Brand
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {BRAND_COLLECTIONS.map(collection => {
+                const alreadyAdded = collection.brands.filter(b =>
+                  myBrands.some(mb => mb.name === b.name)
+                ).length;
+                const total = collection.brands.length;
+
+                return (
+                  <div
+                    key={collection.id}
+                    className="bg-white rounded-xl border border-neutral-200 p-5 hover:border-neutral-300 transition-colors"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex-1 min-w-0 mr-3">
+                        <h3 className="font-semibold text-neutral-900">{collection.name}</h3>
+                        <p className="text-xs text-neutral-500 mt-0.5">{collection.description}</p>
+                      </div>
+                      <button
+                        onClick={() => loadCollection(collection)}
+                        disabled={alreadyAdded === total}
+                        className="flex-shrink-0 px-3 py-1.5 bg-neutral-900 text-white rounded-lg text-xs font-medium hover:bg-neutral-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {alreadyAdded === total ? 'Added ✓' : alreadyAdded > 0 ? 'Add Rest' : 'Add All'}
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1.5">
+                      {collection.brands.slice(0, 8).map(brand => {
+                        const isAdded = myBrands.some(mb => mb.name === brand.name);
+                        return (
+                          <span
+                            key={brand.name}
+                            className={`text-xs px-2 py-0.5 rounded-full border ${
+                              isAdded
+                                ? 'bg-neutral-900 text-white border-neutral-900'
+                                : 'bg-white text-neutral-600 border-neutral-200'
+                            }`}
+                          >
+                            {brand.name}
+                          </span>
+                        );
+                      })}
+                      {collection.brands.length > 8 && (
+                        <span className="text-xs text-neutral-400 px-2 py-0.5">
+                          +{collection.brands.length - 8} more
+                        </span>
+                      )}
+                    </div>
+
+                    {alreadyAdded > 0 && alreadyAdded < total && (
+                      <p className="text-xs text-neutral-400 mt-2">
+                        {alreadyAdded} of {total} already in your brands
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+// ============================================================
+// APP-PART-4-SIMPLE-AUTH.jsx
+// Contains:
+//   1. WishlistsManagerModal  (NEW — replaces old WishlistModal)
+//   2. Updated ShareWishlistModal (copy-link + wishlist picker)
+//   3. All modal renders to paste into the return() of App
+//   4. Fixed saveToCloud (was referencing old `wishlist` variable)
+//   5. Sign-in modal render
+// ============================================================
+
+// ─────────────────────────────────────────────────────────────
+// 1. WishlistsManagerModal
+//    Shows all wishlists, lets user pick one to view/manage,
+//    create new ones, delete them, and share them.
+// ─────────────────────────────────────────────────────────────
+function WishlistsManagerModal({
+  wishlists,
+  onClose,
+  onRemoveItem,
+  onDeleteWishlist,
+  onCreateNew,
+  onShare,
+  onAddToBag,
+  shippingProfile,
+}) {
+  const [selectedWishlistId, setSelectedWishlistId] = useState(
+    wishlists.length > 0 ? wishlists[0].id : null
+  );
+  const [view, setView] = useState('list'); // 'list' | 'detail'
+
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+  const handleDealClick = (url) => {
+    if (isMobile) {
+      window.location.href = url;
+    } else {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  // Helper: get size label for a wishlist item based on its category
+  const getSizeLabel = (item) => {
+    if (!shippingProfile) return null;
+    const category = (item.category || '').toLowerCase();
+    const brand = (item.brand || '').toLowerCase();
+
+    // Footwear check
+    const isFootwear =
+      category === 'footwear' ||
+      ['shoe', 'boot', 'sneaker', 'sandal', 'heel', 'loafer'].some(k =>
+        (item.product || '').toLowerCase().includes(k)
+      );
+    if (isFootwear && shippingProfile.shoeSize) {
+      return `Shoe: ${shippingProfile.shoeSize}`;
+    }
+
+    // Dress check
+    if (category === 'dress' || (item.product || '').toLowerCase().includes('dress')) {
+      if (shippingProfile.dressSize) return `Dress: ${shippingProfile.dressSize}`;
+    }
+
+    // Pants check
+    if (['pant', 'jean', 'denim', 'trouser', 'short'].some(k =>
+      (item.product || '').toLowerCase().includes(k)
+    )) {
+      if (shippingProfile.pantsWaist && shippingProfile.pantsInseam) {
+        return `${shippingProfile.pantsWaist}W × ${shippingProfile.pantsInseam}L`;
+      }
+      if (shippingProfile.pantsWaist) return `Waist: ${shippingProfile.pantsWaist}`;
+    }
+
+    // Default: shirt size
+    if (shippingProfile.shirtSize) return `Size: ${shippingProfile.shirtSize}`;
+
+    return null;
+  };
+
+  const selectedWishlist = wishlists.find(w => w.id === selectedWishlistId);
+  const totalItems = wishlists.reduce((sum, w) => sum + w.items.length, 0);
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+
+        {/* Header */}
+        <div className="p-6 border-b border-neutral-200">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-2xl font-bold text-neutral-900">
+              {view === 'detail' && selectedWishlist
+                ? (
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setView('list')}
+                      className="text-neutral-400 hover:text-neutral-700 mr-1"
+                    >
+                      ←
+                    </button>
+                    <span>{selectedWishlist.emoji} {selectedWishlist.name}</span>
+                  </div>
+                )
+                : 'My Wishlists'
+              }
+            </h2>
+            <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+          {view === 'list' && (
+            <p className="text-sm text-neutral-500">
+              {wishlists.length} wishlist{wishlists.length !== 1 ? 's' : ''} · {totalItems} item{totalItems !== 1 ? 's' : ''}
+            </p>
+          )}
+          {view === 'detail' && selectedWishlist && (
+            <p className="text-sm text-neutral-500">
+              {selectedWishlist.items.length} item{selectedWishlist.items.length !== 1 ? 's' : ''} ·{' '}
+              {selectedWishlist.privacy === 'link-only' ? '🔗 Link Only' : '🔒 Private'}
+            </p>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-6">
+
+          {/* ── LIST VIEW ── */}
+          {view === 'list' && (
+            <div className="space-y-3">
+              {wishlists.length === 0 ? (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-500">No wishlists yet</p>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    Create one to start saving deals
+                  </p>
+                </div>
+              ) : (
+                wishlists.map(wishlist => {
+                  const preview = wishlist.items.slice(0, 3);
+                  const totalValue = wishlist.items
+                    .reduce((sum, i) => sum + i.salePrice, 0)
+                    .toFixed(2);
+
+                  return (
+                    <div
+                      key={wishlist.id}
+                      className="border border-neutral-200 rounded-xl p-4 hover:border-neutral-300 transition-colors"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <button
+                          onClick={() => {
+                            setSelectedWishlistId(wishlist.id);
+                            setView('detail');
+                          }}
+                          className="flex items-center gap-2 text-left"
+                        >
+                          <span className="text-2xl">{wishlist.emoji}</span>
+                          <div>
+                            <p className="font-semibold text-neutral-900">{wishlist.name}</p>
+                            <p className="text-xs text-neutral-500">
+                              {wishlist.items.length} item{wishlist.items.length !== 1 ? 's' : ''}
+                              {wishlist.items.length > 0 && ` · $${totalValue}`}
+                            </p>
+                          </div>
+                        </button>
+
+                        <div className="flex items-center gap-2">
+                          {/* Share button */}
+                          <button
+                            onClick={() => onShare(wishlist.id)}
+                            className="p-1.5 text-neutral-400 hover:text-neutral-700 transition-colors"
+                            title="Share wishlist"
+                          >
+                            <Upload className="w-4 h-4" />
+                          </button>
+                          {/* Delete button */}
+                          <button
+                            onClick={() => {
+                              if (window.confirm(`Delete "${wishlist.name}"? This can't be undone.`)) {
+                                onDeleteWishlist(wishlist.id);
+                                if (selectedWishlistId === wishlist.id) {
+                                  const remaining = wishlists.filter(w => w.id !== wishlist.id);
+                                  setSelectedWishlistId(remaining.length > 0 ? remaining[0].id : null);
+                                }
+                              }
+                            }}
+                            className="p-1.5 text-neutral-400 hover:text-red-500 transition-colors"
+                            title="Delete wishlist"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Preview images */}
+                      {preview.length > 0 && (
+                        <div className="flex gap-2 mt-3">
+                          {preview.map(item => (
+                            <img
+                              key={item.id}
+                              src={item.image}
+                              alt={item.product}
+                              className="w-14 h-14 object-cover rounded-lg border border-neutral-200 cursor-pointer hover:opacity-80"
+                              onClick={() => handleDealClick(item.link)}
+                            />
+                          ))}
+                          {wishlist.items.length > 3 && (
+                            <div className="w-14 h-14 rounded-lg bg-neutral-100 border border-neutral-200 flex items-center justify-center text-xs text-neutral-500 font-medium">
+                              +{wishlist.items.length - 3}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {/* ── DETAIL VIEW ── */}
+          {view === 'detail' && selectedWishlist && (
+            <div>
+              {selectedWishlist.items.length === 0 ? (
+                <div className="text-center py-12">
+                  <Heart className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
+                  <p className="text-neutral-500">This wishlist is empty</p>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    Click the heart icon on deals to save them here
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {selectedWishlist.items.map(item => {
+                    const sizeLabel = getSizeLabel(item);
+                    return (
+                      <div key={item.id} className="flex gap-4 bg-neutral-50 rounded-xl p-4">
+                        <img
+                          src={item.image}
+                          alt={item.product}
+                          className="w-20 h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 flex-shrink-0"
+                          onClick={() => handleDealClick(item.link)}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs text-neutral-500 mb-0.5">{item.brand}</p>
+                          <h3
+                            className="font-medium text-neutral-900 line-clamp-2 text-sm mb-1 cursor-pointer hover:text-neutral-600"
+                            onClick={() => handleDealClick(item.link)}
+                          >
+                            {item.product}
+                          </h3>
+
+                          {/* Size label */}
+                          {sizeLabel && (
+                            <span className="inline-block text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full mb-1.5">
+                              Your {sizeLabel}
+                            </span>
+                          )}
+
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-semibold text-neutral-900">${item.salePrice}</span>
+                            {item.originalPrice > item.salePrice && (
+                              <>
+                                <span className="text-xs text-neutral-400 line-through">
+                                  ${item.originalPrice}
+                                </span>
+                                <span className="text-xs text-green-600 font-medium">
+                                  {item.discount} off
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => onAddToBag(item)}
+                              className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg hover:bg-neutral-800"
+                            >
+                              Add to Bag
+                            </button>
+                            <button
+                              onClick={() => handleDealClick(item.link)}
+                              className="text-xs bg-neutral-200 text-neutral-700 px-3 py-1 rounded-lg hover:bg-neutral-300"
+                            >
+                              View Deal
+                            </button>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => onRemoveItem(selectedWishlist.id, item.id)}
+                          className="text-red-400 hover:text-red-600 flex-shrink-0"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-neutral-200">
+          {view === 'detail' && selectedWishlist && selectedWishlist.items.length > 0 && (
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm text-neutral-600">Total Value</p>
+                <p className="text-xl font-bold text-neutral-900">
+                  ${selectedWishlist.items.reduce((s, i) => s + i.salePrice, 0).toFixed(2)}
+                </p>
+              </div>
+              <button
+                onClick={() => onShare(selectedWishlist.id)}
+                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+              >
+                <Upload className="w-4 h-4" />
+                Share
+              </button>
+            </div>
+          )}
+          <button
+            onClick={onCreateNew}
+            className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-neutral-300 rounded-xl text-neutral-600 hover:border-neutral-400 hover:text-neutral-900 transition-colors text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" />
+            Create New Wishlist
+          </button>
+        </div>
       </div>
+    </div>
+  );
+}
 
-      {fetchingDeals && <FetchingDealsAnimation />}
+// ─────────────────────────────────────────────────────────────
+// 2. Updated ShareWishlistModal
+//    Adds: Copy Link button, wishlist selector dropdown
+// ─────────────────────────────────────────────────────────────
+function ShareWishlistModal({
+  onClose,
+  wishlists,
+  shareWishlistId,
+  setShareWishlistId,
+  shareRecipient,
+  setShareRecipient,
+  shareMessage,
+  setShareMessage,
+  onShare,
+  shareSending,
+}) {
+  const [copied, setCopied] = useState(false);
 
-      {showBagModal && (
+  const selectedWishlist = wishlists.find(w => w.id === shareWishlistId) || wishlists[0];
+  const shareLink = selectedWishlist
+    ? `${window.location.origin}/wishlist/${selectedWishlist.shareId}`
+    : '';
+
+  const handleCopyLink = async () => {
+    if (!shareLink) return;
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for browsers that block clipboard
+      const ta = document.createElement('textarea');
+      ta.value = shareLink;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Share Wishlist</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+
+        <div className="space-y-4 mb-6">
+
+          {/* Wishlist picker (only shown when multiple wishlists exist) */}
+          {wishlists.length > 1 && (
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Which Wishlist?
+              </label>
+              <select
+                value={shareWishlistId || ''}
+                onChange={(e) => setShareWishlistId(e.target.value)}
+                className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+              >
+                {wishlists.map(w => (
+                  <option key={w.id} value={w.id}>
+                    {w.emoji} {w.name} ({w.items.length} items)
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Privacy notice */}
+          {selectedWishlist && (
+            <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${
+              selectedWishlist.privacy === 'private'
+                ? 'bg-amber-50 border border-amber-200 text-amber-800'
+                : 'bg-blue-50 border border-blue-200 text-blue-800'
+            }`}>
+              <span className="text-base">{selectedWishlist.privacy === 'private' ? '🔒' : '🔗'}</span>
+              <p>
+                {selectedWishlist.privacy === 'private'
+                  ? 'This wishlist is set to Private. Only you can view it — sharing the link won\'t work until you change the privacy setting.'
+                  : 'This wishlist is Link Only — anyone with the link can view it.'}
+              </p>
+            </div>
+          )}
+
+          {/* Copy link */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Share Link
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={shareLink}
+                readOnly
+                className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-xs bg-neutral-50 text-neutral-600 font-mono overflow-hidden"
+              />
+              <button
+                onClick={handleCopyLink}
+                disabled={selectedWishlist?.privacy === 'private'}
+                className={`flex-shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  copied
+                    ? 'bg-green-600 text-white'
+                    : 'bg-neutral-900 text-white hover:bg-neutral-800'
+                } disabled:opacity-40 disabled:cursor-not-allowed`}
+              >
+                {copied ? (
+                  <><Check className="w-4 h-4" /> Copied!</>
+                ) : (
+                  'Copy'
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Email share */}
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Or Share via Email
+            </label>
+            <input
+              type="email"
+              value={shareRecipient}
+              onChange={(e) => setShareRecipient(e.target.value)}
+              placeholder="friend@example.com"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-700 mb-2">
+              Message (optional)
+            </label>
+            <textarea
+              value={shareMessage}
+              onChange={(e) => setShareMessage(e.target.value)}
+              placeholder="Add a personal message…"
+              rows="3"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onShare}
+            disabled={!shareRecipient.trim() || shareSending}
+            className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium"
+          >
+            {shareSending ? 'Sending…' : 'Send Email'}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ─────────────────────────────────────────────────────────────
+// 3. FIXED saveToCloud
+//    Paste this over the existing saveToCloud in Part 2.
+//    Bug: was referencing `wishlist` (old single-list variable)
+//    instead of `wishlists` (new array).
+// ─────────────────────────────────────────────────────────────
+/*
+
+  const saveToCloud = async () => {
+    if (!user) return;
+
+    if (
+      myBrands.length === 0 &&
+      shoppingBag.length === 0 &&
+      selectedGenders.length === 0 &&
+      wishlists.length === 0          // ← FIXED: was `wishlist.length`
+    ) return;
+
+    try {
+      setSyncStatus('syncing');
+      await setDoc(doc(db, 'users', user.email), {
+        brands: myBrands,
+        genderPreferences: selectedGenders,
+        shoppingBag: shoppingBag,
+        wishlists: wishlists,           // ← FIXED: was `wishlist`
+        activeWishlistId: activeWishlistId,
+        shippingProfile: shippingProfile,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+      setSyncStatus('synced');
+      setTimeout(() => setSyncStatus('idle'), 2000);
+    } catch (error) {
+      console.error('saveToCloud error:', error);
+      setSyncStatus('error');
+    }
+  };
+
+*/
+
+
+// ─────────────────────────────────────────────────────────────
+// 4. MODAL RENDERS
+//    Paste all of these inside the return() of App, just before
+//    the closing </div> tag of the outermost wrapper.
+//    They replace / supplement the existing modal renders.
+// ─────────────────────────────────────────────────────────────
+
+/*
+
+      {/* ── Sign-in modal ──────────────────────────────────── */}
+/*      {showSignIn && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-neutral-900">Sign In</h3>
+              <button onClick={() => setShowSignIn(false)} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <p className="text-sm text-neutral-600 mb-4">
+              Enter your email to sync your brands and wishlist across devices.
+            </p>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 mb-3"
+              onKeyPress={(e) => e.key === 'Enter' && signIn()}
+              autoFocus
+            />
+            {error && <p className="text-red-500 text-xs mb-3">{error}</p>}
+            <div className="flex gap-3">
+              <button
+                onClick={signIn}
+                disabled={signingIn}
+                className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium disabled:opacity-50"
+              >
+                {signingIn ? 'Signing in…' : 'Continue'}
+              </button>
+              <button
+                onClick={() => setShowSignIn(false)}
+                className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Shopping bag modal ─────────────────────────────── */}
+/*      {showBagModal && (
         <ShoppingBagModal
           bag={shoppingBag}
           onClose={() => setShowBagModal(false)}
@@ -2823,22 +3594,63 @@ export default function App() {
         />
       )}
 
-      {showWishlistModal && (
-        <WishlistModal
-          wishlist={wishlist}
+      {/* ── Wishlists manager modal ────────────────────────── */}
+/*      {showWishlistModal && (
+        <WishlistsManagerModal
+          wishlists={wishlists}
           onClose={() => setShowWishlistModal(false)}
-          onRemove={removeFromWishlist}
-          onShare={() => {
+          onRemoveItem={removeFromWishlist}
+          onDeleteWishlist={deleteWishlist}
+          onCreateNew={() => {
+            setShowWishlistModal(false);
+            setShowCreateWishlistModal(true);
+          }}
+          onShare={(wishlistId) => {
+            setShareWishlistId(wishlistId);
             setShowWishlistModal(false);
             setShowShareModal(true);
           }}
           onAddToBag={addToBag}
+          shippingProfile={shippingProfile}
         />
       )}
 
-      {showShareModal && (
+      {/* ── Create wishlist modal ──────────────────────────── */}
+/*      {showCreateWishlistModal && (
+        <CreateWishlistModal
+          onClose={() => setShowCreateWishlistModal(false)}
+          onCreate={createWishlist}
+        />
+      )}
+
+      {/* ── Add-to-wishlist modal (multi-wishlist picker) ──── */}
+/*      {showAddToWishlistModal && (
+        <AddToWishlistModal
+          onClose={() => {
+            setShowAddToWishlistModal(false);
+            setPendingWishlistItem(null);
+          }}
+          wishlists={wishlists}
+          pendingItem={pendingWishlistItem}
+          onAddToWishlist={addToSpecificWishlist}
+          onCreateNew={() => {
+            setShowAddToWishlistModal(false);
+            setShowCreateWishlistModal(true);
+          }}
+        />
+      )}
+
+      {/* ── Share wishlist modal ───────────────────────────── */}
+/*      {showShareModal && (
         <ShareWishlistModal
-          onClose={() => setShowShareModal(false)}
+          onClose={() => {
+            setShowShareModal(false);
+            setShareRecipient('');
+            setShareMessage('');
+          }}
+          wishlists={wishlists}
+          shareWishlistId={shareWishlistId}
+          setShareWishlistId={setShareWishlistId}
           shareRecipient={shareRecipient}
           setShareRecipient={setShareRecipient}
           shareMessage={shareMessage}
@@ -2848,62 +3660,15 @@ export default function App() {
         />
       )}
 
-      {showSignIn && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-xl">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-neutral-900">Sign In to BrandSnobs</h2>
-              <button onClick={() => {
-                setShowSignIn(false);
-                setEmail('');
-                setError('');
-              }} className="text-neutral-400 hover:text-neutral-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            <p className="text-neutral-600 mb-6">
-              Enter your email to access your brands on any device.
-            </p>
-
-            <input
-              type="email"
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError('');
-              }}
-              onKeyPress={(e) => e.key === 'Enter' && signIn()}
-              className="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-900 mb-4"
-              disabled={signingIn}
-              autoFocus
-            />
-
-            {error && (
-              <p className="text-red-600 text-sm mb-4">{error}</p>
-            )}
-
-            <button
-              onClick={signIn}
-              disabled={signingIn || !email}
-              className="w-full bg-neutral-900 text-white py-3 rounded-lg hover:bg-neutral-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium mb-3"
-            >
-              {signingIn ? 'Signing In...' : 'Continue'}
-            </button>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <p className="text-xs text-blue-800">
-                💡 <span className="font-semibold">No password needed!</span> Same email = same brands on all devices.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showRecommendModal && (
+      {/* ── Recommend brand modal ──────────────────────────── */}
+/*      {showRecommendModal && (
         <RecommendBrandModal
-          onClose={() => setShowRecommendModal(false)}
+          onClose={() => {
+            setShowRecommendModal(false);
+            setRecommendBrand('');
+            setRecommendEmail('');
+            setRecommendSuccess(false);
+          }}
           onSubmit={submitBrandRecommendation}
           brandName={recommendBrand}
           setBrandName={setRecommendBrand}
@@ -2914,171 +3679,16 @@ export default function App() {
         />
       )}
 
-      {showNameCollectionPrompt && (
+      {/* ── Name collection prompt ─────────────────────────── */}
+/*      {showNameCollectionPrompt && (
         <NameCollectionModal
           onClose={() => setShowNameCollectionPrompt(false)}
-          onRename={(newName) => renameCollection('Uncategorized', newName)}
+          onRename={(name) => {
+            renameCollection('Uncategorized', name);
+            setShowNameCollectionPrompt(false);
+          }}
+          initialName=""
         />
       )}
 
-      <footer className="bg-white border-t border-neutral-200 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center space-y-4">
-            <div className="flex items-center justify-center gap-6 text-sm text-neutral-600">
-              <button onClick={() => setShowHowItWorks(true)} className="hover:text-neutral-900 transition-colors">How It Works</button>
-              <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-neutral-900 transition-colors">Privacy Policy</button>
-              <button onClick={() => setShowTermsOfService(true)} className="hover:text-neutral-900 transition-colors">Terms of Service</button>
-            </div>
-            <div className="bg-neutral-50 rounded-lg p-4 max-w-2xl mx-auto">
-              <p className="text-xs text-neutral-600">
-                <span className="font-semibold">Affiliate Disclosure:</span> BrandSnobs participates in affiliate marketing programs including CJ Affiliate, ShareASale, and Impact. We earn commissions on purchases made through our links. This helps keep BrandSnobs free for everyone.
-              </p>
-            </div>
-            <p className="text-sm text-neutral-500">
-              © 2026 BrandSnobs. You Like What You Like.
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      {showHowItWorks && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-neutral-900">How It Works</h2>
-              <button onClick={() => setShowHowItWorks(false)} className="text-neutral-400 hover:text-neutral-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="prose prose-neutral max-w-none">
-              <h3>Find Deals on YOUR Favorite Brands</h3>
-              
-              <h4>1. Add Your Brands</h4>
-              <p>Tell us which brands you love - we'll track deals just for you. Unlike other deal sites that show you everything, we only show deals on brands YOU care about.</p>
-              
-              <h4>2. Browse Curated Deals</h4>
-              <p>See the latest sales, discounts, and promotions on your brands across ALL retailers. We search department stores, brand websites, outdoor retailers, and more!</p>
-              
-              <h4>3. Add to Bag</h4>
-              <p>Found something you like? Add it to your BrandSnobs shopping bag. Group items by retailer to streamline checkout.</p>
-              
-              <h4>4. Checkout</h4>
-              <p>Complete your purchase on the retailer's website.</p>
-              <p><strong>Why not checkout on BrandSnobs?</strong></p>
-              <ul>
-                <li>Your payment info stays secure with trusted retailers</li>
-                <li>You earn retailer rewards points</li>
-                <li>Easy returns through the retailer</li>
-                <li>Retailer handles shipping and customer service</li>
-              </ul>
-              <p>We're a deal discovery platform - we find the deals, retailers handle the transaction.</p>
-              
-              <h4>5. Sign In to Sync</h4>
-              <p>Create an account to sync your brands and deals across all your devices. PC, phone, tablet - your brands follow you everywhere.</p>
-              
-              <h3>Why BrandSnobs?</h3>
-              <p><strong>You Like What You Like</strong> - We don't use algorithms to "suggest" brands. You tell us exactly which brands you want, and we find the deals.</p>
-              <p><strong>Save Time</strong> - No more checking 10 different websites. See all your brand deals in one place.</p>
-              <p><strong>Never Miss a Sale</strong> - New deals added daily from retailers across the web.</p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showPrivacyPolicy && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-neutral-900">Privacy Policy</h2>
-              <button onClick={() => setShowPrivacyPolicy(false)} className="text-neutral-400 hover:text-neutral-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="prose prose-neutral max-w-none text-sm">
-              <p><strong>Effective Date:</strong> February 24, 2026</p>
-              
-              <h3>Information We Collect</h3>
-              <p><strong>Information You Provide:</strong></p>
-              <ul>
-                <li>Email address (when you sign in)</li>
-                <li>Brand preferences (brands you add to your list)</li>
-                <li>Shopping bag items (deals you save)</li>
-                <li>Size preferences (optional, for filtering deals)</li>
-              </ul>
-              
-              <p><strong>Automatically Collected:</strong></p>
-              <ul>
-                <li>Device information (browser type, operating system)</li>
-                <li>Usage data (pages viewed, deals clicked)</li>
-                <li>Cookies (for authentication and preferences)</li>
-              </ul>
-              
-              <h3>How We Use Your Information</h3>
-              <p>We use your information to:</p>
-              <ul>
-                <li>Provide and improve our services</li>
-                <li>Show you relevant deals on your favorite brands</li>
-                <li>Sync your preferences across devices</li>
-              </ul>
-              
-              <h3>Information Sharing</h3>
-              <p>We do NOT sell your personal information. We may share with affiliate networks to track purchases and analytics providers (aggregated data only).</p>
-              
-              <h3>Affiliate Disclosure</h3>
-              <p>BrandSnobs participates in affiliate marketing programs. When you purchase through our links, we may earn a commission. This helps us keep BrandSnobs free.</p>
-              
-              <h3>Your Rights</h3>
-              <p>You have the right to access your data, delete your account, and update your preferences.</p>
-              
-              <p className="mt-6 text-neutral-500"><em>Last updated: February 24, 2026</em></p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showTermsOfService && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-8 my-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-3xl font-bold text-neutral-900">Terms of Service</h2>
-              <button onClick={() => setShowTermsOfService(false)} className="text-neutral-400 hover:text-neutral-600">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="prose prose-neutral max-w-none text-sm">
-              <p><strong>Effective Date:</strong> February 24, 2026</p>
-              
-              <h3>What BrandSnobs Does</h3>
-              <p>BrandSnobs is a deal discovery platform. We show you deals on brands you care about, aggregate sales from multiple retailers, and provide links to retailers' websites.</p>
-              
-              <p><strong>We do NOT:</strong></p>
-              <ul>
-                <li>Process payments (purchases happen on retailer sites)</li>
-                <li>Handle shipping or fulfillment</li>
-                <li>Provide customer service for purchases</li>
-                <li>Guarantee product availability or pricing</li>
-              </ul>
-              
-              <h3>Acceptable Use</h3>
-              <p>You agree NOT to scrape our data, interfere with the platform, violate any laws, or upload malicious code.</p>
-              
-              <h3>Affiliate Links & Commissions</h3>
-              <p>BrandSnobs earns commissions on purchases made through our links. This helps us keep the service free. Clicking our links means you consent to affiliate tracking.</p>
-              
-              <h3>Third-Party Websites</h3>
-              <p>When you click a deal, you're redirected to retailer websites. We're not responsible for retailer policies, pricing, availability, product quality, or customer service.</p>
-              
-              <h3>Disclaimers</h3>
-              <p>BrandSnobs is provided "as is" without warranties. We don't guarantee continuous availability, error-free operation, or deal accuracy. Deals are subject to change without notice.</p>
-              
-              <h3>Limitation of Liability</h3>
-              <p>BrandSnobs is not liable for purchases made through our links, retailer errors, product defects, shipping delays, or missed deals.</p>
-              
-              <p className="mt-6 text-neutral-500"><em>Last updated: February 24, 2026</em></p>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+*/
