@@ -2980,6 +2980,27 @@ export default function App() {
               </div>
             )}
 
+            {/* Quick brand actions bar */}
+            {myBrands.length > 0 && (
+              <div className="flex items-center gap-3 mb-5 p-3 bg-white border border-neutral-200 rounded-xl">
+                <span className="text-sm text-neutral-500 flex-1">Don't see a brand?</span>
+                <button
+                  onClick={() => setShowAddBrand(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white rounded-lg text-xs font-medium hover:bg-neutral-800 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Add Brand
+                </button>
+                <button
+                  onClick={() => setShowRecommendModal(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 text-neutral-700 rounded-lg text-xs font-medium hover:bg-neutral-100 transition-colors"
+                >
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  Request Brand
+                </button>
+              </div>
+            )}
+
             {/* Deal cards grid */}
             {dealsLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-neutral-400">
@@ -3057,17 +3078,29 @@ export default function App() {
                       brandsInColl.includes((d.brand || '').toLowerCase())
                     );
                     if (collDeals.length === 0) return null;
+                    const isCollapsedDeals = collapsedCollections.includes('deals__' + collName);
                     return (
                       <div key={collName} className="mb-8">
-                        <h3 className="text-lg font-semibold text-neutral-900 mb-3 flex items-center gap-2">
-                          {collName}
-                          <span className="text-xs font-normal text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
-                            {collDeals.length} deal{collDeals.length !== 1 ? 's' : ''}
-                          </span>
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                          {collDeals.map(deal => dealCard(deal))}
-                        </div>
+                        <button
+                          onClick={() => toggleCollectionCollapse('deals__' + collName)}
+                          className="w-full flex items-center justify-between mb-3 group"
+                        >
+                          <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
+                            {collName}
+                            <span className="text-xs font-normal text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                              {collDeals.length} deal{collDeals.length !== 1 ? 's' : ''}
+                            </span>
+                          </h3>
+                          {isCollapsedDeals
+                            ? <ChevronDown className="w-5 h-5 text-neutral-400 group-hover:text-neutral-600" />
+                            : <ChevronUp className="w-5 h-5 text-neutral-400 group-hover:text-neutral-600" />
+                          }
+                        </button>
+                        {!isCollapsedDeals && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                            {collDeals.map(deal => dealCard(deal))}
+                          </div>
+                        )}
                       </div>
                     );
                   });
