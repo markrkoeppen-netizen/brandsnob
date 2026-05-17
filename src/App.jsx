@@ -2924,80 +2924,139 @@ export default function App() {
               />
             )}
 
-            {/* Search + sort/filter bar */}
+            {/* Side-by-side search bars + filters */}
             {myBrands.length > 0 && (
-              <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search deals or brands…"
-                    className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                  />
+              <div className="flex flex-col sm:flex-row gap-3 mb-6 items-end">
+
+                {/* LEFT: Add Brand search */}
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Add Brand</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+                    <input
+                      type="text"
+                      value={newBrandName}
+                      onChange={(e) => handleBrandInputChange(e.target.value)}
+                      placeholder="Search to add brand..."
+                      className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                      onFocus={() => newBrandName && setShowSuggestions(brandSuggestions.length > 0)}
+                    />
+                    {newBrandName && (
+                      <button
+                        onClick={() => { setNewBrandName(''); setShowSuggestions(false); }}
+                        className="absolute right-3 top-2.5 text-neutral-400 hover:text-neutral-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                    {/* Suggestions dropdown */}
+                    {showSuggestions && brandSuggestions.length > 0 && (
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                        {brandSuggestions.map((brand, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              selectBrandSuggestion(brand);
+                              setNewBrandName('');
+                              setShowSuggestions(false);
+                            }}
+                            className="w-full text-left px-4 py-2.5 hover:bg-neutral-100 transition-colors text-sm font-medium text-neutral-900 border-b border-neutral-100 last:border-b-0"
+                          >
+                            {brand}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {/* Request brand when not found */}
+                    {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
+                      <div className="absolute z-20 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg p-4 text-center">
+                        <p className="text-sm text-neutral-600 mb-3">
+                          Can't find <strong>"{newBrandName}"</strong>?
+                        </p>
+                        <button
+                          onClick={() => {
+                            handleOnboardingBrandRequest(newBrandName);
+                            setNewBrandName('');
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 text-sm font-medium flex items-center justify-center gap-2"
+                        >
+                          <TrendingUp className="w-4 h-4" />
+                          Request This Brand
+                        </button>
+                        <p className="text-xs text-neutral-500 mt-2">
+                          ⚡ We'll add it in less than 24 hours!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* RIGHT: Search Products */}
+                <div className="flex-1">
+                  <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Search Products</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search your deals..."
+                      className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-2.5 text-neutral-400 hover:text-neutral-600"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                   {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-2.5 text-neutral-400 hover:text-neutral-600"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+                    <p className="text-xs text-neutral-400 mt-1 ml-1">
+                      {filteredDeals.length} result{filteredDeals.length !== 1 ? 's' : ''}
+                    </p>
                   )}
                 </div>
 
+                {/* Filters + refresh */}
                 <div className="flex gap-2">
-                  <select
-                    value={dealSort}
-                    onChange={(e) => setDealSort(e.target.value)}
-                    className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
-                  >
-                    <option value="discount">Best Discount</option>
-                    <option value="price-low">Price: Low–High</option>
-                    <option value="price-high">Price: High–Low</option>
-                    <option value="brand">Brand A–Z</option>
-                  </select>
-
-                  <select
-                    value={dealFilter}
-                    onChange={(e) => setDealFilter(e.target.value)}
-                    className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
-                  >
-                    <option value="all">All Discounts</option>
-                    <option value=">30%">30%+ Off</option>
-                    <option value=">50%">50%+ Off</option>
-                  </select>
-
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Sort</label>
+                    <select
+                      value={dealSort}
+                      onChange={(e) => setDealSort(e.target.value)}
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+                    >
+                      <option value="discount">Best Discount</option>
+                      <option value="price-low">Price: Low–High</option>
+                      <option value="price-high">Price: High–Low</option>
+                      <option value="brand">Brand A–Z</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Filter</label>
+                    <select
+                      value={dealFilter}
+                      onChange={(e) => setDealFilter(e.target.value)}
+                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+                    >
+                      <option value="all">All Discounts</option>
+                      <option value=">30%">30%+ Off</option>
+                      <option value=">50%">50%+ Off</option>
+                    </select>
+                  </div>
                   <button
                     onClick={refreshDeals}
                     disabled={refreshing}
-                    className="p-2 border border-neutral-300 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors"
+                    className="p-2 border border-neutral-300 rounded-lg text-neutral-600 hover:bg-neutral-100 transition-colors self-end"
                     title="Refresh deals"
                   >
                     <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
                   </button>
                 </div>
-              </div>
-            )}
 
-            {/* Quick brand actions bar */}
-            {myBrands.length > 0 && (
-              <div className="flex items-center gap-3 mb-5 p-3 bg-white border border-neutral-200 rounded-xl">
-                <span className="text-sm text-neutral-500 flex-1">Don't see a brand?</span>
-                <button
-                  onClick={() => setShowAddBrand(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white rounded-lg text-xs font-medium hover:bg-neutral-800 transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  Add Brand
-                </button>
-                <button
-                  onClick={() => setShowRecommendModal(true)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 text-neutral-700 rounded-lg text-xs font-medium hover:bg-neutral-100 transition-colors"
-                >
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  Request Brand
-                </button>
               </div>
             )}
 
