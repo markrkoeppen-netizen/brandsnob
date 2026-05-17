@@ -3545,32 +3545,72 @@ export default function App() {
                       </button>
                     </div>
 
-                    <div className="flex flex-wrap gap-1.5">
-                      {collection.brands.slice(0, 8).map(brand => {
+                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-2">
+                      {collection.brands.slice(0, 10).map(brand => {
                         const isAdded = myBrands.some(mb => mb.name === brand.name);
+                        // Convert brand name to a likely domain for Clearbit
+                        const domain = brand.name
+                          .toLowerCase()
+                          .replace(/\s+&\s+/g, '')
+                          .replace(/\s+/g, '')
+                          .replace(/[^a-z0-9]/g, '') + '.com';
+                        const logoUrl = `https://logo.clearbit.com/${domain}`;
                         return (
-                          <span
+                          <button
                             key={brand.name}
-                            className={`text-xs px-2 py-0.5 rounded-full border ${
+                            onClick={() => {
+                              if (!isAdded) {
+                                setNewBrandName(brand.name);
+                                setShowAddBrand(true);
+                              }
+                            }}
+                            disabled={isAdded}
+                            title={isAdded ? `${brand.name} (added)` : `Add ${brand.name}`}
+                            className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${
                               isAdded
-                                ? 'bg-neutral-900 text-white border-neutral-900'
-                                : 'bg-white text-neutral-600 border-neutral-200'
+                                ? 'bg-neutral-900 border-neutral-900 opacity-60 cursor-default'
+                                : 'bg-white border-neutral-200 hover:border-neutral-400 hover:shadow-sm cursor-pointer'
                             }`}
                           >
-                            {brand.name}
-                          </span>
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
+                              <img
+                                src={logoUrl}
+                                alt={brand.name}
+                                className="w-full h-full object-contain p-1"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                  e.target.nextSibling.style.display = 'flex';
+                                }}
+                              />
+                              <span
+                                style={{ display: 'none' }}
+                                className="w-full h-full items-center justify-center text-xs font-bold text-neutral-500"
+                              >
+                                {brand.name.slice(0, 2).toUpperCase()}
+                              </span>
+                            </div>
+                            <span className={`text-xs font-medium text-center leading-tight line-clamp-2 ${
+                              isAdded ? 'text-white' : 'text-neutral-700'
+                            }`}>
+                              {brand.name}
+                            </span>
+                            {isAdded && (
+                              <span className="text-xs text-neutral-300">✓</span>
+                            )}
+                          </button>
                         );
                       })}
-                      {collection.brands.length > 8 && (
-                        <span className="text-xs text-neutral-400 px-2 py-0.5">
-                          +{collection.brands.length - 8} more
-                        </span>
+                      {collection.brands.length > 10 && (
+                        <div className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-neutral-300 text-neutral-400">
+                          <span className="text-sm font-medium">+{collection.brands.length - 10}</span>
+                          <span className="text-xs">more</span>
+                        </div>
                       )}
                     </div>
 
                     {alreadyAdded > 0 && alreadyAdded < total && (
                       <p className="text-xs text-neutral-400 mt-2">
-                        {alreadyAdded} of {total} already in your brands
+                        {alreadyAdded} of {total} added
                       </p>
                     )}
                   </div>
