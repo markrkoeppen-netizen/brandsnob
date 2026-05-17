@@ -3538,13 +3538,13 @@ export default function App() {
                             title={isAdded ? `${brand.name} (added)` : `Add ${brand.name}`}
                             className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${
                               isAdded
-                                ? 'bg-neutral-900 border-neutral-900 opacity-60 cursor-default'
+                                ? 'bg-emerald-600 border-emerald-600 cursor-default'
                                 : 'bg-white border-neutral-200 hover:border-neutral-400 hover:shadow-sm cursor-pointer'
                             }`}
                           >
                             <BrandLogo domain={domain} name={brand.name} />
                             <span className={`text-xs font-medium text-center leading-tight line-clamp-2 ${
-                              isAdded ? 'text-white' : 'text-neutral-700'
+                              isAdded ? 'text-white font-semibold' : 'text-neutral-700'
                             }`}>
                               {brand.name}
                             </span>
