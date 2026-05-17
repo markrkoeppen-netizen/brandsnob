@@ -3296,138 +3296,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Add Brand panel */}
-            {showAddBrand && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-neutral-900">Add a Brand</h3>
-                    <button
-                      onClick={() => {
-                        setShowAddBrand(false);
-                        setNewBrandName('');
-                        setNewBrandCollection('');
-                        setShowSuggestions(false);
-                      }}
-                      className="text-neutral-400 hover:text-neutral-600"
-                    >
-                      <X className="w-6 h-6" />
-                    </button>
-                  </div>
-
-                  {/* Brand search */}
-                  <div className="mb-4 relative">
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">
-                      Brand Name
-                    </label>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
-                      <input
-                        type="text"
-                        value={newBrandName}
-                        onChange={(e) => handleBrandInputChange(e.target.value)}
-                        placeholder="Search brands…"
-                        className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                        autoFocus
-                      />
-                    </div>
-
-                    {showSuggestions && brandSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg max-h-48 overflow-y-auto">
-                        {brandSuggestions.map((brand, i) => (
-                          <button
-                            key={i}
-                            onClick={() => selectBrandSuggestion(brand)}
-                            className="w-full text-left px-4 py-2.5 hover:bg-neutral-100 transition-colors text-sm font-medium text-neutral-900 border-b border-neutral-100 last:border-b-0"
-                          >
-                            {brand}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-
-                    {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg p-4 text-center">
-                        <p className="text-sm text-neutral-600 mb-3">
-                          Can't find <strong>"{newBrandName}"</strong>?
-                        </p>
-                        <button
-                          onClick={() => handleOnboardingBrandRequest(newBrandName)}
-                          className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 text-sm font-medium"
-                        >
-                          Request This Brand
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Collection picker */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-neutral-700 mb-2">
-                      Add to Collection
-                    </label>
-                    {!showNewCollection ? (
-                      <>
-                        <select
-                          value={newBrandCollection}
-                          onChange={(e) => setNewBrandCollection(e.target.value)}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900 mb-2"
-                        >
-                          <option value="">Choose a collection…</option>
-                          {userCollections.map(c => (
-                            <option key={c} value={c}>{c}</option>
-                          ))}
-                        </select>
-                        <button
-                          onClick={() => setShowNewCollection(true)}
-                          className="text-sm text-neutral-600 underline hover:text-neutral-900"
-                        >
-                          + Create new collection
-                        </button>
-                      </>
-                    ) : (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newCollectionName}
-                          onChange={(e) => setNewCollectionName(e.target.value)}
-                          placeholder="Collection name…"
-                          className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => setShowNewCollection(false)}
-                          className="text-sm text-neutral-500 hover:text-neutral-700"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => addBrand()}
-                      disabled={!newBrandName.trim() || (!newBrandCollection && !newCollectionName.trim())}
-                      className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      Add Brand
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowAddBrand(false);
-                        setNewBrandName('');
-                        setNewBrandCollection('');
-                        setShowSuggestions(false);
-                      }}
-                      className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -3548,12 +3416,94 @@ export default function App() {
                     <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-2">
                       {collection.brands.slice(0, 10).map(brand => {
                         const isAdded = myBrands.some(mb => mb.name === brand.name);
-                        // Convert brand name to a likely domain for Clearbit
-                        const domain = brand.name
-                          .toLowerCase()
-                          .replace(/\s+&\s+/g, '')
-                          .replace(/\s+/g, '')
-                          .replace(/[^a-z0-9]/g, '') + '.com';
+                        // Known domain lookup — Clearbit needs the real domain to find logos
+                        const BRAND_DOMAINS = {
+                          'Gucci': 'gucci.com',
+                          'Prada': 'prada.com',
+                          'Louis Vuitton': 'louisvuitton.com',
+                          'Hermès': 'hermes.com',
+                          'Goyard': 'goyard.com',
+                          'Fendi': 'fendi.com',
+                          'Saint Laurent': 'ysl.com',
+                          'Chloé': 'chloe.com',
+                          'The Row': 'therow.com',
+                          'Burberry': 'burberry.com',
+                          'Dolce & Gabbana': 'dolcegabbana.com',
+                          'Christian Louboutin': 'christianlouboutin.com',
+                          'Jimmy Choo': 'jimmychoo.com',
+                          'Stuart Weitzman': 'stuartweitzman.com',
+                          'Cole Haan': 'colehaan.com',
+                          'Feragamo': 'ferragamo.com',
+                          'Lucchese': 'lucchese.com',
+                          'Tumi': 'tumi.com',
+                          'Coach': 'coach.com',
+                          'Nike': 'nike.com',
+                          'Adidas': 'adidas.com',
+                          'Lululemon': 'lululemon.com',
+                          'Alo': 'aloyoga.com',
+                          'Vuori': 'vuoriclothing.com',
+                          'On Running': 'on.com',
+                          'Athleta': 'athleta.gap.com',
+                          'Under Armour': 'underarmour.com',
+                          'YoungLA': 'youngla.com',
+                          'Gymshark': 'gymshark.com',
+                          'Calvin Klein': 'calvinklein.com',
+                          'Donna Karan': 'donnakaran.com',
+                          'Free People': 'freepeople.com',
+                          'Kate Spade': 'katespade.com',
+                          'Marc Jacobs': 'marcjacobs.com',
+                          'Michael Kors': 'michaelkors.com',
+                          'Oscar de la Renta': 'oscardelarenta.com',
+                          'Spanx': 'spanx.com',
+                          'Tom Ford': 'tomford.com',
+                          'Tory Burch': 'toryburch.com',
+                          'Vera Wang': 'verawang.com',
+                          'Abercrombie & Fitch': 'abercrombie.com',
+                          'American Giant': 'american-giant.com',
+                          'Brooks Brothers': 'brooksbrothers.com',
+                          'Carhartt': 'carhartt.com',
+                          'Chubbies': 'chubbiesshorts.com',
+                          'Everlane': 'everlane.com',
+                          'Kith': 'kith.com',
+                          'Lacoste': 'lacoste.com',
+                          'Levi Strauss': 'levi.com',
+                          'Madewell': 'madewell.com',
+                          'Peter Millar': 'petermillar.com',
+                          'Polo Ralph Lauren': 'ralphlauren.com',
+                          'Rhone': 'rhone.com',
+                          'Tommy Bahama': 'tommybahama.com',
+                          'TravisMatthew': 'travismathew.com',
+                          'Vineyard Vines': 'vineyardvines.com',
+                          'Wrangler': 'wrangler.com',
+                          'Allbirds': 'allbirds.com',
+                          'BIRKENSTOCK': 'birkenstock.com',
+                          'Bombas': 'bombas.com',
+                          'Crocs': 'crocs.com',
+                          'Havaianas': 'havaianas.com',
+                          'OluKai': 'olukai.com',
+                          'OOFOS': 'oofos.com',
+                          'Reef': 'reef.com',
+                          'Sanuk': 'sanuk.com',
+                          'Teva': 'teva.com',
+                          'UGG': 'ugg.com',
+                          'Costa': 'costadelmar.com',
+                          'Gorjana': 'gorjana.com',
+                          'Kendra Scott': 'kendrascott.com',
+                          'Oakley': 'oakley.com',
+                          'Ray-Ban': 'ray-ban.com',
+                          'The North Face': 'thenorthface.com',
+                          'Columbia': 'columbia.com',
+                          'Yeti': 'yeti.com',
+                          'Pelagic': 'pelagicgear.com',
+                          'Ariat': 'ariat.com',
+                          'Cinch': 'cinchwestern.com',
+                          'Justin Boots': 'justinboots.com',
+                          'Stetson': 'stetson.com',
+                          'Tony Lama': 'tonylama.com',
+                          'Thom Browne': 'thombrowne.com',
+                          'Cult Gaia': 'cultgaia.com',
+                        };
+                        const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
                         const logoUrl = `https://logo.clearbit.com/${domain}`;
                         return (
                           <button
@@ -3620,6 +3570,139 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* ── Add Brand modal (global — works from any tab) ─── */}
+      {showAddBrand && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-neutral-900">Add a Brand</h3>
+              <button
+                onClick={() => {
+                  setShowAddBrand(false);
+                  setNewBrandName('');
+                  setNewBrandCollection('');
+                  setShowSuggestions(false);
+                }}
+                className="text-neutral-400 hover:text-neutral-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Brand name */}
+            <div className="mb-4 relative">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Brand Name
+              </label>
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  value={newBrandName}
+                  onChange={(e) => handleBrandInputChange(e.target.value)}
+                  placeholder="Search brands…"
+                  className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+
+              {showSuggestions && brandSuggestions.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  {brandSuggestions.map((brand, i) => (
+                    <button
+                      key={i}
+                      onClick={() => selectBrandSuggestion(brand)}
+                      className="w-full text-left px-4 py-2.5 hover:bg-neutral-100 transition-colors text-sm font-medium text-neutral-900 border-b border-neutral-100 last:border-b-0"
+                    >
+                      {brand}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {newBrandName && brandSuggestions.length === 0 && showSuggestions && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg p-4 text-center">
+                  <p className="text-sm text-neutral-600 mb-3">
+                    Can't find <strong>"{newBrandName}"</strong>?
+                  </p>
+                  <button
+                    onClick={() => handleOnboardingBrandRequest(newBrandName)}
+                    className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 text-sm font-medium"
+                  >
+                    Request This Brand
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Collection picker */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-neutral-700 mb-2">
+                Add to Collection
+              </label>
+              {!showNewCollection ? (
+                <>
+                  <select
+                    value={newBrandCollection}
+                    onChange={(e) => setNewBrandCollection(e.target.value)}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900 mb-2"
+                  >
+                    <option value="">Choose a collection…</option>
+                    {userCollections.map(c => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setShowNewCollection(true)}
+                    className="text-sm text-neutral-600 underline hover:text-neutral-900"
+                  >
+                    + Create new collection
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newCollectionName}
+                    onChange={(e) => setNewCollectionName(e.target.value)}
+                    placeholder="Collection name…"
+                    className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900"
+                    autoFocus
+                  />
+                  <button
+                    onClick={() => setShowNewCollection(false)}
+                    className="text-sm text-neutral-500 hover:text-neutral-700"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => addBrand()}
+                disabled={!newBrandName.trim() || (!newBrandCollection && !newCollectionName.trim())}
+                className="flex-1 bg-neutral-900 text-white py-2 rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Add Brand
+              </button>
+              <button
+                onClick={() => {
+                  setShowAddBrand(false);
+                  setNewBrandName('');
+                  setNewBrandCollection('');
+                  setShowSuggestions(false);
+                }}
+                className="flex-1 bg-neutral-200 text-neutral-700 py-2 rounded-lg hover:bg-neutral-300 text-sm"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Sign-in modal ──────────────────────────────────── */}
       {showSignIn && (
