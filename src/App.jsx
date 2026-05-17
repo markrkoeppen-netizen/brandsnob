@@ -329,7 +329,7 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
 ];
 
-function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions }) {
+function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn }) {
   const popularBrands = [
     { name: 'Alo', emoji: '🧘' },
     { name: 'Burberry', emoji: '🧥' },
@@ -435,6 +435,20 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Returning user sign-in */}
+        <div className="mt-8 text-center border-t border-neutral-200 pt-6">
+          <p className="text-sm text-neutral-500 mb-3">
+            Already have an account?
+          </p>
+          <button
+            onClick={onSignIn}
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-neutral-900 text-white rounded-xl font-semibold text-sm hover:bg-neutral-800 transition-colors"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In to Restore Your Brands
+          </button>
         </div>
       </div>
     </div>
@@ -2744,6 +2758,7 @@ export default function App() {
           brandSuggestions={brandSuggestions}
           showSuggestions={showSuggestions}
           setShowSuggestions={setShowSuggestions}
+          onSignIn={() => setShowSignIn(true)}
         />
       )}
 
@@ -3006,24 +3021,57 @@ export default function App() {
                     })}
                   </p>
                 )}
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                  {filteredDeals.map(deal => (
+                {/* Group deals by the user's named collections */}
+                {(() => {
+                  const allWishlistItems = wishlists.flatMap(w => w.items);
+                  const dealCard = (deal) => (
                     <LuxuryDealCard
                       key={deal.id}
                       deal={deal}
                       onAddToBag={addToBag}
                       onDealClick={handleDealClick}
-                      // isInWishlist uses the new cross-wishlist check
-                      wishlist={wishlists.flatMap(w => w.items)}
+                      wishlist={allWishlistItems}
                       onAddToWishlist={addToWishlist}
                       onRemoveFromWishlist={(dealId) => {
-                        // Remove from whichever wishlist contains it
                         const containing = wishlists.find(w => w.items.some(i => i.id === dealId));
                         if (containing) removeFromWishlist(containing.id, dealId);
                       }}
                     />
-                  ))}
-                </div>
+                  );
+
+                  // If searching, show flat list
+                  if (searchQuery) {
+                    return (
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                        {filteredDeals.map(deal => dealCard(deal))}
+                      </div>
+                    );
+                  }
+
+                  // Group by collection
+                  return userCollections.map(collName => {
+                    const brandsInColl = myBrands
+                      .filter(b => b.collection === collName)
+                      .map(b => b.name.toLowerCase());
+                    const collDeals = filteredDeals.filter(d =>
+                      brandsInColl.includes((d.brand || '').toLowerCase())
+                    );
+                    if (collDeals.length === 0) return null;
+                    return (
+                      <div key={collName} className="mb-8">
+                        <h3 className="text-lg font-semibold text-neutral-900 mb-3 flex items-center gap-2">
+                          {collName}
+                          <span className="text-xs font-normal text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                            {collDeals.length} deal{collDeals.length !== 1 ? 's' : ''}
+                          </span>
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
+                          {collDeals.map(deal => dealCard(deal))}
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
               </>
             )}
           </div>
