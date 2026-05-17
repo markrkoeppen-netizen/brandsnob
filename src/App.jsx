@@ -2956,13 +2956,16 @@ export default function App() {
                           <button
                             key={i}
                             onClick={() => {
-                              selectBrandSuggestion(brand);
-                              setNewBrandName('');
+                              // Pre-fill the Add Brand modal and open it
+                              setNewBrandName(brand);
                               setShowSuggestions(false);
+                              setBrandSuggestions([]);
+                              setShowAddBrand(true);
                             }}
                             className="w-full text-left px-4 py-2.5 hover:bg-neutral-100 transition-colors text-sm font-medium text-neutral-900 border-b border-neutral-100 last:border-b-0"
                           >
-                            {brand}
+                            <span>{brand}</span>
+                            <span className="text-xs text-neutral-400 ml-2">— tap to add</span>
                           </button>
                         ))}
                       </div>
