@@ -329,6 +329,27 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
 ];
 
+function BrandLogo({ domain, name }) {
+  const [errored, setErrored] = React.useState(false);
+  const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+  return (
+    <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
+      {!errored ? (
+        <img
+          src={logoUrl}
+          alt={name}
+          className="w-8 h-8 object-contain"
+          onError={() => setErrored(true)}
+        />
+      ) : (
+        <span className="text-xs font-bold text-neutral-500">
+          {name.replace(/[^a-zA-Z0-9 ]/g, '').trim().split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn }) {
   const popularBrands = [
     { name: 'Alo', emoji: '🧘' },
@@ -3504,7 +3525,6 @@ export default function App() {
                           'Cult Gaia': 'cultgaia.com',
                         };
                         const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
-                        const logoUrl = `https://logo.clearbit.com/${domain}`;
                         return (
                           <button
                             key={brand.name}
@@ -3522,23 +3542,7 @@ export default function App() {
                                 : 'bg-white border-neutral-200 hover:border-neutral-400 hover:shadow-sm cursor-pointer'
                             }`}
                           >
-                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0">
-                              <img
-                                src={logoUrl}
-                                alt={brand.name}
-                                className="w-full h-full object-contain p-1"
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                  e.target.nextSibling.style.display = 'flex';
-                                }}
-                              />
-                              <span
-                                style={{ display: 'none' }}
-                                className="w-full h-full items-center justify-center text-xs font-bold text-neutral-500"
-                              >
-                                {brand.name.slice(0, 2).toUpperCase()}
-                              </span>
-                            </div>
+                            <BrandLogo domain={domain} name={brand.name} />
                             <span className={`text-xs font-medium text-center leading-tight line-clamp-2 ${
                               isAdded ? 'text-white' : 'text-neutral-700'
                             }`}>
