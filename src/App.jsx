@@ -2657,37 +2657,44 @@ export default function App() {
       console.warn('Firestore share record failed (non-fatal):', fsError);
     }
 
-    // Send email via EmailJS
+    // Send email via Vercel serverless function (bypasses CORS restrictions)
     try {
-      await emailjs.send(
-        'service_9b98jq6',
-        'template_m8cfg6j',
-        {
-          to_email: shareRecipient.trim(),
-          submitter_email: shareRecipient.trim(),
-          user_email: user?.email || 'A BrandSnobs user',
-          brand_name: `${wishlistToShare.emoji} ${wishlistToShare.name} (${wishlistToShare.items.length} items · $${totalValue} total)`,
-          message: messageBody,
-        },
-        'QPiBFFlW7aGv6W0UP'
-      );
-      alert('Wishlist shared successfully!');
+      const response = await fetch('/api/send-wishlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: shareRecipient.trim(),
+          senderName: user?.email || 'A BrandSnobs user',
+          wishlistName: wishlistToShare.name,
+          wishlistEmoji: wishlistToShare.emoji,
+          message: shareMessage.trim() || '',
+          shareLink,
+          items: wishlistToShare.items,
+          totalValue,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send email');
+      }
+
+      alert(`Wishlist shared! ${shareRecipient} will receive an email with all the details.`);
       setShowShareModal(false);
       setShareRecipient('');
       setShareMessage('');
     } catch (error) {
-      console.error('EmailJS share error:', error);
-      // Email failed but Firestore record was saved — offer copy link as fallback
-      const fallback = window.confirm(
-        `Email delivery failed. Would you like to copy the share link instead so you can send it manually?`
-      );
-      if (fallback) {
-        try {
-          await navigator.clipboard.writeText(shareLink);
-          alert('Link copied! You can paste it into any message.');
-        } catch {
-          prompt('Copy this link:', shareLink);
-        }
+      console.error('Share error:', error);
+      // Fall back to clipboard
+      try {
+        await navigator.clipboard.writeText(shareLink);
+        alert(`Email failed — but the share link has been copied to your clipboard! Paste it in a message to ${shareRecipient}.`);
+        setShowShareModal(false);
+        setShareRecipient('');
+        setShareMessage('');
+      } catch {
+        prompt('Copy this share link and send it manually:', shareLink);
       }
     } finally {
       setShareSending(false);
