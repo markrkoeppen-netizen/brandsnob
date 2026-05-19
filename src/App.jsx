@@ -13,11 +13,11 @@ const CATEGORIES = [
 ];
 
 const GENDER_OPTIONS = [
-  { id: 'women', label: "Women's", icon: '👗' },
-  { id: 'men', label: "Men's", icon: '👔' },
-  { id: 'girls', label: "Girls'", icon: '🎀' },
-  { id: 'boys', label: "Boys'", icon: '⚽' },
-  { id: 'unisex', label: 'Unisex', icon: '✨' }
+  { id: 'women', label: "Women's" },
+  { id: 'men', label: "Men's" },
+  { id: 'girls', label: "Girls'" },
+  { id: 'boys', label: "Boys'" },
+  { id: 'unisex', label: 'Unisex' }
 ];
 
 const BRAND_COLLECTIONS = [
@@ -457,6 +457,19 @@ function TermsOfServiceModal({ onClose }) {
   );
 }
 
+function Toast({ message, visible }) {
+  return (
+    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
+      visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+    }`}>
+      <div className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2.5 rounded-full shadow-lg text-sm font-medium">
+        <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+        {message}
+      </div>
+    </div>
+  );
+}
+
 function BrandLogo({ domain, name }) {
   const [errored, setErrored] = React.useState(false);
   const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -505,16 +518,31 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
     <div className="fixed inset-0 bg-gradient-to-br from-neutral-50 to-neutral-100 z-40 flex items-center justify-center p-4 overflow-y-auto">
       <div className="max-w-2xl w-full py-8">
         <div className="text-center mb-8">
-          <ShoppingBag className="w-20 h-20 text-neutral-900 mx-auto mb-6" />
+          <ShoppingBag className="w-16 h-16 text-neutral-900 mx-auto mb-5" />
           <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-3">
-            Welcome to BrandSnobs
+            BrandSnobs
           </h1>
-          <p className="text-xl md:text-2xl text-neutral-600 font-light tracking-wide">
-            YOU LIKE WHAT YOU LIKE
+          <p className="text-lg md:text-xl text-neutral-600 font-light tracking-widest uppercase mb-6">
+            You Like What You Like
           </p>
-          <p className="text-neutral-500 mt-4 max-w-md mx-auto">
-            Track deals from your favorite brands. We'll show you sales from across the web.
-          </p>
+          <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto mb-6">
+            <div className="bg-white rounded-xl border border-neutral-200 p-3 text-center">
+              <p className="text-xl font-bold text-neutral-900">100+</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Premium Brands</p>
+            </div>
+            <div className="bg-white rounded-xl border border-neutral-200 p-3 text-center">
+              <p className="text-xl font-bold text-neutral-900">Daily</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Deal Updates</p>
+            </div>
+            <div className="bg-white rounded-xl border border-neutral-200 p-3 text-center">
+              <p className="text-xl font-bold text-neutral-900">Free</p>
+              <p className="text-xs text-neutral-500 mt-0.5">Always</p>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-neutral-500 max-w-md mx-auto">
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Track sales from your favorite brands</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Save to wishlists &amp; share with friends</span>
+          </div>
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 p-6 md:p-8 mb-8">
@@ -970,9 +998,11 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
           <span className="text-xs font-medium tracking-widest uppercase text-neutral-500">
             {deal.brand}
           </span>
-          <span className="text-xs text-neutral-400 hidden md:block">
-            {deal.retailer}
-          </span>
+          {deal.retailer && deal.retailer !== deal.brand && (
+            <span className="text-xs text-neutral-400 hidden md:block border border-neutral-200 px-1.5 py-0.5 rounded-full">
+              {deal.retailer}
+            </span>
+          )}
         </div>
 
         <h3 className="font-display text-sm md:text-lg font-medium text-neutral-900 mb-2 md:mb-3 line-clamp-2 leading-snug min-h-[2.5rem] md:min-h-[3.5rem]">
@@ -1053,31 +1083,24 @@ function GenderPreference({ selectedGenders, onGenderChange }) {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-neutral-100 p-3 md:p-5 mb-4 md:mb-6">
-      <div className="flex items-center gap-2 mb-3">
-        <User className="w-4 h-4 text-neutral-500" />
-        <span className="text-sm font-medium text-neutral-700">Shopping For</span>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        {GENDER_OPTIONS.map((option) => {
-          const isSelected = selectedGenders.includes(option.id);
-          return (
-            <button
-              key={option.id}
-              onClick={() => toggleGender(option.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all ${
-                isSelected
-                  ? 'border-neutral-900 bg-neutral-900 text-white'
-                  : 'border-neutral-300 bg-white text-neutral-600 hover:border-neutral-400'
-              }`}
-            >
-              <span className="text-base">{option.icon}</span>
-              <span>{option.label}</span>
-              {isSelected && <Check className="w-3 h-3" />}
-            </button>
-          );
-        })}
-      </div>
+    <div className="flex flex-wrap items-center gap-2 mb-4">
+      <span className="text-xs text-neutral-400 font-medium tracking-wide uppercase mr-1">For:</span>
+      {GENDER_OPTIONS.map((option) => {
+        const isSelected = selectedGenders.includes(option.id);
+        return (
+          <button
+            key={option.id}
+            onClick={() => toggleGender(option.id)}
+            className={`px-2.5 py-1 rounded-full border text-xs font-medium transition-all ${
+              isSelected
+                ? 'border-neutral-900 bg-neutral-900 text-white'
+                : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-400 hover:text-neutral-700'
+            }`}
+          >
+            {option.label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -1934,6 +1957,8 @@ export default function App() {
   const [recommendEmail, setRecommendEmail] = useState('');
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
   const [showTermsOfService, setShowTermsOfService] = useState(false);
@@ -2383,7 +2408,8 @@ export default function App() {
     setShowNewCollection(false);
     setShowAddBrand(false);
     setShowSuggestions(false);
-    
+    showToast(`${brandName} added to your brands!`);
+
     // Show fetching animation for first brand
     if (isFirstBrand) {
       setFetchingDeals(true);
@@ -2414,6 +2440,12 @@ export default function App() {
   const handleOnboardingBrandRequest = (brandName) => {
     setRecommendBrand(brandName);
     setShowRecommendModal(true);
+  };
+
+  const showToast = (message) => {
+    setToastMessage(message);
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2500);
   };
 
   const userCollections = [...new Set(myBrands.map(b => b.collection).filter(Boolean))];
@@ -3096,7 +3128,7 @@ export default function App() {
               { id: 'deals', label: 'Deals', count: filteredDeals.length },
               { id: 'brands', label: 'My Brands', count: myBrands.length },
               { id: 'profile', label: 'Profile' },
-              { id: 'recommendations', label: 'Discover' }
+              { id: 'recommendations', label: 'Inspiration' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -3618,7 +3650,7 @@ export default function App() {
         {activeTab === 'recommendations' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Discover Brands</h2>
+              <h2 className="text-2xl font-bold text-neutral-900">Inspiration</h2>
               <button
                 onClick={() => setShowRecommendModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-sm font-medium"
@@ -3952,6 +3984,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <Toast message={toastMessage} visible={toastVisible} />
 
       {/* ── How It Works modal ────────────────────────────── */}
       {showHowItWorks && (
