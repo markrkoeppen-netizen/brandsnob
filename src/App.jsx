@@ -111,7 +111,10 @@ const BRAND_COLLECTIONS = [
       { name: 'Tommy Bahama', category: 'Fashion' },
       { name: 'TravisMatthew', category: 'Fashion' },
       { name: 'Vineyard Vines', category: 'Fashion' },
-      { name: 'Wrangler', category: 'Fashion' }
+      { name: 'Wrangler', category: 'Fashion' },
+      { name: 'American Eagle', category: 'Fashion' },
+      { name: 'Comfrt', category: 'Fashion' },
+      { name: 'Hollister', category: 'Fashion' }
     ]
   },
   {
@@ -152,7 +155,8 @@ const BRAND_COLLECTIONS = [
       { name: 'The North Face', category: 'Outdoor' },
       { name: 'Columbia', category: 'Outdoor' },
       { name: 'Yeti', category: 'Outdoor' },
-      { name: 'Pelagic', category: 'Outdoor' }
+      { name: 'Pelagic', category: 'Outdoor' },
+      { name: 'RTIC Outdoors', category: 'Outdoor' }
     ]
   },
   {
@@ -177,7 +181,9 @@ const BRAND_COLLECTIONS = [
       { name: 'Thom Browne', category: 'Fashion' },
       { name: 'Cult Gaia', category: 'Accessories' },
       { name: 'Burlebo', category: 'Fashion' },
-      { name: 'Poncho Outdoors', category: 'Fashion' }
+      { name: 'Poncho Outdoors', category: 'Fashion' },
+      { name: 'Fear of God Essentials', category: 'Fashion' },
+      { name: 'Hellstar', category: 'Fashion' }
     ]
   },
   {
@@ -242,7 +248,9 @@ const BRAND_COLLECTIONS = [
       { name: 'Aritzia', category: 'Fashion' },
       { name: 'Anthropologie', category: 'Fashion' },
       { name: 'Outdoor Voices', category: 'Fashion' },
-      { name: 'Sweaty Betty', category: 'Fashion' }
+      { name: 'Sweaty Betty', category: 'Fashion' },
+      { name: 'Brandy Melville', category: 'Fashion' },
+      { name: 'Victoria\'s Secret', category: 'Fashion' }
     ]
   },
   {
@@ -268,7 +276,8 @@ const BRAND_COLLECTIONS = [
       { name: 'New Balance', category: 'Footwear' },
       { name: 'Nike', category: 'Footwear' },
       { name: 'Adidas', category: 'Footwear' },
-      { name: 'Puma', category: 'Footwear' }
+      { name: 'Puma', category: 'Footwear' },
+      { name: 'Supreme', category: 'Fashion' }
     ]
   },
   {
@@ -326,7 +335,8 @@ const ALL_AVAILABLE_BRANDS = [
   'Poncho Outdoors', 'Prada', 'Puma', 'Rag & Bone', 'Ray-Ban', 'Reebok', 'Reef', 'Reformation', 'REI Co-op', 'Rhone', 'Saint Laurent', 'Salomon', 'Samsonite', 'Sanuk', 'Shade Critters', 'Spanx', 'Stetson', 'Stuart Weitzman', 'Sweaty Betty',
   'Teva', 'The North Face', 'The Row', 'Theory', 'Thom Browne', 'Tiffany & Co.', 'Tom Ford', 'Tommy Bahama', 'Tony Lama',
   'Tory Burch', 'TravisMatthew', 'Trendia', 'Tumi', 'UGG', 'Under Armour', 'Untuckit', 'Vans', 'Vera Wang', 'Vince',
-  'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
+  'Victoria\'s Secret', 'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara',
+  'American Eagle', 'Brandy Melville', 'Comfrt', 'Fear of God Essentials', 'Hellstar', 'Hollister', 'RTIC Outdoors', 'Supreme'
 ];
 
 function HowItWorksModal({ onClose }) {
@@ -2801,11 +2811,54 @@ export default function App() {
     }
     
     if (selectedGenders.length > 0) {
-      result = result.filter(deal => {
-        if (deal.gender) {
-          return selectedGenders.includes(deal.gender) || deal.gender === 'unisex';
+      // Keyword maps for each gender — checks product title, category, and gender field
+      const GENDER_KEYWORDS = {
+        men:    ['men', "men's", 'mens', 'male', 'masculine', 'husband', 'boyfriend', 'guy', 'guys', 'his'],
+        women:  ['women', "women's", 'womens', 'woman', 'female', 'feminine', 'ladies', 'lady', "lady's", 'her', 'hers', 'wife', 'girlfriend'],
+        boys:   ['boys', "boys'", "boy's", 'boy', 'youth male', 'kids male', 'little boy'],
+        girls:  ['girls', "girls'", "girl's", 'girl', 'youth female', 'kids female', 'little girl'],
+        unisex: ['unisex', 'gender neutral', 'gender-neutral', 'all genders', 'everyone'],
+      };
+
+      const detectGender = (deal) => {
+        // First check explicit gender field
+        const explicitGender = (deal.gender || '').toLowerCase().trim();
+        if (explicitGender) {
+          if (explicitGender === 'unisex' || explicitGender.includes('unisex')) return ['men', 'women', 'boys', 'girls', 'unisex'];
+          if (explicitGender.includes('men') && !explicitGender.includes('women')) return ['men'];
+          if (explicitGender.includes('women') || explicitGender.includes('woman')) return ['women'];
+          if (explicitGender.includes('boy')) return ['boys'];
+          if (explicitGender.includes('girl')) return ['girls'];
         }
-        return true;
+
+        // Scan product title and category for gender keywords
+        const searchText = [
+          deal.product || '',
+          deal.title || '',
+          deal.category || '',
+          deal.description || '',
+        ].join(' ').toLowerCase();
+
+        const matched = new Set();
+        for (const [gender, keywords] of Object.entries(GENDER_KEYWORDS)) {
+          if (keywords.some(kw => searchText.includes(kw))) {
+            matched.add(gender);
+          }
+        }
+
+        // Unisex matches all genders
+        if (matched.has('unisex')) return ['men', 'women', 'boys', 'girls', 'unisex'];
+
+        // If no gender keywords found at all, show under all filters
+        // (better to show too much than hide valid deals)
+        if (matched.size === 0) return ['men', 'women', 'boys', 'girls', 'unisex'];
+
+        return [...matched];
+      };
+
+      result = result.filter(deal => {
+        const dealGenders = detectGender(deal);
+        return selectedGenders.some(g => dealGenders.includes(g));
       });
     }
     
@@ -3690,6 +3743,15 @@ export default function App() {
                           'Tony Lama': 'tonylama.com',
                           'Thom Browne': 'thombrowne.com',
                           'Cult Gaia': 'cultgaia.com',
+                          'American Eagle': 'ae.com',
+                          'Brandy Melville': 'brandymelvilleusa.com',
+                          'Comfrt': 'wearecomfrt.com',
+                          'Fear of God Essentials': 'fearofgod.com',
+                          'Hellstar': 'hellstar.com',
+                          'Hollister': 'hollisterco.com',
+                          'RTIC Outdoors': 'rticoutdoors.com',
+                          'Supreme': 'supremenewyork.com',
+                          "Victoria's Secret": 'victoriassecret.com',
                         };
                         const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
                         return (
