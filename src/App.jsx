@@ -2661,7 +2661,7 @@ export default function App() {
     try {
       await emailjs.send(
         'service_9b98jq6',
-        'template_7sri3sr',
+        'template_m8cfg6j',
         {
           to_email: shareRecipient.trim(),
           submitter_email: shareRecipient.trim(),
