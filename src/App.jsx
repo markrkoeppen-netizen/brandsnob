@@ -329,6 +329,124 @@ const ALL_AVAILABLE_BRANDS = [
   'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara'
 ];
 
+function HowItWorksModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">How It Works</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-5">
+          {[
+            { step: '1', icon: '🏷️', title: 'Add Your Brands', desc: 'Search for and add the fashion brands you love. Organize them into collections like "Sneakers", "Luxury", or "Workwear".' },
+            { step: '2', icon: '🔍', title: 'We Find the Deals', desc: 'BrandSnobs automatically scans your brands for sales, discounts, and deals — updated regularly so you never miss a drop.' },
+            { step: '3', icon: '❤️', title: 'Save to Wishlist', desc: 'Heart any item to save it to a wishlist. Create multiple wishlists for birthdays, holidays, or any occasion.' },
+            { step: '4', icon: '🔗', title: 'Share with Anyone', desc: 'Share your wishlist with friends and family via a link or email. Perfect for gift-giving season.' },
+            { step: '5', icon: '🛍️', title: 'Shop When Ready', desc: 'Click any deal to go straight to the brand's website and check out. We never store your payment info.' },
+          ].map(({ step, icon, title, desc }) => (
+            <div key={step} className="flex gap-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-neutral-900 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                {step}
+              </div>
+              <div>
+                <p className="font-semibold text-neutral-900 mb-1">{icon} {title}</p>
+                <p className="text-sm text-neutral-600">{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-neutral-900 text-white py-2.5 rounded-xl font-medium hover:bg-neutral-800 transition-colors"
+        >
+          Got it!
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PrivacyPolicyModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Privacy Policy</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-4 text-sm text-neutral-600">
+          <p className="text-xs text-neutral-400">Last updated: January 2025</p>
+          {[
+            { title: 'Information We Collect', body: 'We collect your email address (if you sign in), your brand preferences, wishlist items, and shipping profile information you choose to enter. We do not collect payment information.' },
+            { title: 'How We Use Your Information', body: 'Your data is used solely to provide the BrandSnobs service — syncing your brands and wishlists across devices. We do not sell your data to third parties.' },
+            { title: 'Data Storage', body: 'Your data is stored securely using Google Firebase. We use industry-standard encryption for all data in transit and at rest.' },
+            { title: 'Affiliate Links', body: 'BrandSnobs earns a commission when you make a purchase through our links. This does not affect the price you pay. We only feature brands and deals we believe are genuinely worthwhile.' },
+            { title: 'Cookies', body: 'We use minimal cookies and local storage to remember your preferences between sessions. We do not use tracking cookies or share data with advertisers.' },
+            { title: 'Your Rights', body: 'You can delete your account and all associated data at any time by contacting us at admin@brandsnobs.com. We will process deletion requests within 30 days.' },
+            { title: 'Contact', body: 'Questions about this policy? Email us at admin@brandsnobs.com.' },
+          ].map(({ title, body }) => (
+            <div key={title}>
+              <p className="font-semibold text-neutral-900 mb-1">{title}</p>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-neutral-900 text-white py-2.5 rounded-xl font-medium hover:bg-neutral-800 transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function TermsOfServiceModal({ onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-neutral-900">Terms of Service</h3>
+          <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-4 text-sm text-neutral-600">
+          <p className="text-xs text-neutral-400">Last updated: January 2025</p>
+          {[
+            { title: 'Acceptance', body: 'By using BrandSnobs, you agree to these terms. If you do not agree, please do not use the service.' },
+            { title: 'Use of Service', body: 'BrandSnobs is a personal shopping tool. You may use it for personal, non-commercial purposes. You may not scrape, copy, or redistribute our deal data.' },
+            { title: 'Accuracy of Deals', body: 'We strive to keep deal information accurate and up to date, but prices and availability can change at any time. Always verify the final price on the retailer's website before purchasing.' },
+            { title: 'Affiliate Relationships', body: 'We have affiliate relationships with many of the brands and retailers featured. We earn a commission on qualifying purchases, which helps keep BrandSnobs free.' },
+            { title: 'Account Responsibility', body: 'You are responsible for maintaining the security of your account. Please use a valid email address and notify us immediately of any unauthorized access.' },
+            { title: 'Wishlist Sharing', body: 'When you share a wishlist with a link, anyone with that link can view it. You are responsible for who you share links with. Set wishlists to Private if you do not want them publicly accessible.' },
+            { title: 'Limitation of Liability', body: 'BrandSnobs is provided "as is." We are not liable for missed deals, incorrect prices, or any purchases you make through third-party retailers.' },
+            { title: 'Changes to Terms', body: 'We may update these terms from time to time. Continued use of the service after changes constitutes acceptance of the new terms.' },
+            { title: 'Contact', body: 'Questions? Email us at admin@brandsnobs.com.' },
+          ].map(({ title, body }) => (
+            <div key={title}>
+              <p className="font-semibold text-neutral-900 mb-1">{title}</p>
+              <p>{body}</p>
+            </div>
+          ))}
+        </div>
+        <button
+          onClick={onClose}
+          className="w-full mt-6 bg-neutral-900 text-white py-2.5 rounded-xl font-medium hover:bg-neutral-800 transition-colors"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function BrandLogo({ domain, name }) {
   const [errored, setErrored] = React.useState(false);
   const logoUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
@@ -350,7 +468,7 @@ function BrandLogo({ domain, name }) {
   );
 }
 
-function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn }) {
+function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn, onHowItWorks, onPrivacy, onTerms }) {
   const popularBrands = [
     { name: 'Alo', emoji: '🧘' },
     { name: 'Burberry', emoji: '🧥' },
@@ -470,6 +588,15 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
             <LogIn className="w-4 h-4" />
             Sign In to Restore Your Brands
           </button>
+        </div>
+
+        {/* Footer links */}
+        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-neutral-400">
+          <button onClick={onHowItWorks} className="hover:text-neutral-600 underline">How It Works</button>
+          <span>·</span>
+          <button onClick={onPrivacy} className="hover:text-neutral-600 underline">Privacy Policy</button>
+          <span>·</span>
+          <button onClick={onTerms} className="hover:text-neutral-600 underline">Terms of Service</button>
         </div>
       </div>
     </div>
@@ -2495,46 +2622,73 @@ export default function App() {
       return;
     }
 
-    const wishlistToShare = wishlists.find(w => w.id === shareWishlistId);
+    const wishlistToShare = wishlists.find(w => w.id === shareWishlistId) || wishlists[0];
     if (!wishlistToShare) {
-      alert('Wishlist not found');
+      alert('No wishlist found to share');
       return;
     }
 
     setShareSending(true);
 
-    // Create simple text format for wishlist
-    const wishlistText = wishlistToShare.items.map((item, index) => 
-      `${index + 1}. ${item.product}\n   ${item.brand} - $${item.salePrice} (${item.discount} off)\n   ${item.link}`
+    const wishlistText = wishlistToShare.items.map((item, index) =>
+      `${index + 1}. ${item.product} - ${item.brand} - $${item.salePrice} (${item.discount} off)\n${item.link}`
     ).join('\n\n');
 
     const totalValue = wishlistToShare.items.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
-
     const shareLink = `${window.location.origin}/wishlist/${wishlistToShare.shareId}`;
 
+    const messageBody = shareMessage
+      ? `${shareMessage}\n\n=== ${wishlistToShare.name.toUpperCase()} ===\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
+      : `Check out my ${wishlistToShare.emoji} ${wishlistToShare.name} from BrandSnobs!\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`;
+
+    // Save share record to Firestore first (so it's never lost even if email fails)
+    try {
+      await setDoc(doc(collection(db, 'wishlist_shares')), {
+        from: user?.email || 'anonymous',
+        to: shareRecipient.trim(),
+        wishlistName: wishlistToShare.name,
+        wishlistId: wishlistToShare.id,
+        shareId: wishlistToShare.shareId,
+        shareLink,
+        message: messageBody,
+        sharedAt: new Date().toISOString(),
+      });
+    } catch (fsError) {
+      console.warn('Firestore share record failed (non-fatal):', fsError);
+    }
+
+    // Send email via EmailJS
     try {
       await emailjs.send(
         'service_9b98jq6',
         'template_7sri3sr',
         {
-          to_email: shareRecipient,
-          brand_name: `${wishlistToShare.emoji} ${wishlistToShare.name} (${wishlistToShare.items.length} items - $${totalValue} total)`,
-          submitter_email: shareRecipient,
-          user_email: user?.email || 'BrandSnobs User',
-          message: shareMessage 
-            ? `${shareMessage}\n\n=== ${wishlistToShare.name.toUpperCase()} ===\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
-            : `Check out my ${wishlistToShare.name} from BrandSnobs!\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
+          to_email: shareRecipient.trim(),
+          submitter_email: shareRecipient.trim(),
+          user_email: user?.email || 'A BrandSnobs user',
+          brand_name: `${wishlistToShare.emoji} ${wishlistToShare.name} (${wishlistToShare.items.length} items · $${totalValue} total)`,
+          message: messageBody,
         },
         'QPiBFFlW7aGv6W0UP'
       );
-
       alert('Wishlist shared successfully!');
       setShowShareModal(false);
       setShareRecipient('');
       setShareMessage('');
     } catch (error) {
-      console.error('Share error:', error);
-      alert(`Failed to share wishlist: ${error.text || error.message}`);
+      console.error('EmailJS share error:', error);
+      // Email failed but Firestore record was saved — offer copy link as fallback
+      const fallback = window.confirm(
+        `Email delivery failed. Would you like to copy the share link instead so you can send it manually?`
+      );
+      if (fallback) {
+        try {
+          await navigator.clipboard.writeText(shareLink);
+          alert('Link copied! You can paste it into any message.');
+        } catch {
+          prompt('Copy this link:', shareLink);
+        }
+      }
     } finally {
       setShareSending(false);
     }
@@ -2780,6 +2934,9 @@ export default function App() {
           showSuggestions={showSuggestions}
           setShowSuggestions={setShowSuggestions}
           onSignIn={() => setShowSignIn(true)}
+          onHowItWorks={() => setShowHowItWorks(true)}
+          onPrivacy={() => setShowPrivacyPolicy(true)}
+          onTerms={() => setShowTermsOfService(true)}
         />
       )}
 
@@ -2790,13 +2947,16 @@ export default function App() {
       <header className="bg-white border-b border-neutral-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
-          {/* Logo */}
-          <div className="flex items-center gap-2">
+          {/* Logo — click to scroll back to top */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+          >
             <ShoppingBag className="w-7 h-7 text-neutral-900" />
             <span className="font-display text-xl font-bold text-neutral-900 tracking-tight">
               BrandSnobs
             </span>
-          </div>
+          </button>
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
@@ -3575,6 +3735,22 @@ export default function App() {
         )}
       </main>
 
+      {/* ── App footer ────────────────────────────────────── */}
+      {myBrands.length > 0 && (
+        <footer className="border-t border-neutral-200 mt-8 py-6 text-center">
+          <div className="flex items-center justify-center gap-4 text-xs text-neutral-400">
+            <button onClick={() => setShowHowItWorks(true)} className="hover:text-neutral-600 underline">How It Works</button>
+            <span>·</span>
+            <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-neutral-600 underline">Privacy Policy</button>
+            <span>·</span>
+            <button onClick={() => setShowTermsOfService(true)} className="hover:text-neutral-600 underline">Terms of Service</button>
+            <span>·</span>
+            <a href="mailto:admin@brandsnobs.com" className="hover:text-neutral-600 underline">Contact</a>
+          </div>
+          <p className="text-xs text-neutral-300 mt-2">© {new Date().getFullYear()} BrandSnobs. All rights reserved.</p>
+        </footer>
+      )}
+
       {/* ── Add Brand modal (global — works from any tab) ─── */}
       {showAddBrand && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -3706,6 +3882,21 @@ export default function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── How It Works modal ────────────────────────────── */}
+      {showHowItWorks && (
+        <HowItWorksModal onClose={() => setShowHowItWorks(false)} />
+      )}
+
+      {/* ── Privacy Policy modal ───────────────────────────── */}
+      {showPrivacyPolicy && (
+        <PrivacyPolicyModal onClose={() => setShowPrivacyPolicy(false)} />
+      )}
+
+      {/* ── Terms of Service modal ─────────────────────────── */}
+      {showTermsOfService && (
+        <TermsOfServiceModal onClose={() => setShowTermsOfService(false)} />
       )}
 
       {/* ── Sign-in modal ──────────────────────────────────── */}
