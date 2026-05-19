@@ -345,7 +345,7 @@ function HowItWorksModal({ onClose }) {
             { step: '2', icon: '🔍', title: 'We Find the Deals', desc: 'BrandSnobs automatically scans your brands for sales, discounts, and deals — updated regularly so you never miss a drop.' },
             { step: '3', icon: '❤️', title: 'Save to Wishlist', desc: 'Heart any item to save it to a wishlist. Create multiple wishlists for birthdays, holidays, or any occasion.' },
             { step: '4', icon: '🔗', title: 'Share with Anyone', desc: 'Share your wishlist with friends and family via a link or email. Perfect for gift-giving season.' },
-            { step: '5', icon: '🛍️', title: 'Shop When Ready', desc: 'Click any deal to go straight to the brand's website and check out. We never store your payment info.' },
+            { step: '5', icon: '🛍️', title: 'Shop When Ready', desc: 'Click any deal to go straight to the brand&apos;s website and check out. We never store your payment info.' },
           ].map(({ step, icon, title, desc }) => (
             <div key={step} className="flex gap-4">
               <div className="flex-shrink-0 w-10 h-10 bg-neutral-900 text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -422,7 +422,7 @@ function TermsOfServiceModal({ onClose }) {
           {[
             { title: 'Acceptance', body: 'By using BrandSnobs, you agree to these terms. If you do not agree, please do not use the service.' },
             { title: 'Use of Service', body: 'BrandSnobs is a personal shopping tool. You may use it for personal, non-commercial purposes. You may not scrape, copy, or redistribute our deal data.' },
-            { title: 'Accuracy of Deals', body: 'We strive to keep deal information accurate and up to date, but prices and availability can change at any time. Always verify the final price on the retailer's website before purchasing.' },
+            { title: 'Accuracy of Deals', body: 'We strive to keep deal information accurate and up to date, but prices and availability can change at any time. Always verify the final price on the retailer&apos;s website before purchasing.' },
             { title: 'Affiliate Relationships', body: 'We have affiliate relationships with many of the brands and retailers featured. We earn a commission on qualifying purchases, which helps keep BrandSnobs free.' },
             { title: 'Account Responsibility', body: 'You are responsible for maintaining the security of your account. Please use a valid email address and notify us immediately of any unauthorized access.' },
             { title: 'Wishlist Sharing', body: 'When you share a wishlist with a link, anyone with that link can view it. You are responsible for who you share links with. Set wishlists to Private if you do not want them publicly accessible.' },
