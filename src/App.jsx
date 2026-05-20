@@ -2853,43 +2853,48 @@ export default function App() {
       };
 
       const detectGender = (deal) => {
-        // First check explicit gender field
         const explicitGender = (deal.gender || '').toLowerCase().trim();
-        if (explicitGender) {
-          if (explicitGender === 'unisex' || explicitGender.includes('unisex')) return ['men', 'women', 'boys', 'girls', 'unisex'];
-          if (explicitGender.includes('men') && !explicitGender.includes('women')) return ['men'];
-          if (explicitGender.includes('women') || explicitGender.includes('woman')) return ['women'];
-          if (explicitGender.includes('boy')) return ['boys'];
-          if (explicitGender.includes('girl')) return ['girls'];
-        }
 
-        // Scan product title and category for gender keywords
-        const searchText = [
-          deal.product || '',
-          deal.title || '',
-          deal.category || '',
-          deal.description || '',
-        ].join(' ').toLowerCase();
+        // null gender = untagged, show only when no filter active (handled below)
+        if (!explicitGender || explicitGender === 'null') return null;
 
+        // Unisex shows under all filters
+        if (explicitGender === 'unisex') return ['men', 'women', 'boys', 'girls', 'unisex'];
+
+        // Generic kids shows under both boys and girls
+        if (explicitGender === 'kids') return ['boys', 'girls'];
+
+        // Exact matches
+        if (explicitGender === 'women') return ['women'];
+        if (explicitGender === 'men') return ['men'];
+        if (explicitGender === 'girls') return ['girls'];
+        if (explicitGender === 'boys') return ['boys'];
+
+        // Fallback keyword scan for older deals in Firestore
+        const searchText = [deal.product || '', deal.category || ''].join(' ').toLowerCase();
+        const FRONTEND_KEYWORDS = {
+          women:  ["women's", 'womens', 'women ', 'ladies', 'female', 'dress', 'skirt', 'bra', 'blouse'],
+          men:    ["men's", 'mens', 'men ', 'masculine', 'male ', 'beard', 'necktie'],
+          girls:  ["girls'", 'girls ', "girl's"],
+          boys:   ["boys'", 'boys ', "boy's"],
+          unisex: ['unisex', 'gender neutral'],
+        };
         const matched = new Set();
-        for (const [gender, keywords] of Object.entries(GENDER_KEYWORDS)) {
-          if (keywords.some(kw => searchText.includes(kw))) {
-            matched.add(gender);
-          }
+        for (const [gender, keywords] of Object.entries(FRONTEND_KEYWORDS)) {
+          if (keywords.some(kw => searchText.includes(kw))) matched.add(gender);
         }
-
-        // Unisex matches all genders
         if (matched.has('unisex')) return ['men', 'women', 'boys', 'girls', 'unisex'];
+        if (matched.size > 0) return [...matched];
 
-        // If no gender keywords found at all, show under all filters
-        // (better to show too much than hide valid deals)
-        if (matched.size === 0) return ['men', 'women', 'boys', 'girls', 'unisex'];
-
-        return [...matched];
+        // Truly untagged — return null
+        return null;
       };
 
       result = result.filter(deal => {
         const dealGenders = detectGender(deal);
+        // null means untagged — only show when no specific gender filter conflicts
+        // i.e. hide from filtered results to keep filters meaningful
+        if (dealGenders === null) return false;
         return selectedGenders.some(g => dealGenders.includes(g));
       });
     }
