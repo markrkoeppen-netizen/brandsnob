@@ -559,7 +559,7 @@ function BrandLogo({ domain, name }) {
   );
 }
 
-function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn, onHowItWorks, onPrivacy, onTerms }) {
+function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn, onHowItWorks, onPrivacy, onTerms, userCount }) {
   const popularBrands = [
     { name: 'Alo', emoji: '🧘' },
     { name: 'Burberry', emoji: '🧥' },
@@ -3141,6 +3141,7 @@ export default function App() {
           onHowItWorks={() => setShowHowItWorks(true)}
           onPrivacy={() => setShowPrivacyPolicy(true)}
           onTerms={() => setShowTermsOfService(true)}
+          userCount={userCount}
         />
       )}
 
