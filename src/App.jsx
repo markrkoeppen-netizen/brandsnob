@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { db } from './firebase';
-import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, getCountFromServer } from 'firebase/firestore';
 import emailjs from '@emailjs/browser';
 
 // Initialize EmailJS
@@ -457,6 +457,74 @@ function TermsOfServiceModal({ onClose }) {
   );
 }
 
+function OnboardingWalkthrough({ step, onNext, onDone }) {
+  const steps = [
+    {
+      emoji: '🎉',
+      title: 'Your deals are loading!',
+      body: 'BrandSnobs is fetching the latest sales from your brands. New deals are pulled every 6 hours so you never miss a drop.',
+      cta: 'Next',
+    },
+    {
+      emoji: '❤️',
+      title: 'Save deals to your wishlist',
+      body: 'Tap the heart icon on any deal to save it. Create multiple wishlists for birthdays, holidays, or any occasion.',
+      cta: 'Next',
+    },
+    {
+      emoji: '🔗',
+      title: 'Share with friends & family',
+      body: 'Tap the heart icon in the top bar to open your wishlists, then hit Share to send a link or email to anyone.',
+      cta: 'Got it!',
+    },
+  ];
+
+  const current = steps[step];
+  if (!current) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[90] p-4">
+      <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+        <div className="text-center mb-4">
+          <span className="text-4xl">{current.emoji}</span>
+        </div>
+        <h3 className="text-lg font-bold text-neutral-900 text-center mb-2">
+          {current.title}
+        </h3>
+        <p className="text-sm text-neutral-600 text-center mb-6 leading-relaxed">
+          {current.body}
+        </p>
+        <div className="flex items-center justify-between">
+          <div className="flex gap-1.5">
+            {steps.map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === step ? 'w-6 bg-neutral-900' : 'w-1.5 bg-neutral-300'
+                }`}
+              />
+            ))}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={onDone}
+              className="text-sm text-neutral-400 hover:text-neutral-600 px-3 py-1.5"
+            >
+              Skip
+            </button>
+            <button
+              onClick={step === steps.length - 1 ? onDone : onNext}
+              className="text-sm bg-neutral-900 text-white px-4 py-1.5 rounded-lg hover:bg-neutral-800 font-medium"
+            >
+              {current.cta}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Toast({ message, visible }) {
   return (
     <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
@@ -539,10 +607,15 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
               <p className="text-xs text-neutral-500 mt-0.5">Always</p>
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-neutral-500 max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-neutral-500 max-w-md mx-auto mb-4">
             <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Track sales from your favorite brands</span>
             <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Save to wishlists &amp; share with friends</span>
           </div>
+          {userCount && userCount > 0 && (
+            <p className="text-sm text-neutral-400 font-medium">
+              🛍️ Join {userCount.toLocaleString()}+ shoppers already tracking deals
+            </p>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 p-6 md:p-8 mb-8">
@@ -977,6 +1050,18 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
             {deal.discount} OFF
           </div>
         )}
+
+        {(() => {
+          const fetchedAt = deal.fetchedAt || deal.lastUpdated;
+          if (!fetchedAt) return null;
+          const hoursOld = (Date.now() - new Date(fetchedAt).getTime()) / (1000 * 60 * 60);
+          if (hoursOld > 24) return null;
+          return (
+            <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
+              New
+            </div>
+          );
+        })()}
 
         {deal.sizeMatchScore && deal.sizeMatchScore > 0 && (
           <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-green-600 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide flex items-center gap-1">
@@ -1958,6 +2043,9 @@ export default function App() {
   const [recommendSubmitting, setRecommendSubmitting] = useState(false);
   const [recommendSuccess, setRecommendSuccess] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showWalkthrough, setShowWalkthrough] = useState(false);
+  const [walkthroughStep, setWalkthroughStep] = useState(0);
+  const [userCount, setUserCount] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false);
@@ -2409,6 +2497,12 @@ export default function App() {
     setShowAddBrand(false);
     setShowSuggestions(false);
     showToast(`${brandName} added to your brands!`);
+    if (isFirstBrand) {
+      setTimeout(() => {
+        setShowWalkthrough(true);
+        setWalkthroughStep(0);
+      }, 3000); // Show after fetching animation completes
+    }
 
     // Show fetching animation for first brand
     if (isFirstBrand) {
@@ -2441,6 +2535,19 @@ export default function App() {
     setRecommendBrand(brandName);
     setShowRecommendModal(true);
   };
+
+  // Fetch approximate user count for social proof on landing page
+  React.useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        const snapshot = await getCountFromServer(collection(db, 'users'));
+        setUserCount(snapshot.data().count);
+      } catch {
+        setUserCount(null);
+      }
+    };
+    fetchUserCount();
+  }, []);
 
   const showToast = (message) => {
     setToastMessage(message);
@@ -3991,6 +4098,17 @@ export default function App() {
       )}
 
       <Toast message={toastMessage} visible={toastVisible} />
+
+      {showWalkthrough && (
+        <OnboardingWalkthrough
+          step={walkthroughStep}
+          onNext={() => setWalkthroughStep(s => s + 1)}
+          onDone={() => {
+            setShowWalkthrough(false);
+            setWalkthroughStep(0);
+          }}
+        />
+      )}
 
       {/* ── How It Works modal ────────────────────────────── */}
       {showHowItWorks && (
