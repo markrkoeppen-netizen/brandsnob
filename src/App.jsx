@@ -2808,6 +2808,17 @@ export default function App() {
 
     // Send email via Vercel serverless function (bypasses CORS restrictions)
     try {
+      // Build sizes summary to include in email
+      const sizesInfo = [
+        shippingProfile.shirtSize && `Shirt/Top: ${shippingProfile.shirtSize}`,
+        shippingProfile.shoeSize && `Shoe: ${shippingProfile.shoeSize}`,
+        shippingProfile.pantsWaist && shippingProfile.pantsInseam
+          ? `Pants: ${shippingProfile.pantsWaist}W × ${shippingProfile.pantsInseam}L`
+          : shippingProfile.pantsWaist ? `Pants Waist: ${shippingProfile.pantsWaist}` : null,
+        shippingProfile.dressSize && `Dress: ${shippingProfile.dressSize}`,
+        shippingProfile.hatSize && `Hat: ${shippingProfile.hatSize}`,
+      ].filter(Boolean);
+
       const response = await fetch('/api/send-wishlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -2820,6 +2831,7 @@ export default function App() {
           shareLink,
           items: wishlistToShare.items,
           totalValue,
+          sizes: sizesInfo,
         }),
       });
 
@@ -3690,28 +3702,132 @@ export default function App() {
         ══════════════════════════════════════════════════════ */}
         {activeTab === 'profile' && (
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-neutral-900 mb-6">Your Profile</h2>
+            <h2 className="text-2xl font-bold text-neutral-900 mb-6">My Profile</h2>
 
+            {/* ── Personal stats ──────────────────────────────── */}
+            {(() => {
+              const totalWishlistItems = wishlists.reduce((s, w) => s + w.items.length, 0);
+              const allWishlistItems = wishlists.flatMap(w => w.items);
+              const biggestDiscount = allWishlistItems.length > 0
+                ? Math.max(...allWishlistItems.map(i => parseInt(i.discount) || 0))
+                : 0;
+              const totalSaved = allWishlistItems.reduce((s, i) =>
+                s + ((i.originalPrice || 0) - (i.salePrice || 0)), 0);
+              const brandCounts = {};
+              allWishlistItems.forEach(i => {
+                brandCounts[i.brand] = (brandCounts[i.brand] || 0) + 1;
+              });
+              const favBrand = Object.entries(brandCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
+              return (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                  {[
+                    { label: 'Brands Tracked', value: myBrands.length },
+                    { label: 'Wishlist Items', value: totalWishlistItems },
+                    { label: 'Best Deal Found', value: biggestDiscount > 0 ? `${biggestDiscount}% off` : '—' },
+                    { label: 'Fave Brand', value: favBrand || '—' },
+                  ].map(stat => (
+                    <div key={stat.label} className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                      <p className="text-xl font-bold text-neutral-900 truncate">{stat.value}</p>
+                      <p className="text-xs text-neutral-500 mt-1">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+
+            {/* ── My Wishlists ─────────────────────────────────── */}
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Shipping Info</h3>
-              <p className="text-sm text-neutral-500 mb-4">
-                Saved here so you can copy it quickly at checkout.
-              </p>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-neutral-900">My Wishlists</h3>
+                <button
+                  onClick={() => setShowCreateWishlistModal(true)}
+                  className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  New Wishlist
+                </button>
+              </div>
+              {wishlists.length === 0 ? (
+                <div className="text-center py-8 text-neutral-400">
+                  <Heart className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No wishlists yet — heart a deal to get started</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {wishlists.map(wishlist => {
+                    const totalValue = wishlist.items.reduce((s, i) => s + i.salePrice, 0).toFixed(2);
+                    const preview = wishlist.items.slice(0, 4);
+                    return (
+                      <div
+                        key={wishlist.id}
+                        className="border border-neutral-200 rounded-xl p-4 hover:border-neutral-300 transition-colors cursor-pointer"
+                        onClick={() => setShowWishlistModal(true)}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl">{wishlist.emoji}</span>
+                            <div>
+                              <p className="font-medium text-neutral-900 text-sm">{wishlist.name}</p>
+                              <p className="text-xs text-neutral-500">
+                                {wishlist.items.length} item{wishlist.items.length !== 1 ? 's' : ''}
+                                {wishlist.items.length > 0 && ` · $${totalValue}`}
+                                {' · '}{wishlist.privacy === 'link-only' ? '🔗 Shareable' : '🔒 Private'}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShareWishlistId(wishlist.id);
+                              setShowShareModal(true);
+                            }}
+                            className="text-xs px-3 py-1 border border-neutral-200 rounded-lg text-neutral-600 hover:bg-neutral-50"
+                          >
+                            Share
+                          </button>
+                        </div>
+                        {preview.length > 0 && (
+                          <div className="flex gap-2 mt-2">
+                            {preview.map(item => (
+                              <img
+                                key={item.id}
+                                src={item.image}
+                                alt={item.product}
+                                className="w-12 h-12 object-cover rounded-lg border border-neutral-100"
+                              />
+                            ))}
+                            {wishlist.items.length > 4 && (
+                              <div className="w-12 h-12 rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-500 font-medium">
+                                +{wishlist.items.length - 4}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
+            {/* ── Style Profile (sizes) ────────────────────────── */}
+            <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
+              <h3 className="text-lg font-semibold text-neutral-900 mb-1">Your Sizes</h3>
+              <p className="text-sm text-neutral-500 mb-4">
+                Saved sizes appear on your wishlist items and are included when you share a wishlist — so friends and family know exactly what to buy.
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
-                  { key: 'firstName', label: 'First Name', placeholder: 'Jane' },
-                  { key: 'lastName', label: 'Last Name', placeholder: 'Doe' },
-                  { key: 'email', label: 'Email', placeholder: 'jane@example.com' },
-                  { key: 'phone', label: 'Phone', placeholder: '(555) 000-0000' },
-                  { key: 'address', label: 'Address', placeholder: '123 Main St', fullWidth: true },
-                  { key: 'city', label: 'City', placeholder: 'New York' },
-                  { key: 'state', label: 'State', placeholder: 'NY' },
-                  { key: 'zip', label: 'Zip Code', placeholder: '10001' },
+                  { key: 'shirtSize', label: 'Shirt / Top', placeholder: 'M', icon: '👕' },
+                  { key: 'shoeSize', label: 'Shoe', placeholder: '10', icon: '👟' },
+                  { key: 'pantsWaist', label: 'Pants Waist', placeholder: '32', icon: '👖' },
+                  { key: 'pantsInseam', label: 'Pants Inseam', placeholder: '30', icon: '📏' },
+                  { key: 'dressSize', label: 'Dress', placeholder: '8', icon: '👗' },
+                  { key: 'hatSize', label: 'Hat', placeholder: '7 3/8', icon: '🧢' },
                 ].map(field => (
-                  <div key={field.key} className={field.fullWidth ? 'col-span-2' : ''}>
+                  <div key={field.key}>
                     <label className="block text-xs font-medium text-neutral-600 mb-1">
-                      {field.label}
+                      {field.icon} {field.label}
                     </label>
                     <input
                       type="text"
@@ -3725,21 +3841,24 @@ export default function App() {
               </div>
             </div>
 
+            {/* ── Shipping Info ────────────────────────────────── */}
             <div className="bg-white rounded-2xl border border-neutral-200 p-6">
-              <h3 className="text-lg font-semibold text-neutral-900 mb-4">Your Sizes</h3>
+              <h3 className="text-lg font-semibold text-neutral-900 mb-1">Shipping Info</h3>
               <p className="text-sm text-neutral-500 mb-4">
-                We'll highlight deals that match your size.
+                Saved here so you can copy it quickly at checkout.
               </p>
-
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { key: 'shirtSize', label: 'Shirt Size', placeholder: 'M' },
-                  { key: 'shoeSize', label: 'Shoe Size', placeholder: '10' },
-                  { key: 'pantsWaist', label: 'Pants Waist', placeholder: '32' },
-                  { key: 'pantsInseam', label: 'Pants Inseam', placeholder: '30' },
-                  { key: 'dressSize', label: 'Dress Size', placeholder: '8' },
+                  { key: 'firstName', label: 'First Name', placeholder: 'Jane' },
+                  { key: 'lastName', label: 'Last Name', placeholder: 'Doe' },
+                  { key: 'email', label: 'Email', placeholder: 'jane@example.com' },
+                  { key: 'phone', label: 'Phone', placeholder: '(555) 000-0000' },
+                  { key: 'address', label: 'Address', placeholder: '123 Main St', fullWidth: true },
+                  { key: 'city', label: 'City', placeholder: 'New York' },
+                  { key: 'state', label: 'State', placeholder: 'NY' },
+                  { key: 'zip', label: 'Zip Code', placeholder: '10001' },
                 ].map(field => (
-                  <div key={field.key}>
+                  <div key={field.key} className={field.fullWidth ? 'col-span-2' : ''}>
                     <label className="block text-xs font-medium text-neutral-600 mb-1">
                       {field.label}
                     </label>
