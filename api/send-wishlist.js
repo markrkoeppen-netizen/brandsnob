@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { to, from, senderName, wishlistName, wishlistEmoji, message, shareLink, items, totalValue } = req.body;
+  const { to, from, senderName, wishlistName, wishlistEmoji, message, shareLink, items, totalValue, sizes } = req.body;
 
   // Basic validation
   if (!to || !shareLink) {
@@ -50,6 +50,18 @@ export default async function handler(req, res) {
       ${message ? `
       <div style="border-left: 3px solid #171717; padding-left: 16px; margin-bottom: 24px;">
         <p style="margin: 0; color: #404040; font-style: italic;">"${message}"</p>
+      </div>
+      ` : ''}
+
+      ${sizes && sizes.length > 0 ? `
+      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: #15803d;">
+          📏 Their Sizes
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+          ${sizes.map(s => `<span style="background: #ffffff; border: 1px solid #86efac; color: #166534; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px;">${s}</span>`).join('')}
+        </div>
+        <p style="margin: 8px 0 0; font-size: 11px; color: #6b7280;">Sizes saved by ${senderName} — so you know exactly what to order!</p>
       </div>
       ` : ''}
 
