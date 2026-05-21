@@ -2,18 +2,14 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "framework": "vite",
-  "routes": [
+  "rewrites": [
     {
-      "src": "/wishlist/(.*)",
-      "dest": "/wishlist.html"
+      "source": "/wishlist/:shareId",
+      "destination": "/wishlist.html"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!api|assets|wishlist).*)",
+      "destination": "/index.html"
     }
   ]
 }
