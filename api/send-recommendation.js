@@ -87,7 +87,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: 'BrandSnobs <admin@brandsnobs.com>',
-        to: ['admin@brandsnobs.com'],
+        to: ['admin@brandsnobs.com', 'mark.r.koeppen@gmail.com'],
         subject: `New Brand Recommendation: ${brandName}`,
         html: emailHtml,
       }),
