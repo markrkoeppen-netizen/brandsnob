@@ -1061,20 +1061,7 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
           </div>
         )}
 
-        {(() => {
-          const fetchedAt = deal.fetchedAt || deal.lastUpdated;
-          if (!fetchedAt) return null;
-          const hoursOld = (Date.now() - new Date(fetchedAt).getTime()) / (1000 * 60 * 60);
-          if (hoursOld > 24) return null;
-          const label = hoursOld < 1 ? 'Just added'
-            : hoursOld < 6 ? `${Math.round(hoursOld)}h ago`
-            : 'Updated today';
-          return (
-            <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
-              {label}
-            </div>
-          );
-        })()}
+
 
         {deal.sizeMatchScore && deal.sizeMatchScore > 0 && (
           <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-green-600 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide flex items-center gap-1">
