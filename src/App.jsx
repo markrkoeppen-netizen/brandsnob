@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { db } from './firebase';
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, getCountFromServer } from 'firebase/firestore';
-import emailjs from '@emailjs/browser';
-
-// Initialize EmailJS
-emailjs.init('QPiBFFlW7aGv6W0UP');
+// Email sending handled via Resend serverless functions in /api
 
 const CATEGORIES = [
   'Fashion', 'Footwear', 'Accessories', 'Tech', 'Home', 'Outdoor', 
@@ -2880,21 +2877,22 @@ export default function App() {
       
       console.log('✅ Recommendation saved to Firestore');
       
-      // Send email via EmailJS
+      // Send email via Resend serverless function
       try {
-        await emailjs.send(
-          'service_9b98jq6',
-          'template_7sri3sr',
-          {
-            brand_name: recommendBrand.trim(),
-            submitter_email: recommendEmail.trim() || 'Not provided',
-            user_email: user?.email || 'Anonymous',
-            to_email: 'admin@brandsnobs.com',
-            message: `New brand recommendation: ${recommendBrand.trim()}`
-          },
-          'QPiBFFlW7aGv6W0UP'
-        );
-        console.log('✅ Email sent to admin@brandsnobs.com');
+        const emailResponse = await fetch('/api/send-recommendation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brandName: recommendBrand.trim(),
+            submitterEmail: recommendEmail.trim() || null,
+            userEmail: user?.email || 'Anonymous',
+          }),
+        });
+        if (emailResponse.ok) {
+          console.log('✅ Recommendation email sent via Resend');
+        } else {
+          console.warn('⚠️ Email failed but Firestore record saved');
+        }
       } catch (emailError) {
         console.error('⚠️ Email failed but Firestore saved:', emailError);
       }
