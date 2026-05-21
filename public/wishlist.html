@@ -1,5 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>BrandSnobs Wishlist</title>
+  <meta name="description" content="View this BrandSnobs wishlist" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-BrandSnobs
-Track Your Brands →
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #fafafa;
+      color: #171717;
+      min-height: 100vh;
+    }
 
-Loading wishlist…
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: #171717;
+    }
+
+    .logo svg { width: 28px; height: 28px; }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .header-cta {
+      background: #171717;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .header-cta:hover { background: #333; }
+
+    main {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 32px 16px 64px;
+    }
+
+    /* Loading state */
+    .loading {
+      text-align: center;
+      padding: 80px 20px;
+      color: #737373;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e5e5e5;
+      border-top-color: #171717;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Error state */
+    .error {
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .error h2 { font-size: 20px; margin-bottom: 8px; }
+    .error p { color: #737373; font-size: 14px; }
+
+    /* Wishlist header */
+    .wishlist-header {
+      margin-bottom: 32px;
+    }
+
+    .wishlist-emoji { font-size: 48px; margin-bottom: 12px; }
+
+    .wishlist-title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .wishlist-meta {
+      font-size: 14px;
+      color: #737373;
+    }
+
+    .wishlist-total {
+      display: inline-block;
+      background: #f0fdf4;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      padding: 4px 12px;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* Items grid */
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    @media (max-width: 500px) {
+      .items-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    }
+
+    .item-card {
+      background: #fff;
+      border: 1px solid #e5e5e5;
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .item-card:hover {
+      border-color: #a3a3a3;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .item-image {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      background: #f5f5f5;
+      display: block;
+    }
+
+    .item-body { padding: 12px; }
+
+    .item-brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #737373;
+      margin-bottom: 4px;
+    }
+
+    .item-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #171717;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .item-pricing {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .item-sale { font-size: 16px; font-weight: 700; color: #171717; }
+    .item-original { font-size: 12px; color: #a3a3a3; text-decoration: line-through; }
+    .item-discount {
+      font-size: 11px;
+      font-weight: 600;
+      color: #16a34a;
+      background: #f0fdf4;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .item-cta {
+      display: block;
+      width: 100%;
+      background: #171717;
+      color: #fff;
+      border: none;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .item-cta:hover { background: #333; }
+
+    /* Empty state */
+    .empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a3a3a3;
+    }
+
+    /* Footer banner */
+    .footer-banner {
+      margin-top: 48px;
+      background: #171717;
+      color: #fff;
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+    }
+
+    .footer-banner h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .footer-banner p {
+      font-size: 14px;
+      color: #a3a3a3;
+      margin-bottom: 20px;
+    }
+
+    .footer-banner a {
+      display: inline-block;
+      background: #fff;
+      color: #171717;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .footer-banner a:hover { opacity: 0.85; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="https://www.brandsnobs.com" class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 01-8 0"/>
+      </svg>
+      <span class="logo-text">BrandSnobs</span>
+    </a>
+    <a href="https://www.brandsnobs.com" class="header-cta">Track Your Brands →</a>
+  </header>
+
+  <main>
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading wishlist…</p>
+    </div>
+
+    <div id="error" class="error" style="display:none">
+      <p style="font-size:48px;margin-bottom:16px">🔒</p>
+      <h2 id="error-title">Wishlist not found</h2>
+      <p id="error-msg">This wishlist may be private or the link may have expired.</p>
+    </div>
+
+    <div id="content" style="display:none">
+      <div class="wishlist-header">
+        <div class="wishlist-emoji" id="wl-emoji"></div>
+        <h1 class="wishlist-title" id="wl-name"></h1>
+        <p class="wishlist-meta" id="wl-meta"></p>
+        <div class="wishlist-total" id="wl-total"></div>
+      </div>
+
+      <div class="items-grid" id="items-grid"></div>
+
+      <div class="empty" id="empty" style="display:none">
+        <p style="font-size:48px;margin-bottom:12px">🛍️</p>
+        <p>This wishlist is empty</p>
+      </div>
+
+      <div class="footer-banner">
+        <h3>🛍️ BrandSnobs</h3>
+        <p>Track sales from your favorite brands — for free, forever.</p>
+        <a href="https://www.brandsnobs.com">Start Tracking Deals →</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const shareId = window.location.pathname.split('/wishlist/')[1];
+
+    if (!shareId) {
+      showError('Invalid link', 'This wishlist link is invalid.');
+    } else {
+      fetch(`/api/get-wishlist?shareId=${shareId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.error) {
+            const isPrivate = data.error === 'This wishlist is private';
+            showError(
+              isPrivate ? 'This wishlist is private' : 'Wishlist not found',
+              isPrivate
+                ? 'The owner has set this wishlist to private.'
+                : 'This wishlist may have been deleted or the link may be incorrect.'
+            );
+            return;
+          }
+          renderWishlist(data.wishlist, data.owner);
+        })
+        .catch(() => {
+          showError('Something went wrong', 'Please try again later.');
+        });
+    }
+
+    function showError(title, msg) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error-title').textContent = title;
+      document.getElementById('error-msg').textContent = msg;
+    }
+
+    function renderWishlist(wishlist, owner) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('content').style.display = 'block';
+
+      document.title = `${wishlist.emoji} ${wishlist.name} — BrandSnobs`;
+      document.getElementById('wl-emoji').textContent = wishlist.emoji;
+      document.getElementById('wl-name').textContent = wishlist.name;
+      document.getElementById('wl-meta').textContent =
+        `${wishlist.items.length} item${wishlist.items.length !== 1 ? 's' : ''} · Shared via BrandSnobs`;
+
+      const totalValue = wishlist.items.reduce((s, i) => s + (i.salePrice || 0), 0);
+      const totalSavings = wishlist.items.reduce((s, i) =>
+        s + ((i.originalPrice || 0) - (i.salePrice || 0)), 0);
+      document.getElementById('wl-total').textContent =
+        `$${totalValue.toFixed(2)} total value${totalSavings > 0 ? ` · Save $${totalSavings.toFixed(2)}` : ''}`;
+
+      if (wishlist.items.length === 0) {
+        document.getElementById('empty').style.display = 'block';
+        return;
+      }
+
+      const grid = document.getElementById('items-grid');
+      wishlist.items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+          <img class="item-image" src="${item.image}" alt="${item.product}" loading="lazy"
+               onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'" />
+          <div class="item-body">
+            <p class="item-brand">${item.brand}</p>
+            <p class="item-name">${item.product}</p>
+            <div class="item-pricing">
+              <span class="item-sale">$${item.salePrice}</span>
+              ${item.originalPrice > item.salePrice
+                ? `<span class="item-original">$${item.originalPrice}</span>
+                   <span class="item-discount">${item.discount} off</span>`
+                : ''}
+            </div>
+            <a href="${item.link}" target="_blank" rel="noopener noreferrer" class="item-cta">
+              View Deal →
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+  </script>
+
+</body>
+</html>
