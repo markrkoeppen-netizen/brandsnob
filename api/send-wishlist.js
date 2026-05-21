@@ -1,96 +1,145 @@
 // /api/send-wishlist.js
 // Vercel serverless function — handles wishlist share emails via Resend
-// Deploy by placing this file in the /api folder of your GitHub repo
 
 export default async function handler(req, res) {
-  // Only allow POST requests
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { to, from, senderName, wishlistName, wishlistEmoji, message, shareLink, items, totalValue, sizes } = req.body;
+  const { to, senderName, wishlistName, wishlistEmoji, message, shareLink, items, totalValue, sizes } = req.body;
 
-  // Basic validation
   if (!to || !shareLink) {
     return res.status(400).json({ error: 'Missing required fields: to, shareLink' });
   }
 
-  // Format items list for email body
-  const itemsList = items && items.length > 0
-    ? items.map((item, i) =>
-        `${i + 1}. ${item.product}<br>&nbsp;&nbsp;&nbsp;${item.brand} — <strong>$${item.salePrice}</strong> <span style="color:#16a34a">(${item.discount} off)</span><br>&nbsp;&nbsp;&nbsp;<a href="${item.link}" style="color:#1d4ed8">View Deal</a>`
-      ).join('<br><br>')
-    : 'No items in this wishlist yet.';
+  // Build item cards — 2 per row in a table layout (works in all email clients)
+  const buildItemCards = (items) => {
+    if (!items || items.length === 0) return '<p style="color:#737373;text-align:center;padding:24px 0;">No items yet.</p>';
+
+    let rows = '';
+    for (let i = 0; i < items.length; i += 2) {
+      const left = items[i];
+      const right = items[i + 1];
+
+      const cardStyle = 'width:47%;display:inline-block;vertical-align:top;background:#ffffff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:16px;';
+
+      const buildCard = (item) => `
+        <div style="${cardStyle}">
+          <img src="${item.image}" alt="${item.product}"
+               width="100%" style="display:block;width:100%;height:180px;object-fit:cover;background:#f5f5f5;"
+               onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'" />
+          <div style="padding:12px;">
+            <p style="margin:0 0 4px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#737373;">${item.brand}</p>
+            <p style="margin:0 0 8px;font-size:13px;font-weight:500;color:#171717;line-height:1.4;">${item.product.length > 50 ? item.product.substring(0, 50) + '…' : item.product}</p>
+            <div style="margin-bottom:10px;">
+              <span style="font-size:16px;font-weight:700;color:#171717;">$${item.salePrice}</span>
+              ${item.originalPrice > item.salePrice ? `
+                <span style="font-size:12px;color:#a3a3a3;text-decoration:line-through;margin-left:6px;">$${item.originalPrice}</span>
+                <span style="font-size:11px;font-weight:600;color:#16a34a;background:#f0fdf4;padding:2px 6px;border-radius:4px;margin-left:4px;">${item.discount} off</span>
+              ` : ''}
+            </div>
+            <a href="${item.link}" style="display:block;background:#171717;color:#ffffff;text-decoration:none;padding:8px;border-radius:8px;font-size:12px;font-weight:600;text-align:center;">View Deal →</a>
+          </div>
+        </div>`;
+
+      rows += `
+        <div style="margin-bottom:0;">
+          ${buildCard(left)}
+          ${right ? `<div style="width:6%;display:inline-block;"></div>${buildCard(right)}` : ''}
+        </div>`;
+    }
+    return rows;
+  };
 
   const emailHtml = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1">
-    </head>
-    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #171717;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${wishlistEmoji || '🛍️'} ${wishlistName || 'Wishlist'} — BrandSnobs</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#171717;">
 
-      <div style="text-align: center; margin-bottom: 32px;">
-        <h1 style="font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 0;">
-          🛍️ BrandSnobs
-        </h1>
-      </div>
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f5f5;padding:32px 16px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
 
-      <div style="background: #f5f5f5; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
-        <p style="margin: 0 0 8px 0; font-size: 18px; font-weight: 700;">
-          ${senderName || 'Someone'} shared a wishlist with you!
-        </p>
-        <p style="margin: 0; color: #525252; font-size: 15px;">
-          ${wishlistEmoji || '❤️'} <strong>${wishlistName || 'My Wishlist'}</strong>
-          ${totalValue ? `— $${totalValue} in deals` : ''}
-        </p>
-      </div>
+          <!-- Header -->
+          <tr>
+            <td style="background:#171717;border-radius:20px 20px 0 0;padding:28px 32px;text-align:center;">
+              <p style="margin:0;font-size:22px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">🛍️ BrandSnobs</p>
+              <p style="margin:6px 0 0;font-size:12px;color:#a3a3a3;letter-spacing:0.1em;text-transform:uppercase;">Fashion Deals, Tracked For You</p>
+            </td>
+          </tr>
 
-      ${message ? `
-      <div style="border-left: 3px solid #171717; padding-left: 16px; margin-bottom: 24px;">
-        <p style="margin: 0; color: #404040; font-style: italic;">"${message}"</p>
-      </div>
-      ` : ''}
+          <!-- Hero section -->
+          <tr>
+            <td style="background:#ffffff;padding:32px 32px 24px;">
+              <p style="margin:0 0 6px;font-size:13px;color:#737373;font-weight:500;">${senderName || 'Someone'} wants to share something with you</p>
+              <p style="margin:0 0 4px;font-size:28px;font-weight:800;letter-spacing:-0.5px;">${wishlistEmoji || '❤️'} ${wishlistName || 'My Wishlist'}</p>
+              <p style="margin:0;font-size:14px;color:#737373;">${items ? items.length : 0} item${items && items.length !== 1 ? 's' : ''}${totalValue ? ` · $${totalValue} total value` : ''}</p>
 
-      ${sizes && sizes.length > 0 ? `
-      <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
-        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: #15803d;">
-          📏 Their Sizes
-        </p>
-        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-          ${sizes.map(s => `<span style="background: #ffffff; border: 1px solid #86efac; color: #166534; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 99px;">${s}</span>`).join('')}
-        </div>
-        <p style="margin: 8px 0 0; font-size: 11px; color: #6b7280;">Sizes saved by ${senderName} — so you know exactly what to order!</p>
-      </div>
-      ` : ''}
+              ${message ? `
+              <div style="margin-top:20px;border-left:3px solid #171717;padding-left:16px;">
+                <p style="margin:0;font-size:14px;color:#404040;font-style:italic;">"${message}"</p>
+              </div>` : ''}
 
-      <div style="margin-bottom: 24px;">
-        <h2 style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #171717;">
-          Items in this wishlist:
-        </h2>
-        <div style="background: #fafafa; border-radius: 12px; padding: 20px; line-height: 1.8;">
-          ${itemsList}
-        </div>
-      </div>
+              ${sizes && sizes.length > 0 ? `
+              <div style="margin-top:20px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px;">
+                <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#15803d;">📏 Their Sizes</p>
+                <div>
+                  ${sizes.map(s => `<span style="display:inline-block;background:#fff;border:1px solid #86efac;color:#166534;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;margin:0 6px 6px 0;">${s}</span>`).join('')}
+                </div>
+                <p style="margin:8px 0 0;font-size:11px;color:#6b7280;">So you know exactly what size to order!</p>
+              </div>` : ''}
+            </td>
+          </tr>
 
-      <div style="text-align: center; margin-bottom: 32px;">
-        <a href="${shareLink}"
-           style="display: inline-block; background: #171717; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 700; font-size: 16px;">
-          View Full Wishlist →
-        </a>
-      </div>
+          <!-- Items -->
+          <tr>
+            <td style="background:#ffffff;padding:0 32px 32px;">
+              <p style="margin:0 0 16px;font-size:14px;font-weight:700;color:#171717;border-top:1px solid #f5f5f5;padding-top:24px;">Items in this wishlist</p>
+              ${buildItemCards(items)}
+            </td>
+          </tr>
 
-      <hr style="border: none; border-top: 1px solid #e5e5e5; margin: 24px 0;">
+          <!-- CTA Button -->
+          <tr>
+            <td style="background:#ffffff;padding:0 32px 32px;text-align:center;">
+              <a href="${shareLink}"
+                 style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:16px 40px;border-radius:12px;font-weight:700;font-size:16px;letter-spacing:-0.2px;">
+                View Full Wishlist →
+              </a>
+              <p style="margin:12px 0 0;font-size:12px;color:#a3a3a3;">Opens an interactive page with all items</p>
+            </td>
+          </tr>
 
-      <p style="text-align: center; color: #a3a3a3; font-size: 12px; margin: 0;">
-        Sent via <a href="https://www.brandsnobs.com" style="color: #a3a3a3;">BrandSnobs</a> —
-        the smart way to track fashion deals from your favorite brands.
-      </p>
+          <!-- Footer -->
+          <tr>
+            <td style="background:#fafafa;border-top:1px solid #e5e5e5;border-radius:0 0 20px 20px;padding:24px 32px;text-align:center;">
+              <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#171717;">🛍️ BrandSnobs</p>
+              <p style="margin:0 0 12px;font-size:12px;color:#a3a3a3;line-height:1.6;">
+                The smart way to track sales from your favorite fashion brands — free, forever.
+              </p>
+              <a href="https://www.brandsnobs.com"
+                 style="display:inline-block;background:#171717;color:#ffffff;text-decoration:none;padding:10px 24px;border-radius:8px;font-size:12px;font-weight:600;">
+                Start Tracking Deals →
+              </a>
+              <p style="margin:16px 0 0;font-size:11px;color:#d4d4d4;">
+                Sent via <a href="https://www.brandsnobs.com" style="color:#d4d4d4;">BrandSnobs</a>
+              </p>
+            </td>
+          </tr>
 
-    </body>
-    </html>
-  `;
+        </table>
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>`;
 
   try {
     const response = await fetch('https://api.resend.com/emails', {
@@ -102,7 +151,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: 'BrandSnobs <admin@brandsnobs.com>',
         to: [to],
-        subject: `${senderName || 'Someone'} shared their ${wishlistName || 'wishlist'} with you 🛍️`,
+        subject: `${senderName || 'Someone'} shared their ${wishlistEmoji || '🛍️'} ${wishlistName || 'wishlist'} with you`,
         html: emailHtml,
       }),
     });
