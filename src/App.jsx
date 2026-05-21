@@ -1066,9 +1066,12 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
           if (!fetchedAt) return null;
           const hoursOld = (Date.now() - new Date(fetchedAt).getTime()) / (1000 * 60 * 60);
           if (hoursOld > 24) return null;
+          const label = hoursOld < 1 ? 'Just added'
+            : hoursOld < 6 ? `${Math.round(hoursOld)}h ago`
+            : 'Updated today';
           return (
             <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-emerald-500 text-white px-2 py-0.5 rounded-full text-xs font-semibold">
-              New
+              {label}
             </div>
           );
         })()}
@@ -1141,12 +1144,12 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
           {addedToBag ? (
             <span className="flex items-center justify-center gap-2">
               <Check className="w-4 h-4" />
-              Added to Bag
+              Added to Cart
             </span>
           ) : (
             <span className="flex items-center justify-center gap-2">
               <ShoppingBag className="w-4 h-4" />
-              Add to Bag
+              Add to Cart
             </span>
           )}
         </button>
@@ -1161,7 +1164,7 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
         >
           <span className="flex items-center justify-center gap-2">
             <Heart className="w-4 h-4" fill={isInWishlist ? 'currentColor' : 'none'} />
-            {isInWishlist ? 'Saved' : 'Save'}
+            {isInWishlist ? 'In Wishlist' : 'Add to Wishlist'}
           </span>
         </button>
       </div>
@@ -1210,7 +1213,7 @@ function ShoppingBagModal({ bag, onClose, onRemove, onCheckout, onClear, shippin
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-2xl font-bold text-neutral-900">Shopping Bag</h2>
+            <h2 className="text-2xl font-bold text-neutral-900">My Cart</h2>
             <button onClick={onClose} className="text-neutral-400 hover:text-neutral-600">
               <X className="w-6 h-6" />
             </button>
@@ -1464,7 +1467,7 @@ function WishlistModal({ wishlist, onClose, onRemove, onShare, onAddToBag }) {
                         onClick={() => onAddToBag(item)}
                         className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg hover:bg-neutral-800"
                       >
-                        Add to Bag
+                        Add to Cart
                       </button>
                       <button
                         onClick={() => handleDealClick(item.link)}
@@ -1786,7 +1789,7 @@ function WishlistsManagerModal({
                               onClick={() => onAddToBag(item)}
                               className="text-xs bg-neutral-900 text-white px-3 py-1 rounded-lg hover:bg-neutral-800"
                             >
-                              Add to Bag
+                              Add to Cart
                             </button>
                             <button
                               onClick={() => handleDealClick(item.link)}
@@ -3200,18 +3203,24 @@ export default function App() {
               </span>
             )}
 
-            {/* Shopping bag */}
-            <button
-              onClick={() => setShowBagModal(true)}
-              className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
-            >
-              <ShoppingBag className="w-6 h-6" />
-              {shoppingBag.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-neutral-900 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-semibold">
-                  {shoppingBag.length}
-                </span>
-              )}
-            </button>
+            {/* Shopping bag / Cart */}
+            <div className="relative group">
+              <button
+                onClick={() => setShowBagModal(true)}
+                className="relative p-2 text-neutral-600 hover:text-neutral-900 transition-colors"
+              >
+                <ShoppingBag className="w-6 h-6" />
+                {shoppingBag.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-neutral-900 text-white text-xs w-4 h-4 rounded-full flex items-center justify-center font-semibold">
+                    {shoppingBag.length}
+                  </span>
+                )}
+              </button>
+              <div className="absolute top-full right-0 mt-1 bg-neutral-900 text-white text-xs px-2.5 py-1.5 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                Cart — save items to buy later
+                <div className="absolute -top-1 right-3 w-2 h-2 bg-neutral-900 rotate-45"></div>
+              </div>
+            </div>
 
             {/* Wishlist heart — shows total across ALL wishlists */}
             <button
@@ -3261,9 +3270,9 @@ export default function App() {
           <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-hide">
             {[
               { id: 'deals', label: 'Deals', count: filteredDeals.length },
-              { id: 'brands', label: 'My Brands', count: myBrands.length },
+              { id: 'brands', label: 'Brands', count: myBrands.length },
               { id: 'profile', label: 'Profile' },
-              { id: 'recommendations', label: 'Inspiration' }
+              { id: 'recommendations', label: 'Inspire' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -3892,7 +3901,7 @@ export default function App() {
         {activeTab === 'recommendations' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Inspiration</h2>
+              <h2 className="text-2xl font-bold text-neutral-900">Inspire</h2>
               <button
                 onClick={() => setShowRecommendModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-sm font-medium"
