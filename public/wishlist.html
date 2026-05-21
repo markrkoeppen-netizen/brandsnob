@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>BrandSnobs Wishlist</title>
   <meta name="description" content="View this BrandSnobs wishlist" />
+  <!-- Open Graph for social sharing -->
+  <meta property="og:site_name" content="BrandSnobs" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="BrandSnobs Wishlist" id="og-title" />
+  <meta property="og:description" content="Check out this wishlist from BrandSnobs — fashion deals from your favorite brands." id="og-desc" />
+  <meta property="og:image" content="https://www.brandsnobs.com/icon-512.png" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="BrandSnobs Wishlist" id="tw-title" />
+  <meta name="twitter:description" content="Check out this wishlist from BrandSnobs." id="tw-desc" />
+  <meta name="twitter:image" content="https://www.brandsnobs.com/icon-512.png" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -345,6 +355,18 @@
       document.getElementById('content').style.display = 'block';
 
       document.title = `${wishlist.emoji} ${wishlist.name} — BrandSnobs`;
+      const ogTitle = `${wishlist.emoji} ${wishlist.name} — BrandSnobs Wishlist`;
+      const ogDesc = `${wishlist.items.length} item${wishlist.items.length !== 1 ? 's' : ''} · $${wishlist.items.reduce((s,i) => s + (i.salePrice||0), 0).toFixed(2)} total value. View and shop this wishlist on BrandSnobs.`;
+      document.getElementById('og-title').setAttribute('content', ogTitle);
+      document.getElementById('og-desc').setAttribute('content', ogDesc);
+      document.getElementById('tw-title').setAttribute('content', ogTitle);
+      document.getElementById('tw-desc').setAttribute('content', ogDesc);
+      // Notify the wishlist owner that someone viewed it
+      fetch('/api/notify-wishlist-view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shareId, ownerEmail: owner, wishlistName: wishlist.name, wishlistEmoji: wishlist.emoji })
+      }).catch(() => {}); // silent — non-critical
       document.getElementById('wl-emoji').textContent = wishlist.emoji;
       document.getElementById('wl-name').textContent = wishlist.name;
       document.getElementById('wl-meta').textContent =
