@@ -285,7 +285,9 @@ const BRAND_COLLECTIONS = [
       { name: 'Adidas', category: 'Footwear' },
       { name: 'Puma', category: 'Footwear' },
       { name: 'Supreme', category: 'Fashion' },
-      { name: 'Stüssy', category: 'Fashion' }
+      { name: 'Stüssy', category: 'Fashion' },
+      { name: 'Baseball Lifestyle 101', category: 'Fashion' },
+      { name: 'Dirty Mids', category: 'Footwear' }
     ]
   },
   {
@@ -346,7 +348,8 @@ const ALL_AVAILABLE_BRANDS = [
   'Victoria\'s Secret', 'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara',
   'American Eagle', 'Brandy Melville', 'Comfrt', 'Fear of God Essentials', 'Hellstar', 'Hollister', 'RTIC Outdoors', 'Supreme',
   'H&M', 'Tommy Hilfiger', 'Veja', 'Dooney & Bourke',
-  'Stüssy', 'Loewe', 'Bottega Veneta', 'Alaïa', 'Staud', 'Alice + Olivia', 'Mango'
+  'Stüssy', 'Loewe', 'Bottega Veneta', 'Alaïa', 'Staud', 'Alice + Olivia', 'Mango',
+  'Baseball Lifestyle 101', 'Dirty Mids'
 ];
 
 function HowItWorksModal({ onClose }) {
@@ -4033,6 +4036,8 @@ export default function App() {
                           'Staud': 'staud.clothing',
                           'Alice + Olivia': 'aliceandolivia.com',
                           'Mango': 'mango.com',
+                          'Baseball Lifestyle 101': 'baseballlifestyle101.com',
+                          'Dirty Mids': 'dirtymids.com',
                         };
                         const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
                         return (
