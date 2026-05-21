@@ -12,43 +12,49 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields: to, shareLink' });
   }
 
-  // Build item cards — 2 per row in a table layout (works in all email clients)
+  // Build item cards — 2 per row using proper HTML tables (guaranteed side-by-side in all email clients)
   const buildItemCards = (items) => {
     if (!items || items.length === 0) return '<p style="color:#737373;text-align:center;padding:24px 0;">No items yet.</p>';
 
+    const buildCard = (item) => item ? `
+      <td width="48%" valign="top" style="padding:0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;background:#ffffff;">
+          <tr>
+            <td style="padding:0;">
+              <img src="${item.image}" alt="${item.product}"
+                   width="100%" height="160"
+                   style="display:block;width:100%;height:160px;object-fit:cover;background:#f5f5f5;border-radius:12px 12px 0 0;" />
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:12px;">
+              <p style="margin:0 0 3px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#737373;">${item.brand}</p>
+              <p style="margin:0 0 8px;font-size:12px;font-weight:500;color:#171717;line-height:1.4;">${item.product.length > 45 ? item.product.substring(0, 45) + '…' : item.product}</p>
+              <p style="margin:0 0 10px;">
+                <span style="font-size:15px;font-weight:700;color:#171717;">$${item.salePrice}</span>
+                ${item.originalPrice > item.salePrice
+                  ? `<span style="font-size:11px;color:#a3a3a3;text-decoration:line-through;margin-left:5px;">$${item.originalPrice}</span>
+                     <span style="font-size:10px;font-weight:600;color:#16a34a;background:#f0fdf4;padding:2px 5px;border-radius:4px;margin-left:4px;">${item.discount} off</span>`
+                  : ''}
+              </p>
+              <a href="${item.link}" style="display:block;background:#171717;color:#ffffff;text-decoration:none;padding:7px;border-radius:7px;font-size:11px;font-weight:600;text-align:center;">View Deal →</a>
+            </td>
+          </tr>
+        </table>
+      </td>` : '<td width="48%"></td>';
+
     let rows = '';
     for (let i = 0; i < items.length; i += 2) {
-      const left = items[i];
-      const right = items[i + 1];
-
-      const cardStyle = 'width:47%;display:inline-block;vertical-align:top;background:#ffffff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden;margin-bottom:16px;';
-
-      const buildCard = (item) => `
-        <div style="${cardStyle}">
-          <img src="${item.image}" alt="${item.product}"
-               width="100%" style="display:block;width:100%;height:180px;object-fit:cover;background:#f5f5f5;"
-               onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400'" />
-          <div style="padding:12px;">
-            <p style="margin:0 0 4px;font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#737373;">${item.brand}</p>
-            <p style="margin:0 0 8px;font-size:13px;font-weight:500;color:#171717;line-height:1.4;">${item.product.length > 50 ? item.product.substring(0, 50) + '…' : item.product}</p>
-            <div style="margin-bottom:10px;">
-              <span style="font-size:16px;font-weight:700;color:#171717;">$${item.salePrice}</span>
-              ${item.originalPrice > item.salePrice ? `
-                <span style="font-size:12px;color:#a3a3a3;text-decoration:line-through;margin-left:6px;">$${item.originalPrice}</span>
-                <span style="font-size:11px;font-weight:600;color:#16a34a;background:#f0fdf4;padding:2px 6px;border-radius:4px;margin-left:4px;">${item.discount} off</span>
-              ` : ''}
-            </div>
-            <a href="${item.link}" style="display:block;background:#171717;color:#ffffff;text-decoration:none;padding:8px;border-radius:8px;font-size:12px;font-weight:600;text-align:center;">View Deal →</a>
-          </div>
-        </div>`;
-
       rows += `
-        <div style="margin-bottom:0;">
-          ${buildCard(left)}
-          ${right ? `<div style="width:6%;display:inline-block;"></div>${buildCard(right)}` : ''}
-        </div>`;
+        <tr>
+          ${buildCard(items[i])}
+          <td width="4%"></td>
+          ${buildCard(items[i + 1] || null)}
+        </tr>
+        <tr><td colspan="3" height="16"></td></tr>`;
     }
-    return rows;
+
+    return `<table width="100%" cellpadding="0" cellspacing="0">${rows}</table>`;
   };
 
   const emailHtml = `
