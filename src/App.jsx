@@ -33,7 +33,10 @@ const BRAND_COLLECTIONS = [
       { name: 'Chloé', category: 'Fashion' },
       { name: 'The Row', category: 'Fashion' },
       { name: 'Burberry', category: 'Fashion' },
-      { name: 'Dolce & Gabbana', category: 'Fashion' }
+      { name: 'Dolce & Gabbana', category: 'Fashion' },
+      { name: 'Loewe', category: 'Fashion' },
+      { name: 'Bottega Veneta', category: 'Fashion' },
+      { name: 'Alaïa', category: 'Fashion' }
     ]
   },
   {
@@ -48,7 +51,8 @@ const BRAND_COLLECTIONS = [
       { name: 'Feragamo', category: 'Footwear' },
       { name: 'Lucchese', category: 'Footwear' },
       { name: 'Tumi', category: 'Accessories' },
-      { name: 'Coach', category: 'Accessories' }
+      { name: 'Coach', category: 'Accessories' },
+      { name: 'Dooney & Bourke', category: 'Accessories' }
     ]
   },
   {
@@ -111,7 +115,9 @@ const BRAND_COLLECTIONS = [
       { name: 'Wrangler', category: 'Fashion' },
       { name: 'American Eagle', category: 'Fashion' },
       { name: 'Comfrt', category: 'Fashion' },
-      { name: 'Hollister', category: 'Fashion' }
+      { name: 'Hollister', category: 'Fashion' },
+      { name: 'H&M', category: 'Fashion' },
+      { name: 'Tommy Hilfiger', category: 'Fashion' }
     ]
   },
   {
@@ -205,7 +211,8 @@ const BRAND_COLLECTIONS = [
       { name: 'Asics', category: 'Footwear' },
       { name: 'Salomon', category: 'Footwear' },
       { name: 'Reebok', category: 'Footwear' },
-      { name: 'Puma', category: 'Footwear' }
+      { name: 'Puma', category: 'Footwear' },
+      { name: 'Veja', category: 'Footwear' }
     ]
   },
   {
@@ -232,7 +239,10 @@ const BRAND_COLLECTIONS = [
       { name: 'Banana Republic', category: 'Fashion' },
       { name: 'Reformation', category: 'Fashion' },
       { name: 'Aritzia', category: 'Fashion' },
-      { name: 'Zara', category: 'Fashion' }
+      { name: 'Zara', category: 'Fashion' },
+      { name: 'Staud', category: 'Fashion' },
+      { name: 'Alice + Olivia', category: 'Fashion' },
+      { name: 'Mango', category: 'Fashion' }
     ]
   },
   {
@@ -274,7 +284,8 @@ const BRAND_COLLECTIONS = [
       { name: 'Nike', category: 'Footwear' },
       { name: 'Adidas', category: 'Footwear' },
       { name: 'Puma', category: 'Footwear' },
-      { name: 'Supreme', category: 'Fashion' }
+      { name: 'Supreme', category: 'Fashion' },
+      { name: 'Stüssy', category: 'Fashion' }
     ]
   },
   {
@@ -333,7 +344,9 @@ const ALL_AVAILABLE_BRANDS = [
   'Teva', 'The North Face', 'The Row', 'Theory', 'Thom Browne', 'Tiffany & Co.', 'Tom Ford', 'Tommy Bahama', 'Tony Lama',
   'Tory Burch', 'TravisMatthew', 'Trendia', 'Tumi', 'UGG', 'Under Armour', 'Untuckit', 'Vans', 'Vera Wang', 'Vince',
   'Victoria\'s Secret', 'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara',
-  'American Eagle', 'Brandy Melville', 'Comfrt', 'Fear of God Essentials', 'Hellstar', 'Hollister', 'RTIC Outdoors', 'Supreme'
+  'American Eagle', 'Brandy Melville', 'Comfrt', 'Fear of God Essentials', 'Hellstar', 'Hollister', 'RTIC Outdoors', 'Supreme',
+  'H&M', 'Tommy Hilfiger', 'Veja', 'Dooney & Bourke',
+  'Stüssy', 'Loewe', 'Bottega Veneta', 'Alaïa', 'Staud', 'Alice + Olivia', 'Mango'
 ];
 
 function HowItWorksModal({ onClose }) {
@@ -4014,6 +4027,17 @@ export default function App() {
                           'RTIC Outdoors': 'rticoutdoors.com',
                           'Supreme': 'supremenewyork.com',
                           "Victoria's Secret": 'victoriassecret.com',
+                          'H&M': 'hm.com',
+                          'Tommy Hilfiger': 'tommyhilfiger.com',
+                          'Veja': 'veja-store.com',
+                          'Dooney & Bourke': 'dooney.com',
+                          'Stüssy': 'stussy.com',
+                          'Loewe': 'loewe.com',
+                          'Bottega Veneta': 'bottegaveneta.com',
+                          'Alaïa': 'alaia.fr',
+                          'Staud': 'staud.clothing',
+                          'Alice + Olivia': 'aliceandolivia.com',
+                          'Mango': 'mango.com',
                         };
                         const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
                         return (
