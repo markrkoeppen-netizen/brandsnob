@@ -1,4 +1,4 @@
-const CACHE_NAME = 'brandsnobs-v1';
+const CACHE_NAME = 'brandsnobs-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -33,7 +33,9 @@ self.addEventListener('fetch', (event) => {
     event.request.method !== 'GET' ||
     event.request.url.includes('firestore') ||
     event.request.url.includes('googleapis') ||
-    event.request.url.includes('rapidapi')
+    event.request.url.includes('rapidapi') ||
+    event.request.url.includes('emailjs') ||
+    event.request.url.includes('resend')
   ) {
     return;
   }
