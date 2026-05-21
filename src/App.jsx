@@ -3022,8 +3022,7 @@ export default function App() {
 
       result = result.filter(deal => {
         const dealGenders = detectGender(deal);
-        // null means untagged — only show when no specific gender filter conflicts
-        // i.e. hide from filtered results to keep filters meaningful
+        // null means untagged — hide when any gender filter is active
         if (dealGenders === null) return false;
         return selectedGenders.some(g => dealGenders.includes(g));
       });
