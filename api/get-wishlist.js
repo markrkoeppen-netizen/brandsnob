@@ -1,25 +1,6 @@
 // /api/get-wishlist.js
-// Fetches a wishlist from Firestore by shareId for public viewing
-
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-
-function initFirebase() {
-  if (getApps().length > 0) return;
-  
-  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    initializeApp({ credential: cert(serviceAccount) });
-  } else {
-    initializeApp({
-      credential: cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      }),
-    });
-  }
-}
+// Fetches a wishlist from Firestore by shareId using Firebase REST API
+// No firebase-admin needed — uses Firestore REST API with API key
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -33,33 +14,76 @@ export default async function handler(req, res) {
   }
 
   try {
-    initFirebase();
-    const db = getFirestore();
+    const projectId = process.env.FIREBASE_PROJECT_ID || 'brandsnobs-37142';
+    const apiKey = process.env.FIREBASE_API_KEY;
 
-    // Search all users for a wishlist with this shareId
-    const usersSnapshot = await db.collection('users').get();
-    
-    for (const userDoc of usersSnapshot.docs) {
-      const data = userDoc.data();
-      const wishlists = data.wishlists || [];
+    // Use Firestore REST API to query users collection
+    // Run a collection group query isn't easily done via REST, so we use
+    // the Firestore query endpoint to find users with matching shareId
+    const queryUrl = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents:runQuery${apiKey ? `?key=${apiKey}` : ''}`;
+
+    const queryBody = {
+      structuredQuery: {
+        from: [{ collectionId: 'users' }],
+        limit: 100,
+      }
+    };
+
+    const response = await fetch(queryUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(queryBody),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Firestore query failed: ${response.status}`);
+    }
+
+    const results = await response.json();
+
+    for (const result of results) {
+      if (!result.document) continue;
+      const fields = result.document.fields || {};
       
-      const wishlist = wishlists.find(w => w.shareId === shareId);
+      // Parse wishlists array from Firestore format
+      const wishlistsField = fields.wishlists?.arrayValue?.values || [];
       
-      if (wishlist) {
-        // Check privacy
-        if (wishlist.privacy === 'private') {
-          return res.status(403).json({ error: 'This wishlist is private' });
-        }
+      for (const wlValue of wishlistsField) {
+        const wl = wlValue.mapValue?.fields || {};
+        const wlShareId = wl.shareId?.stringValue;
         
-        return res.status(200).json({
-          wishlist: {
-            name: wishlist.name,
-            emoji: wishlist.emoji,
-            items: wishlist.items,
-            createdAt: wishlist.createdAt,
-          },
-          owner: userDoc.id, // email as owner identifier
-        });
+        if (wlShareId === shareId) {
+          const privacy = wl.privacy?.stringValue || 'link-only';
+          
+          if (privacy === 'private') {
+            return res.status(403).json({ error: 'This wishlist is private' });
+          }
+
+          // Parse items
+          const itemValues = wl.items?.arrayValue?.values || [];
+          const items = itemValues.map(iv => {
+            const f = iv.mapValue?.fields || {};
+            return {
+              id: f.id?.stringValue || '',
+              brand: f.brand?.stringValue || '',
+              product: f.product?.stringValue || '',
+              salePrice: parseFloat(f.salePrice?.doubleValue || f.salePrice?.integerValue || 0),
+              originalPrice: parseFloat(f.originalPrice?.doubleValue || f.originalPrice?.integerValue || 0),
+              discount: f.discount?.stringValue || '',
+              image: f.image?.stringValue || '',
+              link: f.link?.stringValue || '',
+              retailer: f.retailer?.stringValue || '',
+            };
+          });
+
+          return res.status(200).json({
+            wishlist: {
+              name: wl.name?.stringValue || 'Wishlist',
+              emoji: wl.emoji?.stringValue || '⭐',
+              items,
+            }
+          });
+        }
       }
     }
 
@@ -67,6 +91,6 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('get-wishlist error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
+    return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }
