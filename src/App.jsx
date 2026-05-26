@@ -3429,7 +3429,22 @@ export default function App() {
         unisex: ['unisex', 'gender neutral', 'gender-neutral', 'all genders', 'everyone'],
       };
 
+      // Brands that are inherently unisex — show under all gender filters
+      const FRONTEND_UNISEX_BRANDS = [
+        'Yeti', 'RTIC Outdoors', 'Pelagic', 'The North Face', 'Columbia', 'Patagonia',
+        "Arc'teryx", 'REI Co-op', 'Mammut', 'Salomon', 'Hoka', 'On Running', 'Allbirds',
+        'Veja', 'BIRKENSTOCK', 'Teva', 'Crocs', 'Reef', 'Sanuk', 'OluKai', 'OOFOS',
+        'Converse', 'Vans', 'New Balance', 'Asics', 'Reebok', 'Puma',
+        'Costa', 'Oakley', 'Ray-Ban', 'Warby Parker', 'Kith', 'Supreme', 'Stüssy',
+        'Carhartt', 'Wrangler', 'Ariat', 'Stetson', 'Tumi', 'Samsonite', 'Away',
+        'Bombas', 'Havaianas', 'Gorjana', 'Kendra Scott', 'Lacoste',
+        'Estée Lauder', 'Lush', 'Bubble', 'LANEIGE', 'Dacor',
+      ];
+
       const detectGender = (deal) => {
+        // If brand is inherently unisex, show under all filters
+        if (FRONTEND_UNISEX_BRANDS.includes(deal.brand)) return ['men', 'women', 'boys', 'girls', 'unisex'];
+
         const explicitGender = (deal.gender || '').toLowerCase().trim();
 
         // null gender = untagged, show only when no filter active (handled below)
