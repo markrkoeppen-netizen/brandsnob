@@ -2260,7 +2260,7 @@ function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCo
   );
 }
 
-function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast }) {
+function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals }) {
   const [activeCat, setActiveCat] = useState('All');
 
   const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
@@ -2445,6 +2445,11 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast }) {
                       }`} style={{fontSize:'10px'}}>
                         {brand.name}
                       </span>
+                      {isAdded && deals && (
+                        <span style={{fontSize:'9px'}} className="text-emerald-600 font-medium">
+                          {deals.filter(d => (d.brand||'').toLowerCase() === brand.name.toLowerCase()).length} deals
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -2939,7 +2944,7 @@ export default function App() {
     setMyBrands([...myBrands, {
       id: Date.now(),
       name: brandName,
-      collection: collection || 'Uncategorized'
+      collection: collection || 'BrandSnobs Collection'
     }]);
     
     setNewBrandName('');
@@ -3724,12 +3729,15 @@ export default function App() {
           <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-hide">
             {[
               { id: 'deals', label: 'Deals', count: filteredDeals.length },
-              { id: 'brands', label: 'My Brands', count: myBrands.length },
+              { id: 'brands', label: 'Brands', count: myBrands.length },
               { id: 'profile', label: 'Profile' },
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
                 className={`flex-shrink-0 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
                     ? 'border-neutral-900 text-neutral-900'
@@ -4035,7 +4043,40 @@ export default function App() {
                           className="w-full flex items-center justify-between mb-3 group"
                         >
                           <h3 className="text-lg font-semibold text-neutral-900 flex items-center gap-2">
-                            {collName}
+                            {editingCollection === collName ? (
+                              <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                <input
+                                  type="text"
+                                  value={editingCollectionName}
+                                  onChange={(e) => setEditingCollectionName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') renameCollection(collName, editingCollectionName);
+                                    if (e.key === 'Escape') setEditingCollection(null);
+                                  }}
+                                  className="px-2 py-0.5 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 w-40"
+                                  autoFocus
+                                />
+                                <button onClick={() => renameCollection(collName, editingCollectionName)}
+                                  className="text-xs px-2 py-0.5 bg-neutral-900 text-white rounded-lg">Save</button>
+                                <button onClick={() => setEditingCollection(null)}
+                                  className="text-xs px-2 py-0.5 bg-neutral-200 text-neutral-700 rounded-lg">Cancel</button>
+                              </div>
+                            ) : (
+                              <span className="flex items-center gap-1.5">
+                                {collName}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingCollection(collName);
+                                    setEditingCollectionName(collName);
+                                  }}
+                                  className="text-neutral-300 hover:text-neutral-600 transition-colors"
+                                  title="Rename collection"
+                                >
+                                  ✏️
+                                </button>
+                              </span>
+                            )}
                             <span className="text-xs font-normal text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
                               {collDeals.length} deal{collDeals.length !== 1 ? 's' : ''}
                             </span>
@@ -4089,6 +4130,7 @@ export default function App() {
               setMyBrands={setMyBrands}
               removeBrand={removeBrand}
               showToast={showToast}
+              deals={deals}
             />
           </div>
         )}
@@ -4126,15 +4168,6 @@ export default function App() {
                 </div>
               );
             })()}
-
-            {/* ── My Collections ──────────────────────────────── */}
-            <MyCollectionsSection
-              myBrands={myBrands}
-              userCollections={userCollections}
-              removeBrand={removeBrand}
-              renameCollection={renameCollection}
-              deals={deals}
-            />
 
             {/* ── My Wishlists ─────────────────────────────────── */}
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
@@ -4206,6 +4239,15 @@ export default function App() {
                 </div>
               )}
             </div>
+
+            {/* ── My Collections ──────────────────────────────── */}
+            <MyCollectionsSection
+              myBrands={myBrands}
+              userCollections={userCollections}
+              removeBrand={removeBrand}
+              renameCollection={renameCollection}
+              deals={deals}
+            />
 
             {/* ── Style Profile (sizes) ────────────────────────── */}
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
