@@ -2262,6 +2262,23 @@ function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCo
 
 function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals }) {
   const [activeCat, setActiveCat] = useState('All');
+  const [pendingBrand, setPendingBrand] = useState(null); // brand waiting for collection assignment
+  const [newCollName, setNewCollName] = useState('');
+  const [showNewColl, setShowNewColl] = useState(false);
+
+  const userCollections = [...new Set(myBrands.map(b => b.collection).filter(Boolean))];
+
+  const confirmAddBrand = (brand, collectionName) => {
+    setMyBrands(prev => [...prev, {
+      id: Date.now() + Math.random(),
+      name: brand.name,
+      collection: collectionName
+    }]);
+    showToast(`${brand.name} added to ${collectionName}!`);
+    setPendingBrand(null);
+    setNewCollName('');
+    setShowNewColl(false);
+  };
 
   const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
   const visibleCollections = activeCat === 'All'
@@ -2405,13 +2422,11 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
                         if (isAdded) {
                           const b = myBrands.find(mb => mb.name === brand.name);
                           if (b) removeBrand(b.id);
+                          showToast(`${brand.name} removed`);
                         } else {
-                          setMyBrands(prev => [...prev, {
-                            id: Date.now() + Math.random(),
-                            name: brand.name,
-                            collection: collection.name
-                          }]);
-                          showToast(`${brand.name} added!`);
+                          setPendingBrand({ ...brand, suggestedCollection: collection.name });
+                          setShowNewColl(false);
+                          setNewCollName('');
                         }
                       }}
                       title={isAdded ? `Remove ${brand.name}` : `Add ${brand.name}`}
@@ -2458,6 +2473,84 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
           );
         })}
       </div>
+
+      {/* ── Collection picker mini-modal ──────────────────── */}
+      {pendingBrand && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-bold text-neutral-900">Add {pendingBrand.name}</h3>
+              <button onClick={() => setPendingBrand(null)} className="text-neutral-400 hover:text-neutral-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <p className="text-sm text-neutral-500 mb-4">Which collection should this go in?</p>
+
+            {/* Existing collections */}
+            <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
+              {userCollections.length > 0 && userCollections.map(coll => (
+                <button
+                  key={coll}
+                  onClick={() => confirmAddBrand(pendingBrand, coll)}
+                  className="w-full text-left px-3 py-2.5 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 transition-all text-sm font-medium text-neutral-900"
+                >
+                  {coll}
+                </button>
+              ))}
+              {/* Suggested collection from browse context */}
+              {pendingBrand.suggestedCollection && !userCollections.includes(pendingBrand.suggestedCollection) && (
+                <button
+                  onClick={() => confirmAddBrand(pendingBrand, pendingBrand.suggestedCollection)}
+                  className="w-full text-left px-3 py-2.5 rounded-xl border border-neutral-200 hover:border-neutral-900 hover:bg-neutral-50 transition-all text-sm font-medium text-neutral-900 flex items-center justify-between"
+                >
+                  <span>{pendingBrand.suggestedCollection}</span>
+                  <span className="text-xs text-neutral-400">suggested</span>
+                </button>
+              )}
+            </div>
+
+            {/* Create new collection */}
+            {!showNewColl ? (
+              <button
+                onClick={() => setShowNewColl(true)}
+                className="w-full text-sm text-neutral-500 hover:text-neutral-900 py-2 border border-dashed border-neutral-300 rounded-xl hover:border-neutral-400 transition-colors"
+              >
+                + Create new collection
+              </button>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newCollName}
+                  onChange={(e) => setNewCollName(e.target.value)}
+                  placeholder="Collection name..."
+                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && newCollName.trim()) confirmAddBrand(pendingBrand, newCollName.trim());
+                    if (e.key === 'Escape') setShowNewColl(false);
+                  }}
+                />
+                <button
+                  onClick={() => newCollName.trim() && confirmAddBrand(pendingBrand, newCollName.trim())}
+                  disabled={!newCollName.trim()}
+                  className="px-3 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium disabled:opacity-40"
+                >
+                  Add
+                </button>
+              </div>
+            )}
+
+            {/* Skip — use default */}
+            <button
+              onClick={() => confirmAddBrand(pendingBrand, 'BrandSnobs Collection')}
+              className="w-full mt-3 text-xs text-neutral-400 hover:text-neutral-600 py-1"
+            >
+              Skip — add to BrandSnobs Collection
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
