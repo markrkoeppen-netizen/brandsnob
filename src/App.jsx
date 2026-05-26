@@ -20,8 +20,8 @@ const GENDER_OPTIONS = [
 const BRAND_COLLECTIONS = [
   {
     id: 1,
-    name: 'Luxury Fashion Icons',
-    description: 'The most prestigious names in high fashion',
+    name: 'Luxury & Designer',
+    description: 'The most prestigious names in high fashion and luxury accessories',
     brands: [
       { name: 'Gucci', category: 'Fashion' },
       { name: 'Prada', category: 'Fashion' },
@@ -36,29 +36,21 @@ const BRAND_COLLECTIONS = [
       { name: 'Dolce & Gabbana', category: 'Fashion' },
       { name: 'Loewe', category: 'Fashion' },
       { name: 'Bottega Veneta', category: 'Fashion' },
-      { name: 'Alaïa', category: 'Fashion' }
+      { name: 'Alaïa', category: 'Fashion' },
+      { name: 'Christian Louboutin', category: 'Footwear' },
+      { name: 'Jimmy Choo', category: 'Footwear' },
+      { name: 'Stuart Weitzman', category: 'Footwear' },
+      { name: 'Feragamo', category: 'Footwear' },
+      { name: 'Tom Ford', category: 'Fashion' },
+      { name: 'Oscar de la Renta', category: 'Fashion' },
+      { name: 'Vera Wang', category: 'Fashion' },
+      { name: 'Tiffany & Co.', category: 'Accessories' }
     ]
   },
   {
     id: 2,
-    name: 'Designer Shoes & Accessories',
-    description: 'Premium footwear and luxury accessories',
-    brands: [
-      { name: 'Christian Louboutin', category: 'Footwear' },
-      { name: 'Jimmy Choo', category: 'Footwear' },
-      { name: 'Stuart Weitzman', category: 'Footwear' },
-      { name: 'Cole Haan', category: 'Footwear' },
-      { name: 'Feragamo', category: 'Footwear' },
-      { name: 'Lucchese', category: 'Footwear' },
-      { name: 'Tumi', category: 'Accessories' },
-      { name: 'Coach', category: 'Accessories' },
-      { name: 'Dooney & Bourke', category: 'Accessories' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'Athletic & Athleisure',
-    description: 'Performance meets style',
+    name: 'Athletic & Sport',
+    description: 'Performance gear, athleisure, and running brands',
     brands: [
       { name: 'Nike', category: 'Footwear' },
       { name: 'Adidas', category: 'Footwear' },
@@ -69,13 +61,23 @@ const BRAND_COLLECTIONS = [
       { name: 'Athleta', category: 'Fashion' },
       { name: 'Under Armour', category: 'Fashion' },
       { name: 'YoungLA', category: 'Fashion' },
-      { name: 'Gymshark', category: 'Fashion' }
+      { name: 'Gymshark', category: 'Fashion' },
+      { name: 'Hoka', category: 'Footwear' },
+      { name: 'New Balance', category: 'Footwear' },
+      { name: 'Asics', category: 'Footwear' },
+      { name: 'Salomon', category: 'Footwear' },
+      { name: 'Reebok', category: 'Footwear' },
+      { name: 'Puma', category: 'Footwear' },
+      { name: 'Veja', category: 'Footwear' },
+      { name: 'Sweaty Betty', category: 'Fashion' },
+      { name: 'Outdoor Voices', category: 'Fashion' },
+      { name: 'Rhone', category: 'Fashion' }
     ]
   },
   {
-    id: 4,
-    name: 'Contemporary American',
-    description: 'Modern American designers and lifestyle brands',
+    id: 3,
+    name: 'Contemporary Fashion',
+    description: 'Modern designers, American style, and menswear staples',
     brands: [
       { name: 'Calvin Klein', category: 'Fashion' },
       { name: 'Donna Karan', category: 'Fashion' },
@@ -83,87 +85,119 @@ const BRAND_COLLECTIONS = [
       { name: 'Kate Spade', category: 'Accessories' },
       { name: 'Marc Jacobs', category: 'Fashion' },
       { name: 'Michael Kors', category: 'Fashion' },
-      { name: 'Oscar de la Renta', category: 'Fashion' },
       { name: 'Spanx', category: 'Fashion' },
-      { name: 'Tom Ford', category: 'Fashion' },
       { name: 'Tory Burch', category: 'Fashion' },
       { name: 'Trendia', category: 'Fashion' },
-      { name: 'Vera Wang', category: 'Fashion' }
+      { name: 'Theory', category: 'Fashion' },
+      { name: 'Vince', category: 'Fashion' },
+      { name: 'Rag & Bone', category: 'Fashion' },
+      { name: 'J.Crew', category: 'Fashion' },
+      { name: 'Banana Republic', category: 'Fashion' },
+      { name: 'Reformation', category: 'Fashion' },
+      { name: 'Aritzia', category: 'Fashion' },
+      { name: 'Staud', category: 'Fashion' },
+      { name: 'Alice + Olivia', category: 'Fashion' },
+      { name: 'Bonobos', category: 'Fashion' },
+      { name: 'Untuckit', category: 'Fashion' },
+      { name: 'Mac Weldon', category: 'Fashion' },
+      { name: 'Aerie', category: 'Fashion' },
+      { name: 'Anthropologie', category: 'Fashion' },
+      { name: 'Brandy Melville', category: 'Fashion' },
+      { name: "Victoria's Secret", category: 'Fashion' }
     ]
   },
   {
-    id: 5,
-    name: 'Casual & Lifestyle',
-    description: 'Everyday luxury and comfort',
+    id: 4,
+    name: 'Casual & Everyday',
+    description: 'Everyday wear, denim, and wardrobe basics',
     brands: [
       { name: 'Abercrombie & Fitch', category: 'Fashion' },
+      { name: 'American Eagle', category: 'Fashion' },
       { name: 'American Giant', category: 'Fashion' },
       { name: 'Brooks Brothers', category: 'Fashion' },
       { name: 'Carhartt', category: 'Fashion' },
       { name: 'Chubbies', category: 'Fashion' },
+      { name: 'Comfrt', category: 'Fashion' },
       { name: 'Everlane', category: 'Fashion' },
-      { name: 'Kith', category: 'Fashion' },
+      { name: 'H&M', category: 'Fashion' },
+      { name: 'Hollister', category: 'Fashion' },
       { name: 'Lacoste', category: 'Fashion' },
       { name: 'Levi Strauss', category: 'Fashion' },
+      { name: "Levi's", category: 'Fashion' },
+      { name: 'Lucky', category: 'Fashion' },
+      { name: 'AG Jeans', category: 'Fashion' },
       { name: 'Madewell', category: 'Fashion' },
+      { name: 'Mango', category: 'Fashion' },
       { name: 'Peter Millar', category: 'Fashion' },
       { name: 'Polo Ralph Lauren', category: 'Fashion' },
-      { name: 'Rhone', category: 'Fashion' },
       { name: 'Tommy Bahama', category: 'Fashion' },
+      { name: 'Tommy Hilfiger', category: 'Fashion' },
       { name: 'TravisMatthew', category: 'Fashion' },
       { name: 'Vineyard Vines', category: 'Fashion' },
       { name: 'Wrangler', category: 'Fashion' },
-      { name: 'American Eagle', category: 'Fashion' },
-      { name: 'Comfrt', category: 'Fashion' },
-      { name: 'Hollister', category: 'Fashion' },
-      { name: 'H&M', category: 'Fashion' },
-      { name: 'Tommy Hilfiger', category: 'Fashion' }
+      { name: 'Zara', category: 'Fashion' }
     ]
   },
   {
-    id: 6,
-    name: 'Footwear & Comfort',
-    description: 'Comfort meets style',
+    id: 5,
+    name: 'Footwear',
+    description: 'Sneakers, comfort shoes, and iconic footwear brands',
     brands: [
       { name: 'Allbirds', category: 'Footwear' },
       { name: 'BIRKENSTOCK', category: 'Footwear' },
       { name: 'Bombas', category: 'Accessories' },
+      { name: 'Cole Haan', category: 'Footwear' },
+      { name: 'Converse', category: 'Footwear' },
       { name: 'Crocs', category: 'Footwear' },
+      { name: 'Dirty Mids', category: 'Footwear' },
       { name: 'Havaianas', category: 'Footwear' },
+      { name: 'Lucchese', category: 'Footwear' },
       { name: 'OluKai', category: 'Footwear' },
       { name: 'OOFOS', category: 'Footwear' },
       { name: 'Reef', category: 'Footwear' },
       { name: 'Sanuk', category: 'Footwear' },
       { name: 'Teva', category: 'Footwear' },
-      { name: 'UGG', category: 'Footwear' }
+      { name: 'UGG', category: 'Footwear' },
+      { name: 'Vans', category: 'Footwear' }
+    ]
+  },
+  {
+    id: 6,
+    name: 'Accessories',
+    description: 'Sunglasses, jewelry, bags, and finishing touches',
+    brands: [
+      { name: 'Coach', category: 'Accessories' },
+      { name: 'Costa', category: 'Accessories' },
+      { name: 'Dooney & Bourke', category: 'Accessories' },
+      { name: 'Gorjana', category: 'Jewelry' },
+      { name: 'Kendra Scott', category: 'Jewelry' },
+      { name: 'Kith', category: 'Fashion' },
+      { name: 'Oakley', category: 'Accessories' },
+      { name: 'Ray-Ban', category: 'Accessories' },
+      { name: 'Tumi', category: 'Accessories' },
+      { name: 'Warby Parker', category: 'Accessories' },
+      { name: 'Away', category: 'Accessories' },
+      { name: 'Samsonite', category: 'Accessories' }
     ]
   },
   {
     id: 7,
-    name: 'Accessories & Jewelry',
-    description: 'Premium sunglasses, jewelry, and accessories',
-    brands: [
-      { name: 'Costa', category: 'Accessories' },
-      { name: 'Gorjana', category: 'Jewelry' },
-      { name: 'Kendra Scott', category: 'Jewelry' },
-      { name: 'Oakley', category: 'Accessories' },
-      { name: 'Ray-Ban', category: 'Accessories' }
-    ]
-  },
-  {
-    id: 8,
-    name: 'Outdoor & Technical',
-    description: 'Performance gear for adventure',
+    name: 'Outdoor & Adventure',
+    description: 'Technical and performance gear for the outdoors',
     brands: [
       { name: 'The North Face', category: 'Outdoor' },
       { name: 'Columbia', category: 'Outdoor' },
       { name: 'Yeti', category: 'Outdoor' },
       { name: 'Pelagic', category: 'Outdoor' },
-      { name: 'RTIC Outdoors', category: 'Outdoor' }
+      { name: 'RTIC Outdoors', category: 'Outdoor' },
+      { name: 'Patagonia', category: 'Outdoor' },
+      { name: "Arc'teryx", category: 'Outdoor' },
+      { name: 'REI Co-op', category: 'Outdoor' },
+      { name: 'Mammut', category: 'Outdoor' }
     ]
   },
   {
-    id: 9,
+    id: 8,
     name: 'Western & Country',
     description: 'Western wear and country lifestyle',
     brands: [
@@ -177,162 +211,35 @@ const BRAND_COLLECTIONS = [
     ]
   },
   {
-    id: 10,
-    name: 'Avant-Garde & Modern',
-    description: 'Cutting-edge contemporary fashion',
+    id: 9,
+    name: 'Streetwear & Modern',
+    description: 'Cutting-edge streetwear, sneaker culture, and avant-garde fashion',
     brands: [
-      { name: 'Thom Browne', category: 'Fashion' },
-      { name: 'Cult Gaia', category: 'Accessories' },
+      { name: 'Baseball Lifestyle 101', category: 'Fashion' },
       { name: 'Burlebo', category: 'Fashion' },
-      { name: 'Poncho Outdoors', category: 'Fashion' },
+      { name: 'Cult Gaia', category: 'Accessories' },
       { name: 'Fear of God Essentials', category: 'Fashion' },
-      { name: 'Hellstar', category: 'Fashion' }
-    ]
-  },
-  {
-    id: 11,
-    name: 'Beauty & Home',
-    description: 'Luxury beauty and home essentials',
-    brands: [
-      { name: 'Estée Lauder', category: 'Cosmetics' },
-      { name: 'Lush', category: 'Cosmetics' },
-      { name: 'Bubble', category: 'Cosmetics' },
-      { name: 'LANEIGE', category: 'Cosmetics' },
-      { name: 'Dacor', category: 'Home' }
-    ]
-  },
-  {
-    id: 12,
-    name: 'Running & Performance',
-    description: 'Top brands for serious runners and athletes',
-    brands: [
-      { name: 'Hoka', category: 'Footwear' },
-      { name: 'New Balance', category: 'Footwear' },
-      { name: 'Asics', category: 'Footwear' },
-      { name: 'Salomon', category: 'Footwear' },
-      { name: 'Reebok', category: 'Footwear' },
-      { name: 'Puma', category: 'Footwear' },
-      { name: 'Veja', category: 'Footwear' }
-    ]
-  },
-  {
-    id: 13,
-    name: 'Premium Outdoor',
-    description: 'Technical gear for outdoor enthusiasts',
-    brands: [
-      { name: 'Patagonia', category: 'Outdoor' },
-      { name: 'Arc\'teryx', category: 'Outdoor' },
-      { name: 'REI Co-op', category: 'Outdoor' },
-      { name: 'Mammut', category: 'Outdoor' },
-      { name: 'Salomon', category: 'Outdoor' }
-    ]
-  },
-  {
-    id: 14,
-    name: 'Contemporary Chic',
-    description: 'Modern, sophisticated everyday style',
-    brands: [
-      { name: 'Theory', category: 'Fashion' },
-      { name: 'Vince', category: 'Fashion' },
-      { name: 'Rag & Bone', category: 'Fashion' },
-      { name: 'J.Crew', category: 'Fashion' },
-      { name: 'Banana Republic', category: 'Fashion' },
-      { name: 'Reformation', category: 'Fashion' },
-      { name: 'Aritzia', category: 'Fashion' },
-      { name: 'Zara', category: 'Fashion' },
-      { name: 'Staud', category: 'Fashion' },
-      { name: 'Alice + Olivia', category: 'Fashion' },
-      { name: 'Mango', category: 'Fashion' }
-    ]
-  },
-  {
-    id: 15,
-    name: 'Women\'s Fashion Forward',
-    description: 'Trendy, Instagram-worthy brands',
-    brands: [
-      { name: 'Aerie', category: 'Fashion' },
-      { name: 'Reformation', category: 'Fashion' },
-      { name: 'Aritzia', category: 'Fashion' },
-      { name: 'Anthropologie', category: 'Fashion' },
-      { name: 'Outdoor Voices', category: 'Fashion' },
-      { name: 'Sweaty Betty', category: 'Fashion' },
-      { name: 'Brandy Melville', category: 'Fashion' },
-      { name: 'Victoria\'s Secret', category: 'Fashion' }
-    ]
-  },
-  {
-    id: 16,
-    name: 'Men\'s Essentials',
-    description: 'Modern menswear staples',
-    brands: [
-      { name: 'Bonobos', category: 'Fashion' },
-      { name: 'Untuckit', category: 'Fashion' },
-      { name: 'J.Crew', category: 'Fashion' },
-      { name: 'Mac Weldon', category: 'Fashion' },
-      { name: 'Banana Republic', category: 'Fashion' },
-      { name: 'Theory', category: 'Fashion' }
-    ]
-  },
-  {
-    id: 17,
-    name: 'Sneaker Culture',
-    description: 'Classic and contemporary sneaker brands',
-    brands: [
-      { name: 'Converse', category: 'Footwear' },
-      { name: 'Vans', category: 'Footwear' },
-      { name: 'New Balance', category: 'Footwear' },
-      { name: 'Nike', category: 'Footwear' },
-      { name: 'Adidas', category: 'Footwear' },
-      { name: 'Puma', category: 'Footwear' },
+      { name: 'Hellstar', category: 'Fashion' },
+      { name: 'Poncho Outdoors', category: 'Fashion' },
       { name: 'Supreme', category: 'Fashion' },
       { name: 'Stüssy', category: 'Fashion' },
-      { name: 'Baseball Lifestyle 101', category: 'Fashion' },
-      { name: 'Dirty Mids', category: 'Footwear' }
+      { name: 'Thom Browne', category: 'Fashion' }
     ]
   },
   {
-    id: 18,
-    name: 'Denim & Basics',
-    description: 'Quality denim and wardrobe essentials',
+    id: 10,
+    name: 'Lifestyle & Beauty',
+    description: 'Beauty, skincare, home, travel, and family brands',
     brands: [
-      { name: 'Levi\'s', category: 'Fashion' },
-      { name: 'Lucky', category: 'Fashion' },
-      { name: 'AG Jeans', category: 'Fashion' },
-      { name: 'Everlane', category: 'Fashion' },
-      { name: 'Madewell', category: 'Fashion' }
-    ]
-  },
-  {
-    id: 19,
-    name: 'Accessories & Eyewear',
-    description: 'Finish your look with these essentials',
-    brands: [
-      { name: 'Warby Parker', category: 'Accessories' },
-      { name: 'Tiffany & Co.', category: 'Accessories' },
-      { name: 'Ray-Ban', category: 'Accessories' },
-      { name: 'Oakley', category: 'Accessories' },
-      { name: 'Costa', category: 'Accessories' }
-    ]
-  },
-  {
-    id: 20,
-    name: 'Kids & Family',
-    description: 'Children\'s apparel and family favorites',
-    brands: [
+      { name: 'Bubble', category: 'Cosmetics' },
+      { name: 'Dacor', category: 'Home' },
+      { name: 'Estée Lauder', category: 'Cosmetics' },
+      { name: 'LANEIGE', category: 'Cosmetics' },
+      { name: 'Lush', category: 'Cosmetics' },
       { name: 'Shade Critters', category: 'Fashion' }
     ]
-  },
-  {
-    id: 21,
-    name: 'Travel & Luggage',
-    description: 'Premium bags and travel gear',
-    brands: [
-      { name: 'Away', category: 'Accessories' },
-      { name: 'Samsonite', category: 'Accessories' },
-      { name: 'Tumi', category: 'Accessories' }
-    ]
   }
-];
+]
 
 const ALL_AVAILABLE_BRANDS = [
   'Abercrombie & Fitch', 'Adidas', 'Aerie', 'AG Jeans', 'Allbirds', 'Alo', 'American Giant', 'Anthropologie', 'Arc\'teryx', 'Ariat', 'Aritzia', 'Asics', 'Athleta', 'Away', 'Banana Republic', 'BIRKENSTOCK',
