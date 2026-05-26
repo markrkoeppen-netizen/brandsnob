@@ -3396,7 +3396,6 @@ export default function App() {
               { id: 'deals', label: 'Deals', count: filteredDeals.length },
               { id: 'brands', label: 'My Brands', count: myBrands.length },
               { id: 'profile', label: 'Profile' },
-              { id: 'recommendations', label: 'Brands' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -3604,6 +3603,23 @@ export default function App() {
               </div>
             )}
 
+            {/* Manage Brands quick access */}
+            {myBrands.length > 0 && (
+              <div className="flex items-center justify-between mb-4 p-3 bg-white border border-neutral-200 rounded-xl">
+                <div>
+                  <p className="text-sm font-medium text-neutral-900">Tracking {myBrands.length} brand{myBrands.length !== 1 ? 's' : ''}</p>
+                  <p className="text-xs text-neutral-500">Add or remove brands from your tracking list</p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('brands')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-neutral-900 text-white rounded-lg text-xs font-medium hover:bg-neutral-800 transition-colors flex-shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  Manage Brands
+                </button>
+              </div>
+            )}
+
             {/* Deal cards grid */}
             {dealsLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-neutral-400">
@@ -3714,129 +3730,206 @@ export default function App() {
         )}
 
         {/* ══════════════════════════════════════════════════════
-            BRANDS TAB
+            MY BRANDS TAB — unified brand management
         ══════════════════════════════════════════════════════ */}
         {activeTab === 'brands' && (
           <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">My Brands</h2>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-neutral-900">My Brands</h2>
+                <p className="text-sm text-neutral-500 mt-0.5">
+                  {myBrands.length > 0
+                    ? `Tracking ${myBrands.length} brand${myBrands.length !== 1 ? 's' : ''} — tap to add or remove`
+                    : 'Tap any brand to start tracking its deals'}
+                </p>
+              </div>
               <button
-                onClick={() => setShowAddBrand(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-sm font-medium"
+                onClick={() => setShowRecommendModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-neutral-300 text-neutral-700 rounded-lg text-xs font-medium hover:bg-neutral-100 transition-colors"
               >
-                <Plus className="w-4 h-4" />
-                Add Brand
+                <TrendingUp className="w-3.5 h-3.5" />
+                Request Brand
               </button>
             </div>
 
-            {/* Collections */}
-            {userCollections.map(collectionName => {
-              const brandsInCollection = myBrands.filter(b => b.collection === collectionName);
-              const isCollapsed = collapsedCollections.includes(collectionName);
+            {/* Category filter pills */}
+            {(() => {
+              const [activeCat, setActiveCat] = React.useState('All');
+              const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
+              const visibleCollections = activeCat === 'All'
+                ? BRAND_COLLECTIONS
+                : BRAND_COLLECTIONS.filter(c => c.name === activeCat);
 
               return (
-                <div key={collectionName} className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    {editingCollection === collectionName ? (
-                      <div className="flex items-center gap-2 flex-1">
-                        <input
-                          type="text"
-                          value={editingCollectionName}
-                          onChange={(e) => setEditingCollectionName(e.target.value)}
-                          className="flex-1 px-3 py-1 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900"
-                          autoFocus
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') renameCollection(collectionName, editingCollectionName);
-                          }}
-                        />
-                        <button
-                          onClick={() => renameCollection(collectionName, editingCollectionName)}
-                          className="text-xs px-3 py-1 bg-neutral-900 text-white rounded-lg"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingCollection(null)}
-                          className="text-xs px-3 py-1 bg-neutral-200 text-neutral-700 rounded-lg"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
+                <>
+                  <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
+                    {categories.map(cat => (
                       <button
-                        onClick={() => {
-                          setEditingCollection(collectionName);
-                          setEditingCollectionName(collectionName);
-                        }}
-                        className="text-lg font-semibold text-neutral-900 hover:text-neutral-600 transition-colors text-left"
+                        key={cat}
+                        onClick={() => setActiveCat(cat)}
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all flex-shrink-0 ${
+                          activeCat === cat
+                            ? 'bg-neutral-900 text-white'
+                            : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                        }`}
                       >
-                        {collectionName}
+                        {cat}
                       </button>
-                    )}
-                    <button
-                      onClick={() => toggleCollectionCollapse(collectionName)}
-                      className="p-1 text-neutral-400 hover:text-neutral-600"
-                    >
-                      {isCollapsed
-                        ? <ChevronDown className="w-5 h-5" />
-                        : <ChevronUp className="w-5 h-5" />
-                      }
-                    </button>
+                    ))}
                   </div>
 
-                  {!isCollapsed && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {brandsInCollection.map(brand => {
-                        const brandImage = getBrandImage(brand.name);
-                        const brandDealCount = deals.filter(d =>
-                          (d.brand || '').toLowerCase() === brand.name.toLowerCase()
-                        ).length;
+                  {/* Brand collections grid */}
+                  <div className="space-y-6">
+                    {visibleCollections.map(collection => {
+                      const addedCount = collection.brands.filter(b =>
+                        myBrands.some(mb => mb.name === b.name)
+                      ).length;
 
-                        return (
-                          <div
-                            key={brand.id}
-                            className="bg-white rounded-xl border border-neutral-200 p-4 relative group hover:border-neutral-300 transition-colors"
-                          >
-                            <button
-                              onClick={() => removeBrand(brand.id)}
-                              className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-neutral-400 hover:text-red-500"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                            {brandImage ? (
-                              <img
-                                src={brandImage}
-                                alt={brand.name}
-                                className="w-12 h-12 object-cover rounded-lg mb-3 mx-auto"
-                              />
-                            ) : (
-                              <div className="w-12 h-12 bg-neutral-100 rounded-lg mb-3 mx-auto flex items-center justify-center">
-                                <ShoppingBag className="w-6 h-6 text-neutral-400" />
-                              </div>
+                      return (
+                        <div key={collection.id}>
+                          <div className="flex items-center justify-between mb-3">
+                            <div>
+                              <h3 className="font-semibold text-neutral-900 text-sm">{collection.name}</h3>
+                              <p className="text-xs text-neutral-500">{collection.description}</p>
+                            </div>
+                            {addedCount < collection.brands.length && (
+                              <button
+                                onClick={() => {
+                                  collection.brands.forEach(brand => {
+                                    if (!myBrands.some(mb => mb.name === brand.name)) {
+                                      setMyBrands(prev => [...prev, {
+                                        id: Date.now() + Math.random(),
+                                        name: brand.name,
+                                        collection: collection.name
+                                      }]);
+                                    }
+                                  });
+                                }}
+                                className="text-xs px-2.5 py-1 border border-neutral-300 rounded-lg text-neutral-600 hover:bg-neutral-100 flex-shrink-0"
+                              >
+                                {addedCount === 0 ? 'Add All' : 'Add Rest'}
+                              </button>
                             )}
-                            <p className="text-sm font-medium text-neutral-900 text-center truncate">
-                              {brand.name}
-                            </p>
-                            <p className="text-xs text-neutral-500 text-center mt-1">
-                              {brandDealCount} deal{brandDealCount !== 1 ? 's' : ''}
-                            </p>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+
+                          <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+                            {collection.brands.map(brand => {
+                              const isAdded = myBrands.some(mb => mb.name === brand.name);
+                              const BRAND_DOMAINS = {
+                                'Gucci': 'gucci.com', 'Prada': 'prada.com', 'Louis Vuitton': 'louisvuitton.com',
+                                'Hermès': 'hermes.com', 'Goyard': 'goyard.com', 'Fendi': 'fendi.com',
+                                'Saint Laurent': 'ysl.com', 'Chloé': 'chloe.com', 'The Row': 'therow.com',
+                                'Burberry': 'burberry.com', 'Dolce & Gabbana': 'dolcegabbana.com',
+                                'Loewe': 'loewe.com', 'Bottega Veneta': 'bottegaveneta.com', 'Alaïa': 'alaia.fr',
+                                'Christian Louboutin': 'christianlouboutin.com', 'Jimmy Choo': 'jimmychoo.com',
+                                'Stuart Weitzman': 'stuartweitzman.com', 'Cole Haan': 'colehaan.com',
+                                'Feragamo': 'ferragamo.com', 'Lucchese': 'lucchese.com',
+                                'Tumi': 'tumi.com', 'Coach': 'coach.com', 'Dooney & Bourke': 'dooney.com',
+                                'Nike': 'nike.com', 'Adidas': 'adidas.com', 'Lululemon': 'lululemon.com',
+                                'Alo': 'aloyoga.com', 'Vuori': 'vuoriclothing.com', 'On Running': 'on.com',
+                                'Athleta': 'athleta.gap.com', 'Under Armour': 'underarmour.com',
+                                'YoungLA': 'youngla.com', 'Gymshark': 'gymshark.com',
+                                'Calvin Klein': 'calvinklein.com', 'Donna Karan': 'donnakaran.com',
+                                'Free People': 'freepeople.com', 'Kate Spade': 'katespade.com',
+                                'Marc Jacobs': 'marcjacobs.com', 'Michael Kors': 'michaelkors.com',
+                                'Oscar de la Renta': 'oscardelarenta.com', 'Spanx': 'spanx.com',
+                                'Tom Ford': 'tomford.com', 'Tory Burch': 'toryburch.com',
+                                'Vera Wang': 'verawang.com', 'Staud': 'staud.clothing',
+                                'Alice + Olivia': 'aliceandolivia.com', 'Mango': 'mango.com',
+                                'Abercrombie & Fitch': 'abercrombie.com', 'American Giant': 'american-giant.com',
+                                'Brooks Brothers': 'brooksbrothers.com', 'Carhartt': 'carhartt.com',
+                                'Chubbies': 'chubbiesshorts.com', 'Everlane': 'everlane.com',
+                                'Kith': 'kith.com', 'Lacoste': 'lacoste.com', 'Levi Strauss': 'levi.com',
+                                'Madewell': 'madewell.com', 'Peter Millar': 'petermillar.com',
+                                'Polo Ralph Lauren': 'ralphlauren.com', 'Rhone': 'rhone.com',
+                                'Tommy Bahama': 'tommybahama.com', 'TravisMatthew': 'travismathew.com',
+                                'Vineyard Vines': 'vineyardvines.com', 'Wrangler': 'wrangler.com',
+                                'H&M': 'hm.com', 'Tommy Hilfiger': 'tommyhilfiger.com',
+                                'American Eagle': 'ae.com', 'Hollister': 'hollisterco.com',
+                                'Comfrt': 'wearecomfrt.com', 'Allbirds': 'allbirds.com',
+                                'BIRKENSTOCK': 'birkenstock.com', 'Bombas': 'bombas.com',
+                                'Crocs': 'crocs.com', 'Havaianas': 'havaianas.com',
+                                'OluKai': 'olukai.com', 'OOFOS': 'oofos.com',
+                                'Reef': 'reef.com', 'Sanuk': 'sanuk.com', 'Teva': 'teva.com',
+                                'UGG': 'ugg.com', 'Costa': 'costadelmar.com', 'Gorjana': 'gorjana.com',
+                                'Kendra Scott': 'kendrascott.com', 'Oakley': 'oakley.com',
+                                'Ray-Ban': 'ray-ban.com', 'The North Face': 'thenorthface.com',
+                                'Columbia': 'columbia.com', 'Yeti': 'yeti.com',
+                                'Pelagic': 'pelagicgear.com', 'RTIC Outdoors': 'rticoutdoors.com',
+                                'Ariat': 'ariat.com', 'Cinch': 'cinchwestern.com',
+                                'Justin Boots': 'justinboots.com', 'Stetson': 'stetson.com',
+                                'Tony Lama': 'tonylama.com', 'Thom Browne': 'thombrowne.com',
+                                'Cult Gaia': 'cultgaia.com', 'Fear of God Essentials': 'fearofgod.com',
+                                'Hellstar': 'hellstar.com', 'Supreme': 'supremenewyork.com',
+                                'Stüssy': 'stussy.com', 'Veja': 'veja-store.com',
+                                'Brandy Melville': 'brandymelvilleusa.com',
+                                "Victoria's Secret": 'victoriassecret.com',
+                                'Sweaty Betty': 'sweatybetty.com', 'Aritzia': 'aritzia.com',
+                                'Anthropologie': 'anthropologie.com', 'Reformation': 'thereformation.com',
+                              };
+                              const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
+
+                              return (
+                                <button
+                                  key={brand.name}
+                                  onClick={() => {
+                                    if (isAdded) {
+                                      // Remove brand
+                                      const brandToRemove = myBrands.find(mb => mb.name === brand.name);
+                                      if (brandToRemove) removeBrand(brandToRemove.id);
+                                    } else {
+                                      // Add brand directly to this collection
+                                      setMyBrands(prev => [...prev, {
+                                        id: Date.now() + Math.random(),
+                                        name: brand.name,
+                                        collection: collection.name
+                                      }]);
+                                      showToast(`${brand.name} added!`);
+                                    }
+                                  }}
+                                  title={isAdded ? `Remove ${brand.name}` : `Add ${brand.name}`}
+                                  className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all ${
+                                    isAdded
+                                      ? 'border-emerald-500 bg-emerald-50'
+                                      : 'border-neutral-200 bg-white hover:border-neutral-400 hover:shadow-sm'
+                                  }`}
+                                >
+                                  <div className="w-9 h-9 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0 relative">
+                                    <img
+                                      src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+                                      alt={brand.name}
+                                      className="w-7 h-7 object-contain"
+                                      onError={(e) => {
+                                        e.target.style.display = 'none';
+                                        e.target.nextSibling.style.display = 'flex';
+                                      }}
+                                    />
+                                    <span style={{display:'none'}} className="w-full h-full items-center justify-center text-xs font-bold text-neutral-500">
+                                      {brand.name.replace(/[^a-zA-Z0-9 ]/g, '').trim().split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()}
+                                    </span>
+                                    {isAdded && (
+                                      <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center rounded-lg">
+                                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                      </div>
+                                    )}
+                                  </div>
+                                  <span className={`text-center leading-tight line-clamp-2 ${
+                                    isAdded ? 'text-emerald-700 font-semibold' : 'text-neutral-700'
+                                  }`} style={{fontSize:'10px'}}>
+                                    {brand.name}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
               );
-            })}
-
-            {myBrands.length === 0 && (
-              <div className="text-center py-16 text-neutral-400">
-                <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium text-neutral-600">No brands yet</p>
-                <p className="text-sm mt-1">Add your favorite brands to start tracking deals.</p>
-              </div>
-            )}
-
+            })()}
           </div>
         )}
 
@@ -3854,12 +3947,8 @@ export default function App() {
               const biggestDiscount = allWishlistItems.length > 0
                 ? Math.max(...allWishlistItems.map(i => parseInt(i.discount) || 0))
                 : 0;
-              const totalSaved = allWishlistItems.reduce((s, i) =>
-                s + ((i.originalPrice || 0) - (i.salePrice || 0)), 0);
               const brandCounts = {};
-              allWishlistItems.forEach(i => {
-                brandCounts[i.brand] = (brandCounts[i.brand] || 0) + 1;
-              });
+              allWishlistItems.forEach(i => { brandCounts[i.brand] = (brandCounts[i.brand] || 0) + 1; });
               const favBrand = Object.entries(brandCounts).sort((a, b) => b[1] - a[1])[0]?.[0];
               return (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -3932,12 +4021,8 @@ export default function App() {
                         {preview.length > 0 && (
                           <div className="flex gap-2 mt-2">
                             {preview.map(item => (
-                              <img
-                                key={item.id}
-                                src={item.image}
-                                alt={item.product}
-                                className="w-12 h-12 object-cover rounded-lg border border-neutral-100"
-                              />
+                              <img key={item.id} src={item.image} alt={item.product}
+                                className="w-12 h-12 object-cover rounded-lg border border-neutral-100" />
                             ))}
                             {wishlist.items.length > 4 && (
                               <div className="w-12 h-12 rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-500 font-medium">
@@ -3957,7 +4042,7 @@ export default function App() {
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
               <h3 className="text-lg font-semibold text-neutral-900 mb-1">Your Sizes</h3>
               <p className="text-sm text-neutral-500 mb-4">
-                Saved sizes appear on your wishlist items and are included when you share a wishlist — so friends and family know exactly what to buy.
+                Saved sizes appear on your wishlist items and are included when you share a wishlist.
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {[
@@ -4002,9 +4087,7 @@ export default function App() {
                   { key: 'zip', label: 'Zip Code', placeholder: '10001' },
                 ].map(field => (
                   <div key={field.key} className={field.fullWidth ? 'col-span-2' : ''}>
-                    <label className="block text-xs font-medium text-neutral-600 mb-1">
-                      {field.label}
-                    </label>
+                    <label className="block text-xs font-medium text-neutral-600 mb-1">{field.label}</label>
                     <input
                       type="text"
                       value={shippingProfile[field.key] || ''}
@@ -4015,210 +4098,6 @@ export default function App() {
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* ══════════════════════════════════════════════════════
-            RECOMMENDATIONS / DISCOVER TAB
-        ══════════════════════════════════════════════════════ */}
-        {activeTab === 'recommendations' && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Browse & Add Brands</h2>
-              <button
-                onClick={() => setShowRecommendModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-sm font-medium"
-              >
-                <TrendingUp className="w-4 h-4" />
-                Request Brand
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {BRAND_COLLECTIONS.map(collection => {
-                const alreadyAdded = collection.brands.filter(b =>
-                  myBrands.some(mb => mb.name === b.name)
-                ).length;
-                const total = collection.brands.length;
-
-                return (
-                  <div
-                    key={collection.id}
-                    className="bg-white rounded-xl border border-neutral-200 p-5 hover:border-neutral-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1 min-w-0 mr-3">
-                        <h3 className="font-semibold text-neutral-900">{collection.name}</h3>
-                        <p className="text-xs text-neutral-500 mt-0.5">{collection.description}</p>
-                      </div>
-                      <button
-                        onClick={() => loadCollection(collection)}
-                        disabled={alreadyAdded === total}
-                        className="flex-shrink-0 px-3 py-1.5 bg-neutral-900 text-white rounded-lg text-xs font-medium hover:bg-neutral-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        {alreadyAdded === total ? 'Added ✓' : alreadyAdded > 0 ? 'Add Rest' : 'Add All'}
-                      </button>
-                    </div>
-
-                    <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 mt-2">
-                      {collection.brands.slice(0, 10).map(brand => {
-                        const isAdded = myBrands.some(mb => mb.name === brand.name);
-                        // Known domain lookup — Clearbit needs the real domain to find logos
-                        const BRAND_DOMAINS = {
-                          'Gucci': 'gucci.com',
-                          'Prada': 'prada.com',
-                          'Louis Vuitton': 'louisvuitton.com',
-                          'Hermès': 'hermes.com',
-                          'Goyard': 'goyard.com',
-                          'Fendi': 'fendi.com',
-                          'Saint Laurent': 'ysl.com',
-                          'Chloé': 'chloe.com',
-                          'The Row': 'therow.com',
-                          'Burberry': 'burberry.com',
-                          'Dolce & Gabbana': 'dolcegabbana.com',
-                          'Christian Louboutin': 'christianlouboutin.com',
-                          'Jimmy Choo': 'jimmychoo.com',
-                          'Stuart Weitzman': 'stuartweitzman.com',
-                          'Cole Haan': 'colehaan.com',
-                          'Feragamo': 'ferragamo.com',
-                          'Lucchese': 'lucchese.com',
-                          'Tumi': 'tumi.com',
-                          'Coach': 'coach.com',
-                          'Nike': 'nike.com',
-                          'Adidas': 'adidas.com',
-                          'Lululemon': 'lululemon.com',
-                          'Alo': 'aloyoga.com',
-                          'Vuori': 'vuoriclothing.com',
-                          'On Running': 'on.com',
-                          'Athleta': 'athleta.gap.com',
-                          'Under Armour': 'underarmour.com',
-                          'YoungLA': 'youngla.com',
-                          'Gymshark': 'gymshark.com',
-                          'Calvin Klein': 'calvinklein.com',
-                          'Donna Karan': 'donnakaran.com',
-                          'Free People': 'freepeople.com',
-                          'Kate Spade': 'katespade.com',
-                          'Marc Jacobs': 'marcjacobs.com',
-                          'Michael Kors': 'michaelkors.com',
-                          'Oscar de la Renta': 'oscardelarenta.com',
-                          'Spanx': 'spanx.com',
-                          'Tom Ford': 'tomford.com',
-                          'Tory Burch': 'toryburch.com',
-                          'Vera Wang': 'verawang.com',
-                          'Abercrombie & Fitch': 'abercrombie.com',
-                          'American Giant': 'american-giant.com',
-                          'Brooks Brothers': 'brooksbrothers.com',
-                          'Carhartt': 'carhartt.com',
-                          'Chubbies': 'chubbiesshorts.com',
-                          'Everlane': 'everlane.com',
-                          'Kith': 'kith.com',
-                          'Lacoste': 'lacoste.com',
-                          'Levi Strauss': 'levi.com',
-                          'Madewell': 'madewell.com',
-                          'Peter Millar': 'petermillar.com',
-                          'Polo Ralph Lauren': 'ralphlauren.com',
-                          'Rhone': 'rhone.com',
-                          'Tommy Bahama': 'tommybahama.com',
-                          'TravisMatthew': 'travismathew.com',
-                          'Vineyard Vines': 'vineyardvines.com',
-                          'Wrangler': 'wrangler.com',
-                          'Allbirds': 'allbirds.com',
-                          'BIRKENSTOCK': 'birkenstock.com',
-                          'Bombas': 'bombas.com',
-                          'Crocs': 'crocs.com',
-                          'Havaianas': 'havaianas.com',
-                          'OluKai': 'olukai.com',
-                          'OOFOS': 'oofos.com',
-                          'Reef': 'reef.com',
-                          'Sanuk': 'sanuk.com',
-                          'Teva': 'teva.com',
-                          'UGG': 'ugg.com',
-                          'Costa': 'costadelmar.com',
-                          'Gorjana': 'gorjana.com',
-                          'Kendra Scott': 'kendrascott.com',
-                          'Oakley': 'oakley.com',
-                          'Ray-Ban': 'ray-ban.com',
-                          'The North Face': 'thenorthface.com',
-                          'Columbia': 'columbia.com',
-                          'Yeti': 'yeti.com',
-                          'Pelagic': 'pelagicgear.com',
-                          'Ariat': 'ariat.com',
-                          'Cinch': 'cinchwestern.com',
-                          'Justin Boots': 'justinboots.com',
-                          'Stetson': 'stetson.com',
-                          'Tony Lama': 'tonylama.com',
-                          'Thom Browne': 'thombrowne.com',
-                          'Cult Gaia': 'cultgaia.com',
-                          'American Eagle': 'ae.com',
-                          'Brandy Melville': 'brandymelvilleusa.com',
-                          'Comfrt': 'wearecomfrt.com',
-                          'Fear of God Essentials': 'fearofgod.com',
-                          'Hellstar': 'hellstar.com',
-                          'Hollister': 'hollisterco.com',
-                          'RTIC Outdoors': 'rticoutdoors.com',
-                          'Supreme': 'supremenewyork.com',
-                          "Victoria's Secret": 'victoriassecret.com',
-                          'H&M': 'hm.com',
-                          'Tommy Hilfiger': 'tommyhilfiger.com',
-                          'Veja': 'veja-store.com',
-                          'Dooney & Bourke': 'dooney.com',
-                          'Stüssy': 'stussy.com',
-                          'Loewe': 'loewe.com',
-                          'Bottega Veneta': 'bottegaveneta.com',
-                          'Alaïa': 'alaia.fr',
-                          'Staud': 'staud.clothing',
-                          'Alice + Olivia': 'aliceandolivia.com',
-                          'Mango': 'mango.com',
-                          'Baseball Lifestyle 101': 'baseballlifestyle101.com',
-                          'Dirty Mids': 'dirtymids.com',
-                        };
-                        const domain = BRAND_DOMAINS[brand.name] || (brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
-                        return (
-                          <button
-                            key={brand.name}
-                            onClick={() => {
-                              if (!isAdded) {
-                                setNewBrandName(brand.name);
-                                setShowAddBrand(true);
-                              }
-                            }}
-                            disabled={isAdded}
-                            title={isAdded ? `${brand.name} (added)` : `Add ${brand.name}`}
-                            className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border transition-all ${
-                              isAdded
-                                ? 'bg-emerald-600 border-emerald-600 cursor-default'
-                                : 'bg-white border-neutral-200 hover:border-neutral-400 hover:shadow-sm cursor-pointer'
-                            }`}
-                          >
-                            <BrandLogo domain={domain} name={brand.name} />
-                            <span className={`text-xs font-medium text-center leading-tight line-clamp-2 ${
-                              isAdded ? 'text-white font-semibold' : 'text-neutral-700'
-                            }`}>
-                              {brand.name}
-                            </span>
-                            {isAdded && (
-                              <span className="text-xs text-neutral-300">✓</span>
-                            )}
-                          </button>
-                        );
-                      })}
-                      {collection.brands.length > 10 && (
-                        <div className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-neutral-300 text-neutral-400">
-                          <span className="text-sm font-medium">+{collection.brands.length - 10}</span>
-                          <span className="text-xs">more</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {alreadyAdded > 0 && alreadyAdded < total && (
-                      <p className="text-xs text-neutral-400 mt-2">
-                        {alreadyAdded} of {total} added
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
             </div>
           </div>
         )}
