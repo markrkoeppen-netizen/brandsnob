@@ -2127,6 +2127,139 @@ function ShareWishlistModal({
 
 // ─────────────────────────────────────────────────────────────
 
+function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCollection, deals }) {
+  const [collapsed, setCollapsed] = useState([]);
+  const [editing, setEditing] = useState(null);
+  const [editName, setEditName] = useState('');
+
+  const toggleCollapse = (name) => {
+    setCollapsed(prev =>
+      prev.includes(name) ? prev.filter(c => c !== name) : [...prev, name]
+    );
+  };
+
+  const handleRename = (oldName) => {
+    if (editName.trim() && editName.trim() !== oldName) {
+      renameCollection(oldName, editName.trim());
+    }
+    setEditing(null);
+    setEditName('');
+  };
+
+  if (userCollections.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-neutral-900">My Collections</h3>
+        <span className="text-xs text-neutral-500 bg-neutral-100 px-2 py-1 rounded-full">
+          {userCollections.length} collection{userCollections.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+      <p className="text-sm text-neutral-500 mb-4">
+        Your brands are organized into these collections. Tap a collection name to rename it.
+      </p>
+
+      <div className="space-y-3">
+        {userCollections.map(collName => {
+          const brandsInColl = myBrands.filter(b => b.collection === collName);
+          const dealCount = deals.filter(d =>
+            brandsInColl.some(b => b.name.toLowerCase() === (d.brand || '').toLowerCase())
+          ).length;
+          const isCollapsed = collapsed.includes(collName);
+          const isEditing = editing === collName;
+
+          return (
+            <div key={collName} className="border border-neutral-200 rounded-xl overflow-hidden">
+              {/* Collection header */}
+              <div className="flex items-center justify-between p-3 bg-neutral-50">
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  {isEditing ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <input
+                        type="text"
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleRename(collName);
+                          if (e.key === 'Escape') { setEditing(null); setEditName(''); }
+                        }}
+                        className="flex-1 px-2 py-1 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                        autoFocus
+                      />
+                      <button
+                        onClick={() => handleRename(collName)}
+                        className="text-xs px-2.5 py-1 bg-neutral-900 text-white rounded-lg"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => { setEditing(null); setEditName(''); }}
+                        className="text-xs px-2.5 py-1 bg-neutral-200 text-neutral-700 rounded-lg"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setEditing(collName); setEditName(collName); }}
+                      className="font-medium text-neutral-900 text-sm hover:text-neutral-600 text-left truncate flex items-center gap-1.5"
+                    >
+                      {collName}
+                      <span className="text-neutral-400 text-xs">✏️</span>
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                  <span className="text-xs text-neutral-400">
+                    {brandsInColl.length} brand{brandsInColl.length !== 1 ? 's' : ''}
+                    {dealCount > 0 && ` · ${dealCount} deals`}
+                  </span>
+                  <button
+                    onClick={() => toggleCollapse(collName)}
+                    className="text-neutral-400 hover:text-neutral-600 p-1"
+                  >
+                    {isCollapsed
+                      ? <ChevronDown className="w-4 h-4" />
+                      : <ChevronUp className="w-4 h-4" />
+                    }
+                  </button>
+                </div>
+              </div>
+
+              {/* Brand chips */}
+              {!isCollapsed && (
+                <div className="p-3 flex flex-wrap gap-2">
+                  {brandsInColl.map(brand => (
+                    <div
+                      key={brand.id}
+                      className="flex items-center gap-1.5 bg-white border border-neutral-200 rounded-full px-2.5 py-1 text-xs font-medium text-neutral-700"
+                    >
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=${brand.name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com'}&sz=32`}
+                        alt={brand.name}
+                        className="w-3.5 h-3.5 object-contain"
+                        onError={(e) => e.target.style.display = 'none'}
+                      />
+                      {brand.name}
+                      <button
+                        onClick={() => removeBrand(brand.id)}
+                        className="text-neutral-400 hover:text-red-500 ml-0.5"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast }) {
   const [activeCat, setActiveCat] = useState('All');
 
@@ -3993,6 +4126,15 @@ export default function App() {
                 </div>
               );
             })()}
+
+            {/* ── My Collections ──────────────────────────────── */}
+            <MyCollectionsSection
+              myBrands={myBrands}
+              userCollections={userCollections}
+              removeBrand={removeBrand}
+              renameCollection={renameCollection}
+              deals={deals}
+            />
 
             {/* ── My Wishlists ─────────────────────────────────── */}
             <div className="bg-white rounded-2xl border border-neutral-200 p-6 mb-6">
