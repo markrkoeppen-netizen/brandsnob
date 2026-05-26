@@ -573,138 +573,257 @@ function BrandLogo({ domain, name }) {
 }
 
 function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn, onHowItWorks, onPrivacy, onTerms, userCount }) {
-  const popularBrands = [
-    { name: 'Alo', emoji: '🧘' },
-    { name: 'Burberry', emoji: '🧥' },
-    { name: 'Cole Haan', emoji: '👞' },
-    { name: 'Dolce & Gabbana', emoji: '👗' },
-    { name: 'Everlane', emoji: '👕' }
-  ];
-
-  const handleBrandSelect = (brand) => {
-    onBrandSearchChange(brand);
-    setShowSuggestions(false);
-    onAddBrand(brand);
-  };
-
-  const handlePopularBrandClick = (brandName) => {
-    onAddBrand(brandName);
-  };
+  const [selectedBrands, setSelectedBrands] = React.useState([]);
+  const [activeCategory, setActiveCategory] = React.useState('All');
+  const [showSearch, setShowSearch] = React.useState(false);
 
   const handleRequestBrand = () => {
     onRequestBrand(brandSearchQuery);
   };
 
+  const toggleBrand = (brandName) => {
+    setSelectedBrands(prev =>
+      prev.includes(brandName)
+        ? prev.filter(b => b !== brandName)
+        : [...prev, brandName]
+    );
+  };
+
+  const handleStartTracking = () => {
+    if (selectedBrands.length === 0) return;
+    // Add all selected brands to "My Brands" under their collection name
+    selectedBrands.forEach(brandName => {
+      // Find which collection the brand belongs to
+      const collection = BRAND_COLLECTIONS.find(c =>
+        c.brands.some(b => b.name === brandName)
+      );
+      onAddBrand(brandName, collection ? collection.name : 'My Brands');
+    });
+  };
+
+  // Build domain lookup inline for logos
+  const BRAND_DOMAINS = {
+    'Nike': 'nike.com', 'Adidas': 'adidas.com', 'Gucci': 'gucci.com', 'Prada': 'prada.com',
+    'Lululemon': 'lululemon.com', 'Alo': 'aloyoga.com', 'Vuori': 'vuoriclothing.com',
+    'The North Face': 'thenorthface.com', 'Patagonia': 'patagonia.com', 'Columbia': 'columbia.com',
+    'Burberry': 'burberry.com', 'Louis Vuitton': 'louisvuitton.com', 'Coach': 'coach.com',
+    'Kate Spade': 'katespade.com', 'Michael Kors': 'michaelkors.com', 'Tory Burch': 'toryburch.com',
+    'Ralph Lauren': 'ralphlauren.com', 'Polo Ralph Lauren': 'ralphlauren.com', 'Calvin Klein': 'calvinklein.com',
+    'Tommy Hilfiger': 'tommyhilfiger.com', 'H&M': 'hm.com', 'Zara': 'zara.com',
+    'Free People': 'freepeople.com', 'Anthropologie': 'anthropologie.com', 'Madewell': 'madewell.com',
+    'J.Crew': 'jcrew.com', 'Banana Republic': 'bananarepublic.com', 'Gap': 'gap.com',
+    'UGG': 'ugg.com', 'Converse': 'converse.com', 'Vans': 'vans.com', 'New Balance': 'newbalance.com',
+    'Hoka': 'hoka.com', 'On Running': 'on.com', 'Allbirds': 'allbirds.com', 'Veja': 'veja-store.com',
+    'Ray-Ban': 'ray-ban.com', 'Oakley': 'oakley.com', 'Kendra Scott': 'kendrascott.com',
+    'Tiffany & Co.': 'tiffany.com', 'Warby Parker': 'warbyparker.com',
+    'Supreme': 'supremenewyork.com', 'Kith': 'kith.com', 'Stüssy': 'stussy.com',
+    'Fear of God Essentials': 'fearofgod.com', 'Hellstar': 'hellstar.com',
+    'Gymshark': 'gymshark.com', 'Under Armour': 'underarmour.com', 'Rhone': 'rhone.com',
+    'Levi Strauss': 'levi.com', "Levi's": 'levi.com', 'Carhartt': 'carhartt.com',
+    'Vineyard Vines': 'vineyardvines.com', 'Tommy Bahama': 'tommybahama.com',
+    'Peter Millar': 'petermillar.com', 'TravisMatthew': 'travismathew.com',
+    'Lacoste': 'lacoste.com', 'Everlane': 'everlane.com', 'Reformation': 'thereformation.com',
+    'Aritzia': 'aritzia.com', 'Revolve': 'revolve.com', 'American Eagle': 'ae.com',
+    'Hollister': 'hollisterco.com', 'Abercrombie & Fitch': 'abercrombie.com',
+    'Brandy Melville': 'brandymelvilleusa.com', "Victoria's Secret": 'victoriassecret.com',
+    'Spanx': 'spanx.com', 'Athleta': 'athleta.gap.com', 'Sweaty Betty': 'sweatybetty.com',
+    'Ariat': 'ariat.com', 'Wrangler': 'wrangler.com', 'Stetson': 'stetson.com',
+    'Yeti': 'yeti.com', 'Tumi': 'tumi.com', 'Samsonite': 'samsonite.com', 'Away': 'awaytravel.com',
+    'Loewe': 'loewe.com', 'Bottega Veneta': 'bottegaveneta.com', 'Mango': 'mango.com',
+    'Staud': 'staud.clothing', 'Alice + Olivia': 'aliceandolivia.com',
+  };
+
+  const getDomain = (name) => BRAND_DOMAINS[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
+
+  // Get all unique categories
+  const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
+
+  // Get brands to show based on active category
+  const visibleCollections = activeCategory === 'All'
+    ? BRAND_COLLECTIONS
+    : BRAND_COLLECTIONS.filter(c => c.name === activeCategory);
+
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-neutral-50 to-neutral-100 z-40 flex items-center justify-center p-4 overflow-y-auto">
-      <div className="max-w-2xl w-full py-8">
-        <div className="text-center mb-8">
-          <ShoppingBag className="w-16 h-16 text-neutral-900 mx-auto mb-5" />
-          <h1 className="font-display text-4xl md:text-5xl font-bold text-neutral-900 mb-3">
+    <div className="fixed inset-0 bg-gradient-to-br from-neutral-50 to-neutral-100 z-40 overflow-y-auto">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+
+        {/* Header */}
+        <div className="text-center mb-6">
+          <ShoppingBag className="w-12 h-12 text-neutral-900 mx-auto mb-4" />
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-neutral-900 mb-2">
             BrandSnobs
           </h1>
-          <p className="text-lg md:text-xl text-neutral-600 font-light tracking-widest uppercase mb-6">
+          <p className="text-base text-neutral-500 font-light tracking-widest uppercase mb-4">
             You Like What You Like
           </p>
-          <div className="grid grid-cols-3 gap-3 max-w-lg mx-auto mb-6">
-            <div className="bg-white rounded-xl border border-neutral-200 p-3 text-center">
-              <p className="text-xl font-bold text-neutral-900">100+</p>
-              <p className="text-xs text-neutral-500 mt-0.5">Premium Brands</p>
-            </div>
-            <div className="bg-white rounded-xl border border-neutral-200 p-3 text-center">
-              <p className="text-xl font-bold text-neutral-900">Daily</p>
-              <p className="text-xs text-neutral-500 mt-0.5">Deal Updates</p>
-            </div>
-            <div className="bg-white rounded-xl border border-neutral-200 p-3 text-center">
-              <p className="text-xl font-bold text-neutral-900">Free</p>
-              <p className="text-xs text-neutral-500 mt-0.5">Always</p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-sm text-neutral-500 max-w-md mx-auto mb-4">
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Track sales from your favorite brands</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Save to wishlists &amp; share with friends</span>
+          <div className="flex items-center justify-center gap-4 text-sm text-neutral-500 mb-2">
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Track deals from your brands</span>
+            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Free forever</span>
           </div>
           {userCount && userCount > 0 && (
-            <p className="text-sm text-neutral-400 font-medium">
+            <p className="text-xs text-neutral-400">
               🛍️ Join {userCount.toLocaleString()}+ shoppers already tracking deals
             </p>
           )}
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 p-6 md:p-8 mb-8">
-          <h2 className="text-xl font-semibold text-neutral-900 mb-4 text-center">
-            Add Your First Brand
-          </h2>
-          
-          <div className="relative">
-            <div className="relative">
-              <Search className="absolute left-4 top-3.5 w-5 h-5 text-neutral-400" />
-              <input
-                type="text"
-                value={brandSearchQuery}
-                onChange={(e) => onBrandSearchChange(e.target.value)}
-                placeholder="Search for a brand... (e.g., Nike, Gucci, Patagonia)"
-                className="w-full pl-12 pr-4 py-3 border-2 border-neutral-300 rounded-xl text-lg focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
-                autoFocus
-                onFocus={() => brandSearchQuery && setShowSuggestions(brandSuggestions.length > 0)}
-              />
-            </div>
+        {/* Main card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-neutral-200 overflow-hidden mb-6">
 
-            {showSuggestions && brandSuggestions.length > 0 && (
-              <div className="absolute z-10 w-full mt-2 bg-white border-2 border-neutral-300 rounded-xl shadow-lg max-h-60 overflow-y-auto">
-                {brandSuggestions.map((brand, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleBrandSelect(brand)}
-                    className="w-full text-left px-4 py-3 hover:bg-neutral-100 transition-colors border-b border-neutral-100 last:border-b-0 font-medium text-neutral-900"
-                  >
-                    {brand}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {brandSearchQuery && brandSuggestions.length === 0 && showSuggestions && (
-              <div className="absolute z-10 w-full mt-2 bg-white border-2 border-neutral-300 rounded-xl shadow-lg p-6">
-                <p className="text-neutral-600 mb-4 text-center">
-                  Can't find <strong>"{brandSearchQuery}"</strong>?
-                </p>
-                <button
-                  onClick={handleRequestBrand}
-                  className="w-full bg-neutral-900 text-white py-3 px-6 rounded-xl hover:bg-neutral-800 transition-colors font-semibold flex items-center justify-center gap-2"
-                >
-                  <TrendingUp className="w-5 h-5" />
-                  Request This Brand
-                </button>
-                <p className="text-xs text-neutral-500 text-center mt-3">
-                  ⚡ We'll add it in less than 24 hours and notify you!
-                </p>
-              </div>
-            )}
+          {/* Instruction bar */}
+          <div className="bg-neutral-900 px-6 py-3 flex items-center justify-between">
+            <p className="text-white text-sm font-medium">
+              {selectedBrands.length === 0
+                ? '👆 Tap brands to select them'
+                : `✓ ${selectedBrands.length} brand${selectedBrands.length !== 1 ? 's' : ''} selected`
+              }
+            </p>
+            <button
+              onClick={() => setShowSearch(s => !s)}
+              className="text-neutral-400 hover:text-white text-xs flex items-center gap-1.5 transition-colors"
+            >
+              <Search className="w-3.5 h-3.5" />
+              {showSearch ? 'Hide search' : 'Search'}
+            </button>
           </div>
-        </div>
 
-        <div className="text-center">
-          <p className="text-neutral-600 mb-6 font-medium">Or start with our most popular brands:</p>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-4xl mx-auto">
-            {popularBrands.map((brand) => (
-              <button
-                key={brand.name}
-                onClick={() => handlePopularBrandClick(brand.name)}
-                className="bg-white hover:bg-neutral-900 hover:text-white border-2 border-neutral-200 hover:border-neutral-900 text-neutral-900 py-4 px-4 rounded-xl transition-all font-semibold text-sm flex flex-col items-center justify-center gap-2"
-              >
-                <span className="text-2xl">{brand.emoji}</span>
-                <span className="text-xs md:text-sm">{brand.name}</span>
-              </button>
+          {/* Search bar (secondary, collapsible) */}
+          {showSearch && (
+            <div className="px-6 pt-4 pb-2 border-b border-neutral-100">
+              <div className="relative">
+                <Search className="absolute left-3 top-2.5 w-4 h-4 text-neutral-400" />
+                <input
+                  type="text"
+                  value={brandSearchQuery}
+                  onChange={(e) => onBrandSearchChange(e.target.value)}
+                  placeholder="Search for a brand not listed below..."
+                  className="w-full pl-9 pr-4 py-2 border border-neutral-300 rounded-lg text-sm focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                  autoFocus
+                />
+              </div>
+              {showSuggestions && brandSuggestions.length > 0 && (
+                <div className="mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg max-h-48 overflow-y-auto">
+                  {brandSuggestions.map((brand, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        toggleBrand(brand);
+                        onBrandSearchChange('');
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full text-left px-4 py-2.5 hover:bg-neutral-100 text-sm font-medium text-neutral-900 border-b border-neutral-100 last:border-b-0"
+                    >
+                      {selectedBrands.includes(brand) ? '✓ ' : ''}{brand}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {brandSearchQuery && brandSuggestions.length === 0 && showSuggestions && (
+                <div className="mt-1 bg-white border border-neutral-300 rounded-xl shadow-lg p-4 text-center">
+                  <p className="text-sm text-neutral-600 mb-3">Can't find <strong>"{brandSearchQuery}"</strong>?</p>
+                  <button
+                    onClick={handleRequestBrand}
+                    className="w-full bg-neutral-900 text-white py-2 px-4 rounded-lg hover:bg-neutral-800 text-sm font-medium flex items-center justify-center gap-2"
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    Request This Brand
+                  </button>
+                  <p className="text-xs text-neutral-500 mt-2">⚡ We'll add it in less than 24 hours!</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Category filter pills */}
+          <div className="px-4 py-3 border-b border-neutral-100 overflow-x-auto">
+            <div className="flex gap-2 min-w-max">
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-all ${
+                    activeCategory === cat
+                      ? 'bg-neutral-900 text-white'
+                      : 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Brand grid */}
+          <div className="p-4 max-h-[50vh] overflow-y-auto">
+            {visibleCollections.map(collection => (
+              <div key={collection.id} className="mb-5">
+                <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wider mb-3">
+                  {collection.name}
+                </p>
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                  {collection.brands.map(brand => {
+                    const isSelected = selectedBrands.includes(brand.name);
+                    const domain = getDomain(brand.name);
+                    return (
+                      <button
+                        key={brand.name}
+                        onClick={() => toggleBrand(brand.name)}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 transition-all ${
+                          isSelected
+                            ? 'border-emerald-500 bg-emerald-50'
+                            : 'border-neutral-200 bg-white hover:border-neutral-400'
+                        }`}
+                      >
+                        <div className="w-9 h-9 rounded-lg overflow-hidden bg-neutral-100 flex items-center justify-center flex-shrink-0 relative">
+                          <img
+                            src={`https://www.google.com/s2/favicons?domain=${domain}&sz=64`}
+                            alt={brand.name}
+                            className="w-7 h-7 object-contain"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.nextSibling.style.display = 'flex';
+                            }}
+                          />
+                          <span style={{display:'none'}} className="w-full h-full items-center justify-center text-xs font-bold text-neutral-500">
+                            {brand.name.replace(/[^a-zA-Z0-9 ]/g, '').trim().split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()}
+                          </span>
+                          {isSelected && (
+                            <div className="absolute inset-0 bg-emerald-500/20 flex items-center justify-center rounded-lg">
+                              <Check className="w-4 h-4 text-emerald-600" />
+                            </div>
+                          )}
+                        </div>
+                        <span className={`text-xs font-medium text-center leading-tight line-clamp-2 ${
+                          isSelected ? 'text-emerald-700' : 'text-neutral-700'
+                        }`} style={{fontSize:'10px'}}>
+                          {brand.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
+          </div>
+
+          {/* Start tracking button */}
+          <div className="px-6 py-4 border-t border-neutral-100 bg-neutral-50">
+            <button
+              onClick={handleStartTracking}
+              disabled={selectedBrands.length === 0}
+              className="w-full bg-neutral-900 text-white py-3 rounded-xl font-semibold text-base hover:bg-neutral-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {selectedBrands.length === 0
+                ? 'Select brands above to continue'
+                : `Start Tracking ${selectedBrands.length} Brand${selectedBrands.length !== 1 ? 's' : ''} →`
+              }
+            </button>
           </div>
         </div>
 
         {/* Returning user sign-in */}
-        <div className="mt-8 text-center border-t border-neutral-200 pt-6">
-          <p className="text-sm text-neutral-500 mb-3">
-            Already have an account?
-          </p>
+        <div className="text-center border-t border-neutral-200 pt-6">
+          <p className="text-sm text-neutral-500 mb-3">Already have an account?</p>
           <button
             onClick={onSignIn}
             className="inline-flex items-center gap-2 px-6 py-2.5 bg-neutral-900 text-white rounded-xl font-semibold text-sm hover:bg-neutral-800 transition-colors"
@@ -3141,9 +3260,24 @@ export default function App() {
       {/* ── Onboarding ───────────────────────────────────────── */}
       {myBrands.length === 0 && !fetchingDeals && (
         <OnboardingScreen
-          onAddBrand={(brand) => {
-            setNewBrandName(brand);
-            addBrand(brand);
+          onAddBrand={(brand, collectionName) => {
+            // Add brand directly with collection name — no modal needed during onboarding
+            const isFirst = myBrands.length === 0;
+            setMyBrands(prev => {
+              if (prev.some(b => b.name === brand)) return prev;
+              return [...prev, {
+                id: Date.now() + Math.random(),
+                name: brand,
+                collection: collectionName || 'My Brands'
+              }];
+            });
+            if (isFirst) {
+              setFetchingDeals(true);
+              setTimeout(() => {
+                setFetchingDeals(false);
+                setActiveTab('deals');
+              }, 2500);
+            }
           }}
           onLoadCollection={loadCollection}
           onRequestBrand={handleOnboardingBrandRequest}
@@ -3260,9 +3394,9 @@ export default function App() {
           <div className="flex gap-1 overflow-x-auto pb-0 scrollbar-hide">
             {[
               { id: 'deals', label: 'Deals', count: filteredDeals.length },
-              { id: 'brands', label: 'Brands', count: myBrands.length },
+              { id: 'brands', label: 'My Brands', count: myBrands.length },
               { id: 'profile', label: 'Profile' },
-              { id: 'recommendations', label: 'Inspire' }
+              { id: 'recommendations', label: 'Brands' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -3891,7 +4025,7 @@ export default function App() {
         {activeTab === 'recommendations' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-neutral-900">Inspire</h2>
+              <h2 className="text-2xl font-bold text-neutral-900">Browse & Add Brands</h2>
               <button
                 onClick={() => setShowRecommendModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 text-sm font-medium"
