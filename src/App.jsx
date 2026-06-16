@@ -312,11 +312,12 @@ function PrivacyPolicyModal({ onClose }) {
         <div className="space-y-4 text-sm text-neutral-600">
           <p className="text-xs text-neutral-400">Last updated: January 2025</p>
           {[
-            { title: 'Information We Collect', body: 'We collect your email address (if you sign in), your brand preferences, wishlist items, and shipping profile information you choose to enter. We do not collect payment information.' },
-            { title: 'How We Use Your Information', body: 'Your data is used solely to provide the BrandSnobs service — syncing your brands and wishlists across devices. We do not sell your data to third parties.' },
+            { title: 'Information We Collect', body: 'We collect your email address (if you sign in), your brand preferences, wishlist items, saved sizes, and shipping profile information you choose to enter. We do not collect payment information.' },
+            { title: 'How We Use Your Information', body: 'Your data is used solely to provide the BrandSnobs service — syncing your brands and wishlists across devices. We do not sell, rent, or share your personal information with any third parties.' },
             { title: 'Data Storage', body: 'Your data is stored securely using Google Firebase. We use industry-standard encryption for all data in transit and at rest.' },
-            { title: 'Affiliate Links', body: 'BrandSnobs earns a commission when you make a purchase through our links. This does not affect the price you pay. We only feature brands and deals we believe are genuinely worthwhile.' },
-            { title: 'Cookies', body: 'We use minimal cookies and local storage to remember your preferences between sessions. We do not use tracking cookies or share data with advertisers.' },
+            { title: 'When You Click a Deal Link', body: 'When you click a deal and visit a retailer's website, your browser automatically shares standard information with that retailer — including your IP address, browser type, and the fact that you came from BrandSnobs (via an HTTP referrer header). BrandSnobs does not transmit your personal information, wishlist, email, or account data to any retailer. Once you leave BrandSnobs, you are subject to that retailer's own privacy policy.' },
+            { title: 'Affiliate Tracking', body: 'Some deal links contain affiliate tracking codes that tell retailers you arrived via BrandSnobs. This is how we earn commissions on qualifying purchases. These codes do not contain your personal information — they only identify BrandSnobs as the referring source.' },
+            { title: 'Cookies & Local Storage', body: 'We use minimal cookies and local storage to remember your preferences between sessions. We do not use advertising cookies, behavioral tracking, or share any data with ad networks.' },
             { title: 'Your Rights', body: 'You can delete your account and all associated data at any time by contacting us at admin@brandsnobs.com. We will process deletion requests within 30 days.' },
             { title: 'Contact', body: 'Questions about this policy? Email us at admin@brandsnobs.com.' },
           ].map(({ title, body }) => (
@@ -3819,8 +3820,10 @@ export default function App() {
 
             {/* Side-by-side search bars + filters */}
             {myBrands.length > 0 && (
-              <div className="flex flex-col sm:flex-row gap-3 mb-6 items-end">
+              <div className="flex flex-col gap-3 mb-6">
 
+                {/* Search bars row — side by side on all sizes */}
+                <div className="flex gap-3">
                 {/* LEFT: Add Brand search */}
                 <div className="flex-1">
                   <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Add Brand</label>
@@ -3916,14 +3919,16 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Filters + refresh */}
-                <div className="flex gap-2">
-                  <div>
+                </div>{/* end search bars row */}
+
+                {/* Filters row — sort, filter, refresh on one line */}
+                <div className="flex gap-2 items-end">
+                  <div className="flex-1">
                     <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Sort</label>
                     <select
                       value={dealSort}
                       onChange={(e) => setDealSort(e.target.value)}
-                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
                     >
                       <option value="discount">Best Discount</option>
                       <option value="price-low">Price: Low–High</option>
@@ -3931,12 +3936,12 @@ export default function App() {
                       <option value="brand">Brand A–Z</option>
                     </select>
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <label className="block text-xs font-medium text-neutral-500 mb-1 ml-1">Filter</label>
                     <select
                       value={dealFilter}
                       onChange={(e) => setDealFilter(e.target.value)}
-                      className="px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-neutral-900"
                     >
                       <option value="all">All Discounts</option>
                       <option value=">30%">30%+ Off</option>
