@@ -2560,6 +2560,8 @@ export default function App() {
 
   // Simple Email-as-Username Auth States
   const [showSignIn, setShowSignIn] = useState(false);
+  const [pendingWishlistDeal, setPendingWishlistDeal] = useState(null); // deal to add after sign-in
+  const [showWishlistSignInPrompt, setShowWishlistSignInPrompt] = useState(false);
   const [email, setEmail] = useState('');
   const [signingIn, setSigningIn] = useState(false);
   const [error, setError] = useState('');
@@ -2686,7 +2688,15 @@ export default function App() {
       setUser({ email: userEmail });
       localStorage.setItem('userEmail', userEmail);
       setShowSignIn(false);
+      setShowWishlistSignInPrompt(false);
       setEmail('');
+      // If user signed in to save a deal, add it now
+      if (pendingWishlistDeal) {
+        setTimeout(() => {
+          addToWishlist(pendingWishlistDeal);
+          setPendingWishlistDeal(null);
+        }, 500);
+      }
 
     } catch (error) {
       console.error('Sign in error:', error);
@@ -3165,6 +3175,12 @@ export default function App() {
 
   // Add item to wishlist (shows modal to choose which wishlist)
   const addToWishlist = (deal) => {
+    // If not signed in, prompt user to create account to save wishlist
+    if (!user) {
+      setPendingWishlistDeal(deal);
+      setShowWishlistSignInPrompt(true);
+      return;
+    }
     if (wishlists.length === 0) {
       // No wishlists exist — create default and add deal directly in one operation
       const newWishlist = {
@@ -4493,6 +4509,47 @@ export default function App() {
       )}
 
       <Toast message={toastMessage} visible={toastVisible} />
+
+      {/* ── Wishlist sign-in prompt ────────────────────────── */}
+      {showWishlistSignInPrompt && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
+            <div className="text-center mb-5">
+              <span className="text-4xl mb-3 block">❤️</span>
+              <h3 className="text-lg font-bold text-neutral-900 mb-2">Save this deal to your wishlist</h3>
+              <p className="text-sm text-neutral-500">
+                Enter your email to create a free account and save deals to your wishlist — including this one.
+              </p>
+            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="your@email.com"
+              className="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:ring-2 focus:ring-neutral-900 mb-3"
+              onKeyDown={(e) => e.key === 'Enter' && signIn()}
+              autoFocus
+            />
+            {error && <p className="text-red-500 text-xs mb-3">{error}</p>}
+            <button
+              onClick={signIn}
+              disabled={signingIn}
+              className="w-full bg-neutral-900 text-white py-2.5 rounded-xl font-semibold text-sm hover:bg-neutral-800 transition-colors disabled:opacity-50 mb-2"
+            >
+              {signingIn ? 'Saving…' : 'Save to Wishlist →'}
+            </button>
+            <button
+              onClick={() => {
+                setShowWishlistSignInPrompt(false);
+                setPendingWishlistDeal(null);
+              }}
+              className="w-full text-sm text-neutral-400 hover:text-neutral-600 py-1"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
 
       {showWalkthrough && (
         <OnboardingWalkthrough
