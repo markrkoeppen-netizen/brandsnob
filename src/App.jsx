@@ -3174,9 +3174,12 @@ export default function App() {
   };
 
   // Add item to wishlist (shows modal to choose which wishlist)
+  const userRef = React.useRef(user);
+  React.useEffect(() => { userRef.current = user; }, [user]);
+
   const addToWishlist = (deal) => {
     // If not signed in, prompt user to create account to save wishlist
-    if (!user) {
+    if (!userRef.current) {
       setPendingWishlistDeal(deal);
       setShowWishlistSignInPrompt(true);
       return;
