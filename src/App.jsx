@@ -3166,21 +3166,30 @@ export default function App() {
   // Add item to wishlist (shows modal to choose which wishlist)
   const addToWishlist = (deal) => {
     if (wishlists.length === 0) {
-      // No wishlists exist, create default and add
-      const newWishlist = createWishlist('My Wishlist', 'custom', '⭐', 'link-only');
-      const updated = wishlists.map(w => 
-        w.id === newWishlist.id ? { ...w, items: [...w.items, deal] } : w
-      );
-      setWishlists(updated);
+      // No wishlists exist — create default and add deal directly in one operation
+      const newWishlist = {
+        id: 'wishlist_' + Date.now(),
+        name: 'My Wishlist',
+        occasion: 'custom',
+        emoji: '⭐',
+        privacy: 'link-only',
+        shareId: generateShareId(),
+        items: [deal],
+        createdAt: Date.now()
+      };
+      setWishlists([newWishlist]);
+      setActiveWishlistId(newWishlist.id);
+      showToast('Saved to My Wishlist!');
     } else if (wishlists.length === 1) {
-      // Only one wishlist, add directly
+      // Only one wishlist — add directly
       const updated = wishlists.map(w => {
         if (w.items.find(item => item.id === deal.id)) return w;
         return { ...w, items: [...w.items, deal] };
       });
       setWishlists(updated);
+      showToast('Added to wishlist!');
     } else {
-      // Multiple wishlists, show selection modal
+      // Multiple wishlists — show selection modal
       setPendingWishlistItem(deal);
       setShowAddToWishlistModal(true);
     }
