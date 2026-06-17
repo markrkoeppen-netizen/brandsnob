@@ -315,7 +315,7 @@ function PrivacyPolicyModal({ onClose }) {
             { title: 'Information We Collect', body: 'We collect your email address (if you sign in), your brand preferences, wishlist items, saved sizes, and shipping profile information you choose to enter. We do not collect payment information.' },
             { title: 'How We Use Your Information', body: 'Your data is used solely to provide the BrandSnobs service — syncing your brands and wishlists across devices. We do not sell, rent, or share your personal information with any third parties.' },
             { title: 'Data Storage', body: 'Your data is stored securely using Google Firebase. We use industry-standard encryption for all data in transit and at rest.' },
-            { title: 'When You Click a Deal Link', body: 'When you click a deal and visit a retailer's website, your browser automatically shares standard information with that retailer — including your IP address, browser type, and the fact that you came from BrandSnobs (via an HTTP referrer header). BrandSnobs does not transmit your personal information, wishlist, email, or account data to any retailer. Once you leave BrandSnobs, you are subject to that retailer's own privacy policy.' },
+            { title: 'When You Click a Deal Link', body: 'When you click a deal and visit a retailer&apos;s website, your browser automatically shares standard information with that retailer — including your IP address, browser type, and the fact that you came from BrandSnobs (via an HTTP referrer header). BrandSnobs does not transmit your personal information, wishlist, email, or account data to any retailer. Once you leave BrandSnobs, you are subject to that retailer&apos;s own privacy policy.' },
             { title: 'Affiliate Tracking', body: 'Some deal links contain affiliate tracking codes that tell retailers you arrived via BrandSnobs. This is how we earn commissions on qualifying purchases. These codes do not contain your personal information — they only identify BrandSnobs as the referring source.' },
             { title: 'Cookies & Local Storage', body: 'We use minimal cookies and local storage to remember your preferences between sessions. We do not use advertising cookies, behavioral tracking, or share any data with ad networks.' },
             { title: 'Your Rights', body: 'You can delete your account and all associated data at any time by contacting us at admin@brandsnobs.com. We will process deletion requests within 30 days.' },
@@ -3179,7 +3179,9 @@ export default function App() {
 
   const addToWishlist = (deal) => {
     // If not signed in, prompt user to create account to save wishlist
+    console.log('addToWishlist called, user:', userRef.current, 'deal:', deal?.id);
     if (!userRef.current) {
+      console.log('No user — showing sign-in prompt');
       setPendingWishlistDeal(deal);
       setShowWishlistSignInPrompt(true);
       return;
