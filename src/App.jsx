@@ -1198,15 +1198,15 @@ function GenderPreference({ selectedGenders, onGenderChange }) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
-      <span className="text-xs text-neutral-400 font-medium tracking-wide uppercase mr-1">For:</span>
+    <div className="flex items-center gap-2 mb-4 overflow-x-auto scrollbar-hide pb-1">
+      <span className="text-xs text-neutral-400 font-medium tracking-wide uppercase flex-shrink-0">For:</span>
       {GENDER_OPTIONS.map((option) => {
         const isSelected = selectedGenders.includes(option.id);
         return (
           <button
             key={option.id}
             onClick={() => toggleGender(option.id)}
-            className={`px-2.5 py-1 rounded-full border text-xs font-medium transition-all ${
+            className={`flex-shrink-0 px-2.5 py-1 rounded-full border text-xs font-medium transition-all ${
               isSelected
                 ? 'border-neutral-900 bg-neutral-900 text-white'
                 : 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-400 hover:text-neutral-700'
