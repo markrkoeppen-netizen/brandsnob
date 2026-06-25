@@ -44,7 +44,8 @@ const BRAND_COLLECTIONS = [
       { name: 'Tom Ford', category: 'Fashion' },
       { name: 'Oscar de la Renta', category: 'Fashion' },
       { name: 'Vera Wang', category: 'Fashion' },
-      { name: 'Tiffany & Co.', category: 'Accessories' }
+      { name: 'Tiffany & Co.', category: 'Accessories' },
+      { name: 'Chanel', category: 'Fashion' }
     ]
   },
   {
@@ -71,7 +72,8 @@ const BRAND_COLLECTIONS = [
       { name: 'Veja', category: 'Footwear' },
       { name: 'Sweaty Betty', category: 'Fashion' },
       { name: 'Outdoor Voices', category: 'Fashion' },
-      { name: 'Rhone', category: 'Fashion' }
+      { name: 'Rhone', category: 'Fashion' },
+      { name: 'Ten Thousand', category: 'Fashion' }
     ]
   },
   {
@@ -103,7 +105,10 @@ const BRAND_COLLECTIONS = [
       { name: 'Aerie', category: 'Fashion' },
       { name: 'Anthropologie', category: 'Fashion' },
       { name: 'Brandy Melville', category: 'Fashion' },
-      { name: "Victoria's Secret", category: 'Fashion' }
+      { name: "Victoria's Secret", category: 'Fashion' },
+      { name: 'Mizzen+Main', category: 'Fashion' },
+      { name: 'Redvanly', category: 'Fashion' },
+      { name: "Alter'd State", category: 'Fashion' }
     ]
   },
   {
@@ -239,24 +244,25 @@ const BRAND_COLLECTIONS = [
       { name: 'Shade Critters', category: 'Fashion' }
     ]
   }
-]
+];
 
 const ALL_AVAILABLE_BRANDS = [
-  'Abercrombie & Fitch', 'Adidas', 'Aerie', 'AG Jeans', 'Allbirds', 'Alo', 'American Giant', 'Anthropologie', 'Arc\'teryx', 'Ariat', 'Aritzia', 'Asics', 'Athleta', 'Away', 'Banana Republic', 'BIRKENSTOCK',
+  'Abercrombie & Fitch', 'Adidas', 'Aerie', 'AG Jeans', 'Allbirds', 'Alo', 'American Giant', 'Anthropologie', "Arc'teryx", 'Ariat', 'Aritzia', 'Asics', 'Athleta', 'Away', 'Banana Republic', 'BIRKENSTOCK',
   'Bombas', 'Bonobos', 'Brooks Brothers', 'Bubble', 'Burberry', 'Burlebo', 'Calvin Klein', 'Carhartt', 'Chloé', 'Christian Louboutin',
   'Chubbies', 'Cinch', 'Clarks', 'Coach', 'Cole Haan', 'Columbia', 'Converse', 'Costa', 'Crocs', 'Cruel Girl', 'Cult Gaia',
   'Dacor', 'Dolce & Gabbana', 'Donna Karan', 'Dr. Martens', 'Estée Lauder', 'Everlane', 'Fendi', 'Feragamo', 'Free People',
   'Gorjana', 'Goyard', 'Gucci', 'Gymshark', 'Havaianas', 'Hermès', 'Hoka', 'J.Crew', 'Jimmy Choo', 'Justin Boots', 'Kate Spade', 'Kendra Scott', 'Kith', 'Lacoste', 'LANEIGE',
-  'Levi\'s', 'Levi Strauss', 'Louis Vuitton', 'Lucchese', 'Lucky', 'Lululemon', 'Lush', 'Mac Weldon', 'Madewell', 'Mammut', 'Marc Jacobs',
+  "Levi's", 'Levi Strauss', 'Louis Vuitton', 'Lucchese', 'Lucky', 'Lululemon', 'Lush', 'Mac Weldon', 'Madewell', 'Mammut', 'Marc Jacobs',
   'Michael Kors', 'New Balance', 'Nike', 'Oakley', 'OluKai', 'On Running', 'OOFOS', 'Oscar de la Renta', 'Outdoor Voices', 'Panhandle Slim', 'Patagonia', 'Pelagic', 'Peter Millar', 'Polo Ralph Lauren',
   'Poncho Outdoors', 'Prada', 'Puma', 'Rag & Bone', 'Ray-Ban', 'Reebok', 'Reef', 'Reformation', 'REI Co-op', 'Rhone', 'Saint Laurent', 'Salomon', 'Samsonite', 'Sanuk', 'Shade Critters', 'Spanx', 'Stetson', 'Stuart Weitzman', 'Sweaty Betty',
   'Teva', 'The North Face', 'The Row', 'Theory', 'Thom Browne', 'Tiffany & Co.', 'Tom Ford', 'Tommy Bahama', 'Tony Lama',
   'Tory Burch', 'TravisMatthew', 'Trendia', 'Tumi', 'UGG', 'Under Armour', 'Untuckit', 'Vans', 'Vera Wang', 'Vince',
-  'Victoria\'s Secret', 'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara',
+  "Victoria's Secret", 'Vineyard Vines', 'Vuori', 'Warby Parker', 'Wrangler', 'Yeti', 'YoungLA', 'Zara',
   'American Eagle', 'Brandy Melville', 'Comfrt', 'Fear of God Essentials', 'Hellstar', 'Hollister', 'RTIC Outdoors', 'Supreme',
   'H&M', 'Tommy Hilfiger', 'Veja', 'Dooney & Bourke',
   'Stüssy', 'Loewe', 'Bottega Veneta', 'Alaïa', 'Staud', 'Alice + Olivia', 'Mango',
-  'Baseball Lifestyle 101', 'Dirty Mids'
+  'Baseball Lifestyle 101', 'Dirty Mids',
+  'Mizzen+Main', 'Ten Thousand', 'Redvanly', 'Chanel', "Alter'd State"
 ];
 
 function HowItWorksModal({ onClose }) {
@@ -275,7 +281,7 @@ function HowItWorksModal({ onClose }) {
             { step: '2', icon: '🔍', title: 'We Find the Deals', desc: 'BrandSnobs automatically scans your brands for sales, discounts, and deals — updated regularly so you never miss a drop.' },
             { step: '3', icon: '❤️', title: 'Save to Wishlist', desc: 'Heart any item to save it to a wishlist. Create multiple wishlists for birthdays, holidays, or any occasion.' },
             { step: '4', icon: '🔗', title: 'Share with Anyone', desc: 'Share your wishlist with friends and family via a link or email. Perfect for gift-giving season.' },
-            { step: '5', icon: '🛍️', title: 'Shop When Ready', desc: 'Click any deal to go straight to the brand&apos;s website and check out. We never store your payment info.' },
+            { step: '5', icon: '🛍️', title: 'Shop When Ready', desc: "Click any deal to go straight to the brand's website and check out. We never store your payment info." },
           ].map(({ step, icon, title, desc }) => (
             <div key={step} className="flex gap-4">
               <div className="flex-shrink-0 w-10 h-10 bg-neutral-900 text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -315,7 +321,7 @@ function PrivacyPolicyModal({ onClose }) {
             { title: 'Information We Collect', body: 'We collect your email address (if you sign in), your brand preferences, wishlist items, saved sizes, and shipping profile information you choose to enter. We do not collect payment information.' },
             { title: 'How We Use Your Information', body: 'Your data is used solely to provide the BrandSnobs service — syncing your brands and wishlists across devices. We do not sell, rent, or share your personal information with any third parties.' },
             { title: 'Data Storage', body: 'Your data is stored securely using Google Firebase. We use industry-standard encryption for all data in transit and at rest.' },
-            { title: 'When You Click a Deal Link', body: 'When you click a deal and visit a retailer&apos;s website, your browser automatically shares standard information with that retailer — including your IP address, browser type, and the fact that you came from BrandSnobs (via an HTTP referrer header). BrandSnobs does not transmit your personal information, wishlist, email, or account data to any retailer. Once you leave BrandSnobs, you are subject to that retailer&apos;s own privacy policy.' },
+            { title: 'When You Click a Deal Link', body: "When you click a deal and visit a retailer's website, your browser automatically shares standard information with that retailer — including your IP address, browser type, and the fact that you came from BrandSnobs (via an HTTP referrer header). BrandSnobs does not transmit your personal information, wishlist, email, or account data to any retailer. Once you leave BrandSnobs, you are subject to that retailer's own privacy policy." },
             { title: 'Affiliate Tracking', body: 'Some deal links contain affiliate tracking codes that tell retailers you arrived via BrandSnobs. This is how we earn commissions on qualifying purchases. These codes do not contain your personal information — they only identify BrandSnobs as the referring source.' },
             { title: 'Cookies & Local Storage', body: 'We use minimal cookies and local storage to remember your preferences between sessions. We do not use advertising cookies, behavioral tracking, or share any data with ad networks.' },
             { title: 'Your Rights', body: 'You can delete your account and all associated data at any time by contacting us at admin@brandsnobs.com. We will process deletion requests within 30 days.' },
@@ -353,11 +359,11 @@ function TermsOfServiceModal({ onClose }) {
           {[
             { title: 'Acceptance', body: 'By using BrandSnobs, you agree to these terms. If you do not agree, please do not use the service.' },
             { title: 'Use of Service', body: 'BrandSnobs is a personal shopping tool. You may use it for personal, non-commercial purposes. You may not scrape, copy, or redistribute our deal data.' },
-            { title: 'Accuracy of Deals', body: 'We strive to keep deal information accurate and up to date, but prices and availability can change at any time. Always verify the final price on the retailer&apos;s website before purchasing.' },
+            { title: 'Accuracy of Deals', body: "We strive to keep deal information accurate and up to date, but prices and availability can change at any time. Always verify the final price on the retailer's website before purchasing." },
             { title: 'Affiliate Relationships', body: 'We have affiliate relationships with many of the brands and retailers featured. We earn a commission on qualifying purchases, which helps keep BrandSnobs free.' },
             { title: 'Account Responsibility', body: 'You are responsible for maintaining the security of your account. Please use a valid email address and notify us immediately of any unauthorized access.' },
             { title: 'Wishlist Sharing', body: 'When you share a wishlist with a link, anyone with that link can view it. You are responsible for who you share links with. Set wishlists to Private if you do not want them publicly accessible.' },
-            { title: 'Limitation of Liability', body: 'BrandSnobs is provided "as is." We are not liable for missed deals, incorrect prices, or any purchases you make through third-party retailers.' },
+            { title: 'Limitation of Liability', body: "BrandSnobs is provided \"as is.\" We are not liable for missed deals, incorrect prices, or any purchases you make through third-party retailers." },
             { title: 'Changes to Terms', body: 'We may update these terms from time to time. Continued use of the service after changes constitutes acceptance of the new terms.' },
             { title: 'Contact', body: 'Questions? Email us at admin@brandsnobs.com.' },
           ].map(({ title, body }) => (
@@ -499,9 +505,7 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
 
   const handleStartTracking = () => {
     if (selectedBrands.length === 0) return;
-    // Add all selected brands to "My Brands" under their collection name
     selectedBrands.forEach(brandName => {
-      // Find which collection the brand belongs to
       const collection = BRAND_COLLECTIONS.find(c =>
         c.brands.some(b => b.name === brandName)
       );
@@ -509,7 +513,6 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
     });
   };
 
-  // Build domain lookup inline for logos
   const BRAND_DOMAINS = {
     'Nike': 'nike.com', 'Adidas': 'adidas.com', 'Gucci': 'gucci.com', 'Prada': 'prada.com',
     'Lululemon': 'lululemon.com', 'Alo': 'aloyoga.com', 'Vuori': 'vuoriclothing.com',
@@ -539,14 +542,15 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
     'Yeti': 'yeti.com', 'Tumi': 'tumi.com', 'Samsonite': 'samsonite.com', 'Away': 'awaytravel.com',
     'Loewe': 'loewe.com', 'Bottega Veneta': 'bottegaveneta.com', 'Mango': 'mango.com',
     'Staud': 'staud.clothing', 'Alice + Olivia': 'aliceandolivia.com',
+    'Chanel': 'chanel.com', 'Mizzen+Main': 'mizzenandmain.com',
+    'Ten Thousand': 'tenthousand.cc', 'Redvanly': 'redvanly.com',
+    "Alter'd State": 'alteredstate.com',
   };
 
   const getDomain = (name) => BRAND_DOMAINS[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
 
-  // Get all unique categories
   const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
 
-  // Get brands to show based on active category
   const visibleCollections = activeCategory === 'All'
     ? BRAND_COLLECTIONS
     : BRAND_COLLECTIONS.filter(c => c.name === activeCategory);
@@ -771,14 +775,12 @@ function FetchingDealsAnimation() {
             </div>
           </div>
         </div>
-        
         <h2 className="font-display text-3xl font-bold text-neutral-900 mb-3">
           Fetching Your Deals...
         </h2>
         <p className="text-neutral-600 text-lg mb-6">
           Strutting down the runway of savings 💃
         </p>
-        
         <div className="flex items-center justify-center gap-2 text-neutral-400">
           <div className="w-2 h-2 bg-neutral-900 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
           <div className="w-2 h-2 bg-neutral-900 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
@@ -808,11 +810,9 @@ function NameCollectionModal({ onClose, onRename, initialName = '' }) {
             <X className="w-6 h-6" />
           </button>
         </div>
-        
         <p className="text-neutral-600 mb-4">
           You have multiple brands! Give them a collection name so you can organize them.
         </p>
-        
         <div className="mb-6">
           <label className="block text-sm font-medium text-neutral-700 mb-2">
             Collection Name
@@ -827,7 +827,6 @@ function NameCollectionModal({ onClose, onRename, initialName = '' }) {
             autoFocus
           />
         </div>
-        
         <div className="flex gap-3">
           <button
             onClick={handleSubmit}
@@ -849,7 +848,7 @@ function NameCollectionModal({ onClose, onRename, initialName = '' }) {
 }
 
 function CreateWishlistModal({ onClose, onCreate }) {
-  const [wishlistType, setWishlistType] = useState('template'); // 'template' or 'custom'
+  const [wishlistType, setWishlistType] = useState('template');
   const [selectedTemplate, setSelectedTemplate] = useState('mylist');
   const [customName, setCustomName] = useState('');
   const [privacy, setPrivacy] = useState('link-only');
@@ -1090,8 +1089,6 @@ function LuxuryDealCard({ deal, onAddToBag, onDealClick, wishlist, onAddToWishli
             {deal.discount} OFF
           </div>
         )}
-
-
 
         {deal.sizeMatchScore && deal.sizeMatchScore > 0 && (
           <div className="absolute bottom-2 left-2 md:bottom-4 md:left-4 bg-green-600 text-white px-2 md:px-3 py-1 md:py-1.5 rounded-full text-xs md:text-sm font-semibold tracking-wide flex items-center gap-1">
@@ -1528,23 +1525,6 @@ function WishlistModal({ wishlist, onClose, onRemove, onShare, onAddToBag }) {
   );
 }
 
-
-// ── NEW COMPONENTS (Part 4) ────────────────────────────────
-// ============================================================
-// APP-PART-4-SIMPLE-AUTH.jsx
-// Contains:
-//   1. WishlistsManagerModal  (NEW — replaces old WishlistModal)
-//   2. Updated ShareWishlistModal (copy-link + wishlist picker)
-//   3. All modal renders to paste into the return() of App
-//   4. Fixed saveToCloud (was referencing old `wishlist` variable)
-//   5. Sign-in modal render
-// ============================================================
-
-// ─────────────────────────────────────────────────────────────
-// 1. WishlistsManagerModal
-//    Shows all wishlists, lets user pick one to view/manage,
-//    create new ones, delete them, and share them.
-// ─────────────────────────────────────────────────────────────
 function WishlistsManagerModal({
   wishlists,
   onClose,
@@ -1558,7 +1538,7 @@ function WishlistsManagerModal({
   const [selectedWishlistId, setSelectedWishlistId] = useState(
     wishlists.length > 0 ? wishlists[0].id : null
   );
-  const [view, setView] = useState('list'); // 'list' | 'detail'
+  const [view, setView] = useState('list');
 
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
@@ -1570,13 +1550,10 @@ function WishlistsManagerModal({
     }
   };
 
-  // Helper: get size label for a wishlist item based on its category
   const getSizeLabel = (item) => {
     if (!shippingProfile) return null;
     const category = (item.category || '').toLowerCase();
-    const brand = (item.brand || '').toLowerCase();
 
-    // Footwear check
     const isFootwear =
       category === 'footwear' ||
       ['shoe', 'boot', 'sneaker', 'sandal', 'heel', 'loafer'].some(k =>
@@ -1586,12 +1563,10 @@ function WishlistsManagerModal({
       return `Shoe: ${shippingProfile.shoeSize}`;
     }
 
-    // Dress check
     if (category === 'dress' || (item.product || '').toLowerCase().includes('dress')) {
       if (shippingProfile.dressSize) return `Dress: ${shippingProfile.dressSize}`;
     }
 
-    // Pants check
     if (['pant', 'jean', 'denim', 'trouser', 'short'].some(k =>
       (item.product || '').toLowerCase().includes(k)
     )) {
@@ -1601,7 +1576,6 @@ function WishlistsManagerModal({
       if (shippingProfile.pantsWaist) return `Waist: ${shippingProfile.pantsWaist}`;
     }
 
-    // Default: shirt size
     if (shippingProfile.shirtSize) return `Size: ${shippingProfile.shirtSize}`;
 
     return null;
@@ -1614,7 +1588,6 @@ function WishlistsManagerModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
 
-        {/* Header */}
         <div className="p-6 border-b border-neutral-200">
           <div className="flex items-center justify-between mb-1">
             <h2 className="text-2xl font-bold text-neutral-900">
@@ -1650,10 +1623,8 @@ function WishlistsManagerModal({
           )}
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-6">
 
-          {/* ── LIST VIEW ── */}
           {view === 'list' && (
             <div className="space-y-3">
               {wishlists.length === 0 ? (
@@ -1695,7 +1666,6 @@ function WishlistsManagerModal({
                         </button>
 
                         <div className="flex items-center gap-2">
-                          {/* Share button */}
                           <button
                             onClick={() => onShare(wishlist.id)}
                             className="p-1.5 text-neutral-400 hover:text-neutral-700 transition-colors"
@@ -1703,7 +1673,6 @@ function WishlistsManagerModal({
                           >
                             <Upload className="w-4 h-4" />
                           </button>
-                          {/* Delete button */}
                           <button
                             onClick={() => {
                               if (window.confirm(`Delete "${wishlist.name}"? This can't be undone.`)) {
@@ -1722,7 +1691,6 @@ function WishlistsManagerModal({
                         </div>
                       </div>
 
-                      {/* Preview images */}
                       {preview.length > 0 && (
                         <div className="flex gap-2 mt-3">
                           {preview.map(item => (
@@ -1748,7 +1716,6 @@ function WishlistsManagerModal({
             </div>
           )}
 
-          {/* ── DETAIL VIEW ── */}
           {view === 'detail' && selectedWishlist && (
             <div>
               {selectedWishlist.items.length === 0 ? (
@@ -1780,7 +1747,6 @@ function WishlistsManagerModal({
                             {item.product}
                           </h3>
 
-                          {/* Size label */}
                           {sizeLabel && (
                             <span className="inline-block text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full mb-1.5">
                               Your {sizeLabel}
@@ -1832,7 +1798,6 @@ function WishlistsManagerModal({
           )}
         </div>
 
-        {/* Footer */}
         <div className="p-6 border-t border-neutral-200">
           {view === 'detail' && selectedWishlist && selectedWishlist.items.length > 0 && (
             <div className="flex items-center justify-between mb-4">
@@ -1864,10 +1829,6 @@ function WishlistsManagerModal({
   );
 }
 
-// ─────────────────────────────────────────────────────────────
-// 2. Updated ShareWishlistModal
-//    Adds: Copy Link button, wishlist selector dropdown
-// ─────────────────────────────────────────────────────────────
 function ShareWishlistModal({
   onClose,
   wishlists,
@@ -1894,7 +1855,6 @@ function ShareWishlistModal({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback for browsers that block clipboard
       const ta = document.createElement('textarea');
       ta.value = shareLink;
       document.body.appendChild(ta);
@@ -1918,7 +1878,6 @@ function ShareWishlistModal({
 
         <div className="space-y-4 mb-6">
 
-          {/* Wishlist picker (only shown when multiple wishlists exist) */}
           {wishlists.length > 1 && (
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-2">
@@ -1938,7 +1897,6 @@ function ShareWishlistModal({
             </div>
           )}
 
-          {/* Privacy notice */}
           {selectedWishlist && (
             <div className={`flex items-start gap-2 p-3 rounded-lg text-xs ${
               selectedWishlist.privacy === 'private'
@@ -1948,13 +1906,12 @@ function ShareWishlistModal({
               <span className="text-base">{selectedWishlist.privacy === 'private' ? '🔒' : '🔗'}</span>
               <p>
                 {selectedWishlist.privacy === 'private'
-                  ? 'This wishlist is set to Private. Only you can view it — sharing the link won\'t work until you change the privacy setting.'
+                  ? "This wishlist is set to Private. Only you can view it — sharing the link won't work until you change the privacy setting."
                   : 'This wishlist is Link Only — anyone with the link can view it.'}
               </p>
             </div>
           )}
 
-          {/* Copy link */}
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
               Share Link
@@ -1984,7 +1941,6 @@ function ShareWishlistModal({
             </div>
           </div>
 
-          {/* Email share */}
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
               Or Share via Email
@@ -2032,9 +1988,6 @@ function ShareWishlistModal({
   );
 }
 
-
-// ─────────────────────────────────────────────────────────────
-
 function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCollection, deals }) {
   const [collapsed, setCollapsed] = useState([]);
   const [editing, setEditing] = useState(null);
@@ -2079,7 +2032,6 @@ function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCo
 
           return (
             <div key={collName} className="border border-neutral-200 rounded-xl overflow-hidden">
-              {/* Collection header */}
               <div className="flex items-center justify-between p-3 bg-neutral-50">
                 <div className="flex items-center gap-2 flex-1 min-w-0">
                   {isEditing ? (
@@ -2135,7 +2087,6 @@ function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCo
                 </div>
               </div>
 
-              {/* Brand chips */}
               {!isCollapsed && (
                 <div className="p-3 flex flex-wrap gap-2">
                   {brandsInColl.map(brand => (
@@ -2170,7 +2121,7 @@ function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCo
 
 function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals }) {
   const [activeCat, setActiveCat] = useState('All');
-  const [pendingBrand, setPendingBrand] = useState(null); // brand waiting for collection assignment
+  const [pendingBrand, setPendingBrand] = useState(null);
   const [newCollName, setNewCollName] = useState('');
   const [showNewColl, setShowNewColl] = useState(false);
 
@@ -2255,20 +2206,24 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
     'Zara': 'zara.com', 'Converse': 'converse.com', 'Vans': 'vans.com',
     'Away': 'awaytravel.com', 'Samsonite': 'samsonite.com',
     'Tiffany & Co.': 'tiffany.com', 'Warby Parker': 'warbyparker.com',
-    'Kith': 'kith.com', 'Bonobos': 'bonobos.com', 'Untuckit': 'untuckit.com',
+    'Bonobos': 'bonobos.com', 'Untuckit': 'untuckit.com',
     'Mac Weldon': 'macweldon.com', 'Outdoor Voices': 'outdoorvoices.com',
     'Aerie': 'ae.com', 'Shade Critters': 'shadecritters.com',
     'Panhandle Slim': 'panhandleslim.com', 'Cruel Girl': 'cruelgirl.com',
     'Lucky': 'luckybrand.com', 'AG Jeans': 'agjeans.com',
     'Baseball Lifestyle 101': 'baseballlifestyle101.com',
     'Dirty Mids': 'dirtymids.com',
+    'Chanel': 'chanel.com',
+    'Mizzen+Main': 'mizzenandmain.com',
+    'Ten Thousand': 'tenthousand.cc',
+    'Redvanly': 'redvanly.com',
+    "Alter'd State": 'alteredstate.com',
   };
 
   const getDomain = (name) => BRAND_DOMAINS[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
 
   return (
     <>
-      {/* Category filter pills */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-4 scrollbar-hide">
         {categories.map(cat => (
           <button
@@ -2285,7 +2240,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
         ))}
       </div>
 
-      {/* Brand collections */}
       <div className="space-y-6">
         {visibleCollections.map(collection => {
           const addedCount = collection.brands.filter(b =>
@@ -2382,7 +2336,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
         })}
       </div>
 
-      {/* ── Collection picker mini-modal ──────────────────── */}
       {pendingBrand && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-xl">
@@ -2394,7 +2347,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
             </div>
             <p className="text-sm text-neutral-500 mb-4">Which collection should this go in?</p>
 
-            {/* Existing collections */}
             <div className="space-y-2 mb-3 max-h-48 overflow-y-auto">
               {userCollections.length > 0 && userCollections.map(coll => (
                 <button
@@ -2405,7 +2357,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
                   {coll}
                 </button>
               ))}
-              {/* Suggested collection from browse context */}
               {pendingBrand.suggestedCollection && !userCollections.includes(pendingBrand.suggestedCollection) && (
                 <button
                   onClick={() => confirmAddBrand(pendingBrand, pendingBrand.suggestedCollection)}
@@ -2417,7 +2368,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
               )}
             </div>
 
-            {/* Create new collection */}
             {!showNewColl ? (
               <button
                 onClick={() => setShowNewColl(true)}
@@ -2449,7 +2399,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
               </div>
             )}
 
-            {/* Skip — use default */}
             <button
               onClick={() => confirmAddBrand(pendingBrand, 'BrandSnobs Collection')}
               className="w-full mt-3 text-xs text-neutral-400 hover:text-neutral-600 py-1"
@@ -2464,7 +2413,6 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
 }
 
 export default function App() {
-  // Helper function to generate unique share IDs
   const generateShareId = () => {
     return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   };
@@ -2516,29 +2464,26 @@ export default function App() {
     return localStorage.getItem('hasShownUncategorizedPrompt') === 'true';
   });
   
-  // Wishlist states - Updated for multiple wishlists
   const [wishlists, setWishlists] = useState(() => {
     const saved = localStorage.getItem('wishlists');
     if (saved) {
       return JSON.parse(saved);
     }
-    // Check for old single wishlist format and migrate
     const oldWishlist = localStorage.getItem('wishlist');
     if (oldWishlist) {
       const oldItems = JSON.parse(oldWishlist);
       if (oldItems.length > 0) {
-        // Migrate to new format
         const migratedWishlist = {
           id: 'wishlist_' + Date.now(),
           name: 'My Wishlist',
           occasion: 'custom',
           emoji: '⭐',
           privacy: 'link-only',
-          shareId: generateShareId(),
+          shareId: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
           items: oldItems,
           createdAt: Date.now()
         };
-        localStorage.removeItem('wishlist'); // Clean up old format
+        localStorage.removeItem('wishlist');
         return [migratedWishlist];
       }
     }
@@ -2558,9 +2503,8 @@ export default function App() {
   const [shareMessage, setShareMessage] = useState('');
   const [shareSending, setShareSending] = useState(false);
 
-  // Simple Email-as-Username Auth States
   const [showSignIn, setShowSignIn] = useState(false);
-  const [pendingWishlistDeal, setPendingWishlistDeal] = useState(null); // deal to add after sign-in
+  const [pendingWishlistDeal, setPendingWishlistDeal] = useState(null);
   const [showWishlistSignInPrompt, setShowWishlistSignInPrompt] = useState(false);
   const [email, setEmail] = useState('');
   const [signingIn, setSigningIn] = useState(false);
@@ -2616,12 +2560,10 @@ export default function App() {
     if (savedGenders) setSelectedGenders(JSON.parse(savedGenders));
   }, []);
 
-  // Simple email validation
   const isValidEmail = (email) => {
     return email && email.includes('@') && email.includes('.');
   };
 
-  // Sign in with email (no verification)
   const signIn = async () => {
     if (!isValidEmail(email)) {
       setError('Please enter a valid email address');
@@ -2637,19 +2579,15 @@ export default function App() {
       const userDoc = await getDoc(userDocRef);
 
       if (userDoc.exists()) {
-        // Load existing data
         const data = userDoc.data();
         setMyBrands(data.brands || []);
         setSelectedGenders(data.genderPreferences || []);
         setShoppingBag(data.shoppingBag || []);
         
-        // Handle wishlist migration
         if (data.wishlists) {
-          // New format
           setWishlists(data.wishlists);
           setActiveWishlistId(data.activeWishlistId || (data.wishlists.length > 0 ? data.wishlists[0].id : null));
         } else if (data.wishlist && data.wishlist.length > 0) {
-          // Old format - migrate
           const migratedWishlist = {
             id: 'wishlist_' + Date.now(),
             name: 'My Wishlist',
@@ -2671,7 +2609,6 @@ export default function App() {
         });
         console.log('✅ Loaded existing profile:', userEmail);
       } else {
-        // Create new profile
         await setDoc(userDocRef, {
           email: userEmail,
           brands: [],
@@ -2684,13 +2621,11 @@ export default function App() {
         console.log('✅ Created new profile:', userEmail);
       }
 
-      // Set user and save to localStorage
       setUser({ email: userEmail });
       localStorage.setItem('userEmail', userEmail);
       setShowSignIn(false);
       setShowWishlistSignInPrompt(false);
       setEmail('');
-      // If user signed in to save a deal, add it now
       if (pendingWishlistDeal) {
         setTimeout(() => {
           addToWishlist(pendingWishlistDeal);
@@ -2706,7 +2641,6 @@ export default function App() {
     }
   };
 
-  // Sign out
   const signOut = () => {
     setUser(null);
     localStorage.removeItem('userEmail');
@@ -2716,7 +2650,6 @@ export default function App() {
     console.log('✅ Signed out');
   };
 
-  // Auto sign-in on page load
   useEffect(() => {
     const savedEmail = localStorage.getItem('userEmail');
     if (savedEmail) {
@@ -2732,7 +2665,6 @@ export default function App() {
             setSelectedGenders(data.genderPreferences || []);
             setShoppingBag(data.shoppingBag || []);
             
-            // Handle wishlist migration
             if (data.wishlists) {
               setWishlists(data.wishlists);
               setActiveWishlistId(data.activeWishlistId || (data.wishlists.length > 0 ? data.wishlists[0].id : null));
@@ -2770,7 +2702,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('myBrands', JSON.stringify(myBrands));
     
-    // Check if we should show the "Name your collection" prompt
     if (!hasShownUncategorizedPrompt) {
       const uncategorizedBrands = myBrands.filter(b => b.collection === 'Uncategorized');
       if (uncategorizedBrands.length === 2) {
@@ -2969,10 +2900,9 @@ export default function App() {
       setTimeout(() => {
         setShowWalkthrough(true);
         setWalkthroughStep(0);
-      }, 3000); // Show after fetching animation completes
+      }, 3000);
     }
 
-    // Show fetching animation for first brand
     if (isFirstBrand) {
       setFetchingDeals(true);
       setTimeout(() => {
@@ -3004,7 +2934,6 @@ export default function App() {
     setShowRecommendModal(true);
   };
 
-  // Fetch approximate user count for social proof on landing page
   React.useEffect(() => {
     const fetchUserCount = async () => {
       try {
@@ -3041,7 +2970,7 @@ export default function App() {
         brand.toLowerCase().includes(value.toLowerCase())
       ).slice(0, 5);
       setBrandSuggestions(filtered);
-      setShowSuggestions(true); // Always show dropdown when typing (even if empty, to show request brand)
+      setShowSuggestions(true);
     } else {
       setBrandSuggestions([]);
       setShowSuggestions(false);
@@ -3105,21 +3034,18 @@ export default function App() {
 
     if (!proceed) return;
 
-    // Open all links first
     Object.entries(byRetailer).forEach(([retailer, data], index) => {
       setTimeout(() => {
         handleDealClick(data.items[0].link);
       }, index * 500);
     });
 
-    // Wait for all tabs to open, then clear bag and close modal
     setTimeout(() => {
       clearBag();
       setShowBagModal(false);
     }, (retailerCount * 500) + 1000);
   };
 
-  // Save wishlists to localStorage and cloud
   useEffect(() => {
     localStorage.setItem('wishlists', JSON.stringify(wishlists));
     localStorage.setItem('activeWishlistId', activeWishlistId || '');
@@ -3137,7 +3063,6 @@ export default function App() {
     }
   }, [wishlists, activeWishlistId, user]);
 
-  // Create new wishlist
   const createWishlist = (name, occasion, emoji, privacy = 'link-only') => {
     const newWishlist = {
       id: 'wishlist_' + Date.now(),
@@ -3155,7 +3080,6 @@ export default function App() {
     return newWishlist;
   };
 
-  // Delete wishlist
   const deleteWishlist = (wishlistId) => {
     const updated = wishlists.filter(w => w.id !== wishlistId);
     setWishlists(updated);
@@ -3165,7 +3089,6 @@ export default function App() {
     }
   };
 
-  // Update wishlist privacy
   const updateWishlistPrivacy = (wishlistId, privacy) => {
     const updated = wishlists.map(w => 
       w.id === wishlistId ? { ...w, privacy } : w
@@ -3173,12 +3096,10 @@ export default function App() {
     setWishlists(updated);
   };
 
-  // Add item to wishlist (shows modal to choose which wishlist)
   const userRef = React.useRef(user);
   React.useEffect(() => { userRef.current = user; }, [user]);
 
   const addToWishlist = (deal) => {
-    // If not signed in, prompt user to create account to save wishlist
     console.log('addToWishlist called, user:', userRef.current, 'deal:', deal?.id);
     if (!userRef.current) {
       console.log('No user — showing sign-in prompt');
@@ -3187,7 +3108,6 @@ export default function App() {
       return;
     }
     if (wishlists.length === 0) {
-      // No wishlists exist — create default and add deal directly in one operation
       const newWishlist = {
         id: 'wishlist_' + Date.now(),
         name: 'My Wishlist',
@@ -3202,7 +3122,6 @@ export default function App() {
       setActiveWishlistId(newWishlist.id);
       showToast('Saved to My Wishlist!');
     } else if (wishlists.length === 1) {
-      // Only one wishlist — add directly
       const updated = wishlists.map(w => {
         if (w.items.find(item => item.id === deal.id)) return w;
         return { ...w, items: [...w.items, deal] };
@@ -3210,13 +3129,11 @@ export default function App() {
       setWishlists(updated);
       showToast('Added to wishlist!');
     } else {
-      // Multiple wishlists — show selection modal
       setPendingWishlistItem(deal);
       setShowAddToWishlistModal(true);
     }
   };
 
-  // Add item to specific wishlist
   const addToSpecificWishlist = (wishlistId, deal) => {
     const updated = wishlists.map(w => {
       if (w.id !== wishlistId) return w;
@@ -3228,7 +3145,6 @@ export default function App() {
     setShowAddToWishlistModal(false);
   };
 
-  // Remove item from wishlist
   const removeFromWishlist = (wishlistId, dealId) => {
     const updated = wishlists.map(w => 
       w.id === wishlistId 
@@ -3238,12 +3154,10 @@ export default function App() {
     setWishlists(updated);
   };
 
-  // Check if item is in any wishlist
   const isInWishlist = (dealId) => {
     return wishlists.some(w => w.items.some(item => item.id === dealId));
   };
 
-  // Get active wishlist
   const getActiveWishlist = () => {
     if (!activeWishlistId && wishlists.length > 0) {
       setActiveWishlistId(wishlists[0].id);
@@ -3252,7 +3166,6 @@ export default function App() {
     return wishlists.find(w => w.id === activeWishlistId) || wishlists[0] || null;
   };
 
-  // Share wishlist via email
   const shareWishlist = async () => {
     if (!shareRecipient.trim()) {
       alert('Please enter an email address');
@@ -3278,7 +3191,6 @@ export default function App() {
       ? `${shareMessage}\n\n=== ${wishlistToShare.name.toUpperCase()} ===\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
       : `Check out my ${wishlistToShare.emoji} ${wishlistToShare.name} from BrandSnobs!\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`;
 
-    // Save share record to Firestore first (so it's never lost even if email fails)
     try {
       await setDoc(doc(collection(db, 'wishlist_shares')), {
         from: user?.email || 'anonymous',
@@ -3294,9 +3206,7 @@ export default function App() {
       console.warn('Firestore share record failed (non-fatal):', fsError);
     }
 
-    // Send email via Vercel serverless function (bypasses CORS restrictions)
     try {
-      // Build sizes summary to include in email
       const sizesInfo = [
         shippingProfile.shirtSize && `Shirt/Top: ${shippingProfile.shirtSize}`,
         shippingProfile.shoeSize && `Shoe: ${shippingProfile.shoeSize}`,
@@ -3335,7 +3245,6 @@ export default function App() {
       setShareMessage('');
     } catch (error) {
       console.error('Share error:', error);
-      // Fall back to clipboard
       try {
         await navigator.clipboard.writeText(shareLink);
         alert(`Email failed — but the share link has been copied to your clipboard! Paste it in a message to ${shareRecipient}.`);
@@ -3356,7 +3265,6 @@ export default function App() {
     setRecommendSubmitting(true);
     
     try {
-      // Save to Firestore
       const recommendationRef = collection(db, 'brand_recommendations');
       await setDoc(doc(recommendationRef), {
         brandName: recommendBrand.trim(),
@@ -3368,7 +3276,6 @@ export default function App() {
       
       console.log('✅ Recommendation saved to Firestore');
       
-      // Send email via Resend serverless function
       try {
         const emailResponse = await fetch('/api/send-recommendation', {
           method: 'POST',
@@ -3408,7 +3315,6 @@ export default function App() {
   };
 
   const loadCollection = (collectionInput) => {
-    // Handle both object (from recommendations tab) and string (from onboarding)
     const collection = typeof collectionInput === 'string' 
       ? BRAND_COLLECTIONS.find(c => c.name === collectionInput)
       : collectionInput;
@@ -3427,7 +3333,6 @@ export default function App() {
     
     setMyBrands([...myBrands, ...newBrands]);
     
-    // Show fetching animation if these are first brands
     if (isFirstBrands) {
       setFetchingDeals(true);
       setTimeout(() => {
@@ -3451,18 +3356,6 @@ export default function App() {
     }
     
     if (selectedGenders.length > 0) {
-      // Keyword maps for each gender — checks product title, category, and gender field
-      const GENDER_KEYWORDS = {
-        men:    ['men', "men's", 'mens', 'male', 'masculine', 'husband', 'boyfriend', 'guy', 'guys', 'his'],
-        women:  ['women', "women's", 'womens', 'woman', 'female', 'feminine', 'ladies', 'lady', "lady's", 'her', 'hers', 'wife', 'girlfriend'],
-        boys:   ['boys', "boys'", "boy's", 'boy', 'youth male', 'kids male', 'little boy'],
-        girls:  ['girls', "girls'", "girl's", 'girl', 'youth female', 'kids female', 'little girl'],
-        unisex: ['unisex', 'gender neutral', 'gender-neutral', 'all genders', 'everyone'],
-      };
-
-      // Brands that are TRULY unisex — products don't have gender in title
-      // AND the brand only sells gender-neutral items (e.g. drinkware, eyewear, luggage)
-      // Do NOT include brands that sell both men's and women's clothing
       const FRONTEND_UNISEX_BRANDS = [
         'Yeti', 'RTIC Outdoors', 'Pelagic',
         'Costa', 'Oakley', 'Ray-Ban', 'Warby Parker',
@@ -3473,27 +3366,21 @@ export default function App() {
       ];
 
       const detectGender = (deal) => {
-        // If brand is inherently unisex, show under all filters
         if (FRONTEND_UNISEX_BRANDS.includes(deal.brand)) return ['men', 'women', 'boys', 'girls', 'unisex'];
 
         const explicitGender = (deal.gender || '').toLowerCase().trim();
 
-        // null gender = untagged, show only when no filter active (handled below)
         if (!explicitGender || explicitGender === 'null') return null;
 
-        // Unisex shows under all filters
         if (explicitGender === 'unisex') return ['men', 'women', 'boys', 'girls', 'unisex'];
 
-        // Generic kids shows under both boys and girls
         if (explicitGender === 'kids') return ['boys', 'girls'];
 
-        // Exact matches
         if (explicitGender === 'women') return ['women'];
         if (explicitGender === 'men') return ['men'];
         if (explicitGender === 'girls') return ['girls'];
         if (explicitGender === 'boys') return ['boys'];
 
-        // Fallback keyword scan for older deals in Firestore
         const searchText = [deal.product || '', deal.category || ''].join(' ').toLowerCase();
         const FRONTEND_KEYWORDS = {
           women:  ["women's", 'womens', 'women ', 'ladies', 'female', 'dress', 'skirt', 'bra', 'blouse'],
@@ -3509,13 +3396,11 @@ export default function App() {
         if (matched.has('unisex')) return ['men', 'women', 'boys', 'girls', 'unisex'];
         if (matched.size > 0) return [...matched];
 
-        // Truly untagged — return null
         return null;
       };
 
       result = result.filter(deal => {
         const dealGenders = detectGender(deal);
-        // null means untagged — hide when any gender filter is active
         if (dealGenders === null) return false;
         return selectedGenders.some(g => dealGenders.includes(g));
       });
@@ -3626,15 +3511,7 @@ export default function App() {
     hotBrand: hotBrand
   };
 
-  // ============================================================
-  // APP-PART-3-SIMPLE-AUTH.jsx
-  // Contains: Header, Tab Navigation, Deals Tab, Brands Tab,
-  //           Profile Tab, Recommendations Tab
-  // ============================================================
-
-  // ── Total wishlist item count (across ALL wishlists) ────────
   const totalWishlistItems = wishlists.reduce((sum, w) => sum + w.items.length, 0);
-
   return (
     <div className="min-h-screen bg-neutral-50">
 
