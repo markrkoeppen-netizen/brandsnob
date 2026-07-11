@@ -746,12 +746,16 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
         </div>
 
         {/* Footer links */}
-        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-neutral-400">
+        <div className="mt-6 flex items-center justify-center gap-4 text-xs text-neutral-400 flex-wrap">
           <button onClick={onHowItWorks} className="hover:text-neutral-600 underline">How It Works</button>
           <span>·</span>
-          <button onClick={onPrivacy} className="hover:text-neutral-600 underline">Privacy Policy</button>
+          <a href="/about" className="hover:text-neutral-600 underline">About</a>
           <span>·</span>
-          <button onClick={onTerms} className="hover:text-neutral-600 underline">Terms of Service</button>
+          <a href="/privacy" className="hover:text-neutral-600 underline">Privacy Policy</a>
+          <span>·</span>
+          <a href="/terms" className="hover:text-neutral-600 underline">Terms of Service</a>
+          <span>·</span>
+          <a href="/contact" className="hover:text-neutral-600 underline">Contact</a>
         </div>
       </div>
     </div>
@@ -4244,14 +4248,16 @@ export default function App() {
       {/* ── App footer ────────────────────────────────────── */}
       {myBrands.length > 0 && (
         <footer className="border-t border-neutral-200 mt-8 py-6 text-center">
-          <div className="flex items-center justify-center gap-4 text-xs text-neutral-400">
+          <div className="flex items-center justify-center gap-4 text-xs text-neutral-400 flex-wrap">
             <button onClick={() => setShowHowItWorks(true)} className="hover:text-neutral-600 underline">How It Works</button>
             <span>·</span>
-            <button onClick={() => setShowPrivacyPolicy(true)} className="hover:text-neutral-600 underline">Privacy Policy</button>
+            <a href="/about" className="hover:text-neutral-600 underline">About</a>
             <span>·</span>
-            <button onClick={() => setShowTermsOfService(true)} className="hover:text-neutral-600 underline">Terms of Service</button>
+            <a href="/privacy" className="hover:text-neutral-600 underline">Privacy Policy</a>
             <span>·</span>
-            <a href="mailto:admin@brandsnobs.com" className="hover:text-neutral-600 underline">Contact</a>
+            <a href="/terms" className="hover:text-neutral-600 underline">Terms of Service</a>
+            <span>·</span>
+            <a href="/contact" className="hover:text-neutral-600 underline">Contact</a>
           </div>
           <p className="text-xs text-neutral-300 mt-2">© {new Date().getFullYear()} BrandSnobs. All rights reserved.</p>
         </footer>
