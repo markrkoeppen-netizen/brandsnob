@@ -265,6 +265,50 @@ const ALL_AVAILABLE_BRANDS = [
   'Mizzen+Main', 'Ten Thousand', 'Redvanly', 'Chanel', "Alter'd State"
 ];
 
+// ── Custom brand merging ─────────────────────────────────────────
+// Brands added via add-brand.html live in Firestore's custom_brands
+// collection, separate from the hardcoded lists above. These two helpers
+// merge them in at render time WITHOUT mutating BRAND_COLLECTIONS itself
+// (that's a shared module-level constant referenced by multiple
+// components — mutating it directly would leak between components and
+// across re-renders). Used identically by both OnboardingScreen and
+// BrandManagerGrid so the two views can't drift out of sync.
+function mergeCustomBrandsIntoCollections(customBrands) {
+  if (!customBrands || customBrands.length === 0) return BRAND_COLLECTIONS;
+
+  const merged = BRAND_COLLECTIONS.map(c => ({ ...c, brands: [...c.brands] }));
+
+  customBrands.forEach(cb => {
+    if (!cb.name || !cb.collectionName) return;
+    let target = merged.find(c => c.name === cb.collectionName);
+    if (!target) {
+      target = {
+        id: 1000 + merged.length,
+        name: cb.collectionName,
+        description: 'Custom added brands',
+        brands: []
+      };
+      merged.push(target);
+    }
+    if (!target.brands.some(b => b.name === cb.name)) {
+      target.brands.push({ name: cb.name, category: cb.category || 'Fashion' });
+    }
+  });
+
+  return merged;
+}
+
+function mergeCustomBrandDomains(customBrands, baseDomains) {
+  if (!customBrands || customBrands.length === 0) return baseDomains;
+  const merged = { ...baseDomains };
+  customBrands.forEach(cb => {
+    if (cb.name && cb.domain) {
+      merged[cb.name] = cb.domain;
+    }
+  });
+  return merged;
+}
+
 function HowItWorksModal({ onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -486,7 +530,7 @@ function BrandLogo({ domain, name }) {
   );
 }
 
-function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn, onHowItWorks, onPrivacy, onTerms, userCount }) {
+function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandSearchQuery, onBrandSearchChange, brandSuggestions, showSuggestions, setShowSuggestions, onSignIn, onHowItWorks, onPrivacy, onTerms, userCount, customBrands }) {
   const [selectedBrands, setSelectedBrands] = React.useState([]);
   const [activeCategory, setActiveCategory] = React.useState('All');
   const [showSearch, setShowSearch] = React.useState(false);
@@ -547,13 +591,16 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
     "Alter'd State": 'alteredstate.com',
   };
 
-  const getDomain = (name) => BRAND_DOMAINS[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
+  const mergedDomains = React.useMemo(() => mergeCustomBrandDomains(customBrands, BRAND_DOMAINS), [customBrands]);
+  const getDomain = (name) => mergedDomains[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
 
-  const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
+  const mergedCollections = React.useMemo(() => mergeCustomBrandsIntoCollections(customBrands), [customBrands]);
+
+  const categories = ['All', ...mergedCollections.map(c => c.name)];
 
   const visibleCollections = activeCategory === 'All'
-    ? BRAND_COLLECTIONS
-    : BRAND_COLLECTIONS.filter(c => c.name === activeCategory);
+    ? mergedCollections
+    : mergedCollections.filter(c => c.name === activeCategory);
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-neutral-50 to-neutral-100 z-40 overflow-y-auto">
@@ -2123,7 +2170,7 @@ function MyCollectionsSection({ myBrands, userCollections, removeBrand, renameCo
   );
 }
 
-function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals }) {
+function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals, customBrands }) {
   const [activeCat, setActiveCat] = useState('All');
   const [pendingBrand, setPendingBrand] = useState(null);
   const [newCollName, setNewCollName] = useState('');
@@ -2143,10 +2190,11 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
     setShowNewColl(false);
   };
 
-  const categories = ['All', ...BRAND_COLLECTIONS.map(c => c.name)];
+  const mergedCollections = React.useMemo(() => mergeCustomBrandsIntoCollections(customBrands), [customBrands]);
+  const categories = ['All', ...mergedCollections.map(c => c.name)];
   const visibleCollections = activeCat === 'All'
-    ? BRAND_COLLECTIONS
-    : BRAND_COLLECTIONS.filter(c => c.name === activeCat);
+    ? mergedCollections
+    : mergedCollections.filter(c => c.name === activeCat);
 
   const BRAND_DOMAINS = {
     'Gucci': 'gucci.com', 'Prada': 'prada.com', 'Louis Vuitton': 'louisvuitton.com',
@@ -2224,7 +2272,8 @@ function BrandManagerGrid({ myBrands, setMyBrands, removeBrand, showToast, deals
     "Alter'd State": 'alteredstate.com',
   };
 
-  const getDomain = (name) => BRAND_DOMAINS[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
+  const mergedDomains = React.useMemo(() => mergeCustomBrandDomains(customBrands, BRAND_DOMAINS), [customBrands]);
+  const getDomain = (name) => mergedDomains[name] || (name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com');
 
   return (
     <>
@@ -2422,6 +2471,9 @@ export default function App() {
   };
 
   const [myBrands, setMyBrands] = useState([]);
+  // Brands added via add-brand.html — loaded from Firestore once on mount,
+  // merged into the search/browse UI alongside the hardcoded brand lists.
+  const [customBrands, setCustomBrands] = useState([]);
   const [showAddBrand, setShowAddBrand] = useState(false);
   const [newBrandName, setNewBrandName] = useState('');
   const [newBrandCollection, setNewBrandCollection] = useState('');
@@ -2562,6 +2614,21 @@ export default function App() {
     if (savedBag) setShoppingBag(JSON.parse(savedBag));
     if (savedProfile) setShippingProfile(JSON.parse(savedProfile));
     if (savedGenders) setSelectedGenders(JSON.parse(savedGenders));
+  }, []);
+
+  // Load brands added via add-brand.html — same Firestore access pattern
+  // used everywhere else in this file, no new backend dependency needed.
+  useEffect(() => {
+    const fetchCustomBrands = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'custom_brands'));
+        const brands = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setCustomBrands(brands);
+      } catch (error) {
+        console.error('Error loading custom brands:', error);
+      }
+    };
+    fetchCustomBrands();
   }, []);
 
   const isValidEmail = (email) => {
@@ -2970,7 +3037,8 @@ export default function App() {
     setNewBrandName(value);
     
     if (value.trim().length > 0) {
-      const filtered = ALL_AVAILABLE_BRANDS.filter(brand =>
+      const allBrandNames = [...ALL_AVAILABLE_BRANDS, ...customBrands.map(cb => cb.name)];
+      const filtered = allBrandNames.filter(brand =>
         brand.toLowerCase().includes(value.toLowerCase())
       ).slice(0, 5);
       setBrandSuggestions(filtered);
@@ -3553,6 +3621,7 @@ export default function App() {
           onPrivacy={() => setShowPrivacyPolicy(true)}
           onTerms={() => setShowTermsOfService(true)}
           userCount={userCount}
+          customBrands={customBrands}
         />
       )}
 
@@ -4062,6 +4131,7 @@ export default function App() {
               removeBrand={removeBrand}
               showToast={showToast}
               deals={deals}
+              customBrands={customBrands}
             />
           </div>
         )}
