@@ -3629,7 +3629,7 @@ export default function App() {
       {fetchingDeals && <FetchingDealsAnimation />}
 
       {/* ── Header ───────────────────────────────────────────── */}
-      <header className="bg-white border-b border-neutral-200 sticky top-0 z-30">
+      <header className="bg-white border-b border-neutral-200 sticky top-0 z-30 pt-safe">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
           {/* Logo — click to scroll back to top */}
@@ -3637,7 +3637,7 @@ export default function App() {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="flex items-center gap-2 hover:opacity-75 transition-opacity"
           >
-            <ShoppingBag className="w-7 h-7 text-neutral-900" />
+            <img src="/logo-mark.png" alt="BrandSnobs" className="w-7 h-7 object-contain" />
             <span className="font-display text-xl font-bold text-neutral-900 tracking-tight">
               BrandSnobs
             </span>
