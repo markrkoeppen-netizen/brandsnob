@@ -3800,7 +3800,7 @@ export default function App() {
       </header>
 
       {/* ── Main content ─────────────────────────────────────── */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-6 overflow-x-hidden">
 
         {/* ══════════════════════════════════════════════════════
             DEALS TAB
