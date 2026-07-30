@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { ShoppingBag, Plus, X, TrendingUp, Tag, ExternalLink, Download, Upload, LogIn, LogOut, User, Cloud, CloudOff, RefreshCw, Heart, Check, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { db } from './firebase';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Share } from '@capacitor/share';
+import { Browser } from '@capacitor/browser';
+
+const openLegalPage = (path) => {
+  Browser.open({ url: `https://brandsnobs.com${path}` }).catch(() => {
+    window.open(`https://brandsnobs.com${path}`, '_blank');
+  });
+};
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, getCountFromServer } from 'firebase/firestore';
 // Email sending handled via Resend serverless functions in /api
 
@@ -604,20 +613,21 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-neutral-50 to-neutral-100 z-40 overflow-y-auto">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 pb-8" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 2rem)' }}>
 
         {/* Header */}
         <div className="text-center mb-6">
-          <ShoppingBag className="w-12 h-12 text-neutral-900 mx-auto mb-4" />
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-neutral-900 mb-2">
-            BrandSnobs
-          </h1>
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <img src="/logo-mark.png" alt="BrandSnobs" className="w-10 h-10 object-contain" />
+            <h1 className="font-display text-3xl md:text-4xl font-bold text-neutral-900">
+              BrandSnobs
+            </h1>
+          </div>
           <p className="text-base text-neutral-500 font-light tracking-widest uppercase mb-4">
             You Like What You Like
           </p>
           <div className="flex items-center justify-center gap-4 text-sm text-neutral-500 mb-2">
             <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Track deals from your brands</span>
-            <span className="flex items-center gap-1.5"><Check className="w-4 h-4 text-emerald-600 flex-shrink-0" /> Free forever</span>
           </div>
           {userCount && userCount > 0 && (
             <p className="text-xs text-neutral-400">
@@ -796,13 +806,13 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
         <div className="mt-6 flex items-center justify-center gap-4 text-xs text-neutral-400 flex-wrap">
           <button onClick={onHowItWorks} className="hover:text-neutral-600 underline">How It Works</button>
           <span>·</span>
-          <a href="/about" className="hover:text-neutral-600 underline">About</a>
+          <button onClick={() => openLegalPage('/about')} className="hover:text-neutral-600 underline">About</button>
           <span>·</span>
-          <a href="/privacy" className="hover:text-neutral-600 underline">Privacy Policy</a>
+          <button onClick={() => openLegalPage('/privacy')} className="hover:text-neutral-600 underline">Privacy Policy</button>
           <span>·</span>
-          <a href="/terms" className="hover:text-neutral-600 underline">Terms of Service</a>
+          <button onClick={() => openLegalPage('/terms')} className="hover:text-neutral-600 underline">Terms of Service</button>
           <span>·</span>
-          <a href="/contact" className="hover:text-neutral-600 underline">Contact</a>
+          <button onClick={() => openLegalPage('/contact')} className="hover:text-neutral-600 underline">Contact</button>
         </div>
       </div>
     </div>
@@ -1992,6 +2002,25 @@ function ShareWishlistModal({
             </div>
           </div>
 
+          <button
+            onClick={async () => {
+              try {
+                await Share.share({
+                  title: selectedWishlist?.name || 'My Wishlist',
+                  text: `Check out my wishlist on BrandSnobs: ${selectedWishlist?.name || ''}`,
+                  url: shareLink,
+                  dialogTitle: 'Share your wishlist',
+                });
+              } catch (err) {
+                // User cancelled the share sheet, or it isn't supported here — safe to ignore
+              }
+            }}
+            disabled={selectedWishlist?.privacy === 'private'}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-neutral-100 text-neutral-900 hover:bg-neutral-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Share...
+          </button>
+
           <div>
             <label className="block text-sm font-medium text-neutral-700 mb-2">
               Or Share via Email
@@ -2482,6 +2511,8 @@ export default function App() {
   const [brandSuggestions, setBrandSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeTab, setActiveTab] = useState('deals');
+  const [showTopDeals, setShowTopDeals] = useState(false);
+  const dealsListRef = React.useRef(null);
   const [user, setUser] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle');
   const [deals, setDeals] = useState([]);
@@ -2843,17 +2874,28 @@ export default function App() {
       setDealsError(null);
 
       const brandNames = myBrands.map(b => b.name);
-      const dealsRef = collection(db, 'deals');
-      const batchSize = 30;
-      let allDeals = [];
 
-      for (let i = 0; i < brandNames.length; i += batchSize) {
-        const batch = brandNames.slice(i, i + batchSize);
-        const q = query(dealsRef, where('brand', 'in', batch), orderBy('fetchedAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const batchDeals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        allDeals = [...allDeals, ...batchDeals];
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch('https://brandsnobs-backend-production.up.railway.app/api/deals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brands: brandNames }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
       }
+
+      const data = await response.json();
+      if (!data.success) {
+        throw new Error(data.error || 'Unknown server error');
+      }
+
+      const allDeals = data.deals;
 
       const uniqueDeals = Array.from(new Map(allDeals.map(deal => [deal.id, deal])).values());
       const sortedDeals = uniqueDeals.sort((a, b) => parseInt(b.discount) - parseInt(a.discount));
@@ -2865,7 +2907,7 @@ export default function App() {
       setDealsLoading(false);
     } catch (error) {
       console.error('Error fetching deals:', error);
-      setDealsError('Failed to load deals. Please try again.');
+      setDealsError('Failed to load deals: ' + (error?.message || 'Unknown error') + ' [code: ' + (error?.code || 'none') + ']');
       setDealsLoading(false);
     }
   };
@@ -3173,6 +3215,7 @@ export default function App() {
 
   const addToWishlist = (deal) => {
     console.log('addToWishlist called, user:', userRef.current, 'deal:', deal?.id);
+    Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
     if (!userRef.current) {
       console.log('No user — showing sign-in prompt');
       setPendingWishlistDeal(deal);
@@ -3767,26 +3810,38 @@ export default function App() {
             {/* Stats bar */}
             {myBrands.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                <button
+                  onClick={() => setActiveTab('brands')}
+                  className="bg-white rounded-xl border border-neutral-200 p-3 text-center hover:border-neutral-400 hover:shadow-sm active:scale-[0.98] transition-all"
+                >
                   <p className="text-2xl font-bold text-neutral-900">{stats.totalBrands}</p>
                   <p className="text-xs text-neutral-500 mt-1">Brands Tracked</p>
-                </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                </button>
+                <button
+                  onClick={() => dealsListRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  className="bg-white rounded-xl border border-neutral-200 p-3 text-center hover:border-neutral-400 hover:shadow-sm active:scale-[0.98] transition-all"
+                >
                   <p className="text-2xl font-bold text-neutral-900">{stats.totalDeals}</p>
                   <p className="text-xs text-neutral-500 mt-1">Live Deals</p>
-                </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                </button>
+                <button
+                  onClick={() => setShowTopDeals(prev => !prev)}
+                  className={`bg-white rounded-xl border p-3 text-center hover:shadow-sm active:scale-[0.98] transition-all ${showTopDeals ? 'border-orange-400 ring-1 ring-orange-300' : 'border-neutral-200 hover:border-neutral-400'}`}
+                >
                   <p className="text-2xl font-bold text-neutral-900">{stats.avgDiscount}%</p>
-                  <p className="text-xs text-neutral-500 mt-1">Avg. Discount</p>
-                </div>
-                <div className="bg-white rounded-xl border border-neutral-200 p-4 text-center">
+                  <p className="text-xs text-neutral-500 mt-1">Avg. Discount{showTopDeals ? ' 🔥' : ''}</p>
+                </button>
+                <button
+                  onClick={() => stats.hotBrand && setSearchQuery(stats.hotBrand.name)}
+                  className="bg-white rounded-xl border border-neutral-200 p-3 text-center hover:border-neutral-400 hover:shadow-sm active:scale-[0.98] transition-all"
+                >
                   <p className="text-2xl font-bold text-neutral-900 truncate">
                     {stats.hotBrand ? stats.hotBrand.name.split(' ')[0] : '—'}
                   </p>
                   <p className="text-xs text-neutral-500 mt-1">
                     {stats.hotBrand ? `Hottest (${stats.hotBrand.avgDiscount}% avg)` : 'No deals yet'}
                   </p>
-                </div>
+                </button>
               </div>
             )}
 
@@ -3900,6 +3955,7 @@ export default function App() {
                 </div>
 
                 </div>{/* end search bars row */}
+                <div ref={dealsListRef}></div>
 
                 {/* Filters row — sort, filter, refresh on one line */}
                 <div className="flex gap-2 items-end">
@@ -4003,18 +4059,24 @@ export default function App() {
                 {(() => {
                   const allWishlistItems = wishlists.flatMap(w => w.items);
                   const dealCard = (deal) => (
-                    <LuxuryDealCard
-                      key={deal.id}
-                      deal={deal}
-                      onAddToBag={addToBag}
-                      onDealClick={handleDealClick}
-                      wishlist={allWishlistItems}
-                      onAddToWishlist={addToWishlist}
-                      onRemoveFromWishlist={(dealId) => {
-                        const containing = wishlists.find(w => w.items.some(i => i.id === dealId));
-                        if (containing) removeFromWishlist(containing.id, dealId);
-                      }}
-                    />
+                    <div key={deal.id} className="relative">
+                      {showTopDeals && parseInt(deal.discount) >= stats.avgDiscount && (
+                        <span className="absolute top-2 left-2 z-10 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                          🔥 Above Avg
+                        </span>
+                      )}
+                      <LuxuryDealCard
+                        deal={deal}
+                        onAddToBag={addToBag}
+                        onDealClick={handleDealClick}
+                        wishlist={allWishlistItems}
+                        onAddToWishlist={addToWishlist}
+                        onRemoveFromWishlist={(dealId) => {
+                          const containing = wishlists.find(w => w.items.some(i => i.id === dealId));
+                          if (containing) removeFromWishlist(containing.id, dealId);
+                        }}
+                      />
+                    </div>
                   );
 
                   // If searching, show flat list
@@ -4321,13 +4383,13 @@ export default function App() {
           <div className="flex items-center justify-center gap-4 text-xs text-neutral-400 flex-wrap">
             <button onClick={() => setShowHowItWorks(true)} className="hover:text-neutral-600 underline">How It Works</button>
             <span>·</span>
-            <a href="/about" className="hover:text-neutral-600 underline">About</a>
+            <button onClick={() => openLegalPage('/about')} className="hover:text-neutral-600 underline">About</button>
             <span>·</span>
-            <a href="/privacy" className="hover:text-neutral-600 underline">Privacy Policy</a>
+            <button onClick={() => openLegalPage('/privacy')} className="hover:text-neutral-600 underline">Privacy Policy</button>
             <span>·</span>
-            <a href="/terms" className="hover:text-neutral-600 underline">Terms of Service</a>
+            <button onClick={() => openLegalPage('/terms')} className="hover:text-neutral-600 underline">Terms of Service</button>
             <span>·</span>
-            <a href="/contact" className="hover:text-neutral-600 underline">Contact</a>
+            <button onClick={() => openLegalPage('/contact')} className="hover:text-neutral-600 underline">Contact</button>
           </div>
           <p className="text-xs text-neutral-300 mt-2">© {new Date().getFullYear()} BrandSnobs. All rights reserved.</p>
         </footer>
