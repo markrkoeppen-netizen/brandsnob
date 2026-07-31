@@ -4,11 +4,23 @@ import { db } from './firebase';
 import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Share } from '@capacitor/share';
 import { Browser } from '@capacitor/browser';
+import { Keyboard } from '@capacitor/keyboard';
 
 const openLegalPage = (path) => {
   Browser.open({ url: `https://brandsnobs.com${path}` }).catch(() => {
     window.open(`https://brandsnobs.com${path}`, '_blank');
   });
+};
+
+// Wraps an outbound retailer deal link with the Skimlinks tracking redirect
+// so qualifying purchases earn an affiliate commission. Skimlinks auto-detects
+// the merchant from the destination URL - no per-retailer setup needed.
+// If the url is missing or already wrapped, it's returned unchanged.
+const SKIMLINKS_ID = '307040X1795315';
+const wrapAffiliateLink = (url) => {
+  if (!url) return url;
+  if (url.includes('skimresources.com')) return url;
+  return `https://go.skimresources.com/?id=${SKIMLINKS_ID}&url=${encodeURIComponent(url)}`;
 };
 import { doc, setDoc, getDoc, collection, query, where, getDocs, orderBy, getCountFromServer } from 'firebase/firestore';
 // Email sending handled via Resend serverless functions in /api
@@ -507,12 +519,12 @@ function OnboardingWalkthrough({ step, onNext, onDone }) {
 
 function Toast({ message, visible }) {
   return (
-    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 ${
+    <div className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] transition-all duration-300 max-w-[90vw] ${
       visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
     }`}>
-      <div className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2.5 rounded-full shadow-lg text-sm font-medium">
+      <div className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2.5 rounded-full shadow-lg text-sm font-medium min-w-0">
         <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-        {message}
+        <span className="truncate">{message}</span>
       </div>
     </div>
   );
@@ -1484,10 +1496,11 @@ function WishlistModal({ wishlist, onClose, onRemove, onShare, onAddToBag }) {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const handleDealClick = (url) => {
+    const trackedUrl = wrapAffiliateLink(url);
     if (isMobile) {
-      window.location.href = url;
+      window.location.href = trackedUrl;
     } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(trackedUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -1604,10 +1617,11 @@ function WishlistsManagerModal({
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const handleDealClick = (url) => {
+    const trackedUrl = wrapAffiliateLink(url);
     if (isMobile) {
-      window.location.href = url;
+      window.location.href = trackedUrl;
     } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(trackedUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -2677,11 +2691,30 @@ export default function App() {
 
     try {
       const userEmail = email.toLowerCase().trim();
-      const userDocRef = doc(db, 'users', userEmail);
-      const userDoc = await getDoc(userDocRef);
 
-      if (userDoc.exists()) {
-        const data = userDoc.data();
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const response = await fetch('https://brandsnobs-backend-production.up.railway.app/api/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown server error');
+      }
+
+      const data = result.data;
+
+      if (result.exists) {
         setMyBrands(data.brands || []);
         setSelectedGenders(data.genderPreferences || []);
         setShoppingBag(data.shoppingBag || []);
@@ -2711,15 +2744,6 @@ export default function App() {
         });
         console.log('✅ Loaded existing profile:', userEmail);
       } else {
-        await setDoc(userDocRef, {
-          email: userEmail,
-          brands: [],
-          genderPreferences: [],
-          shoppingBag: [],
-          wishlist: [],
-          shippingProfile: {},
-          createdAt: new Date().toISOString()
-        });
         console.log('✅ Created new profile:', userEmail);
       }
 
@@ -2977,10 +3001,11 @@ export default function App() {
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   const handleDealClick = (url) => {
+    const trackedUrl = wrapAffiliateLink(url);
     if (isMobile) {
-      window.location.href = url;
+      window.location.href = trackedUrl;
     } else {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(trackedUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -3212,6 +3237,43 @@ export default function App() {
 
   const userRef = React.useRef(user);
   React.useEffect(() => { userRef.current = user; }, [user]);
+
+  const headerRef = React.useRef(null);
+  React.useEffect(() => {
+    let fixOffset = 0;
+    let debounceTimer = null;
+
+    const applyFix = () => {
+      if (!headerRef.current) return;
+      const top = headerRef.current.getBoundingClientRect().top;
+      if (top < -1) {
+        fixOffset = Math.abs(top);
+        headerRef.current.style.marginTop = fixOffset + 'px';
+      }
+    };
+
+    const debouncedApplyFix = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(applyFix, 150);
+    };
+
+    const handleReset = () => {
+      if (fixOffset > 0 && headerRef.current) {
+        fixOffset = 0;
+        headerRef.current.style.marginTop = '0px';
+      }
+      debouncedApplyFix();
+    };
+
+    window.addEventListener('scroll', handleReset);
+    window.addEventListener('focusout', handleReset);
+
+    return () => {
+      window.removeEventListener('scroll', handleReset);
+      window.removeEventListener('focusout', handleReset);
+      clearTimeout(debounceTimer);
+    };
+  }, []);
 
   const addToWishlist = (deal) => {
     console.log('addToWishlist called, user:', userRef.current, 'deal:', deal?.id);
@@ -3628,7 +3690,7 @@ export default function App() {
 
   const totalWishlistItems = wishlists.reduce((sum, w) => sum + w.items.length, 0);
   return (
-    <div className="min-h-screen bg-neutral-50">
+    <div className="min-h-dvh bg-neutral-50">
 
       {/* ── Onboarding ───────────────────────────────────────── */}
       {myBrands.length === 0 && !fetchingDeals && (
@@ -3672,7 +3734,7 @@ export default function App() {
       {fetchingDeals && <FetchingDealsAnimation />}
 
       {/* ── Header ───────────────────────────────────────────── */}
-      <header className="bg-white border-b border-neutral-200 sticky top-0 z-30 pt-safe">
+      <header ref={headerRef} className="bg-white border-b border-neutral-200 sticky top-0 z-30 pt-safe">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
           {/* Logo — click to scroll back to top */}
