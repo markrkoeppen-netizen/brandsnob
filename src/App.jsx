@@ -2792,6 +2792,12 @@ export default function App() {
     setMyBrands([]);
     setSelectedGenders([]);
     setShoppingBag([]);
+    setShippingProfile({
+      firstName: '', lastName: '', email: '', phone: '',
+      address: '', city: '', state: '', zip: '',
+      shirtSize: '', pantsWaist: '', pantsInseam: '', shoeSize: '', dressSize: ''
+    });
+    localStorage.removeItem('shippingProfile');
     console.log('✅ Signed out');
   };
 
