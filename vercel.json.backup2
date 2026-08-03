@@ -10,11 +10,11 @@
     },
     {
       "source": "/deals/:slug",
-      "destination": "/deals-post"
+      "destination": "/deals-post.html"
     },
     {
       "source": "/deals",
-      "destination": "/deals-index"
+      "destination": "/deals-index.html"
     },
     {
       "source": "/((?!api|assets|wishlist|privacy|terms|about|contact|deals).*)",
