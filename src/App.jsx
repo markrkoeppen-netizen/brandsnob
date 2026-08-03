@@ -826,6 +826,9 @@ function OnboardingScreen({ onAddBrand, onLoadCollection, onRequestBrand, brandS
           <span>·</span>
           <button onClick={() => openLegalPage('/contact')} className="hover:text-neutral-600 underline">Contact</button>
         </div>
+        <p className="text-center text-xs text-neutral-400 mt-2 px-4">
+          BrandSnobs may earn a commission from purchases made through links on this site.
+        </p>
       </div>
     </div>
   );
@@ -2666,9 +2669,24 @@ export default function App() {
   useEffect(() => {
     const fetchCustomBrands = async () => {
       try {
-        const snapshot = await getDocs(collection(db, 'custom_brands'));
-        const brands = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setCustomBrands(brands);
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+        const response = await fetch('https://brandsnobs-backend-production.up.railway.app/custom-brands', {
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Server responded with status ${response.status}`);
+        }
+
+        const result = await response.json();
+        if (!result.success) {
+          throw new Error(result.error || 'Unknown server error');
+        }
+
+        setCustomBrands(result.brands);
       } catch (error) {
         console.error('Error loading custom brands:', error);
       }
@@ -3734,7 +3752,7 @@ export default function App() {
       {fetchingDeals && <FetchingDealsAnimation />}
 
       {/* ── Header ───────────────────────────────────────────── */}
-      <header ref={headerRef} className="bg-white border-b border-neutral-200 sticky top-0 z-30 pt-safe">
+      <header ref={headerRef} className={`bg-white border-b border-neutral-200 z-30 pt-safe ${(showAddBrand || showSignIn || showSuggestions) ? '' : 'sticky top-0'}`}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
           {/* Logo — click to scroll back to top */}
@@ -4453,6 +4471,7 @@ export default function App() {
             <span>·</span>
             <button onClick={() => openLegalPage('/contact')} className="hover:text-neutral-600 underline">Contact</button>
           </div>
+          <p className="text-xs text-neutral-400 mt-2 px-4">BrandSnobs may earn a commission from purchases made through links on this site.</p>
           <p className="text-xs text-neutral-300 mt-2">© {new Date().getFullYear()} BrandSnobs. All rights reserved.</p>
         </footer>
       )}
