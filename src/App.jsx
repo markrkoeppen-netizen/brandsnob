@@ -2529,6 +2529,7 @@ export default function App() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [activeTab, setActiveTab] = useState('deals');
   const [showTopDeals, setShowTopDeals] = useState(false);
+  const [trendingBrands, setTrendingBrands] = useState([]);
   const dealsListRef = React.useRef(null);
   const [user, setUser] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle');
@@ -3256,6 +3257,19 @@ export default function App() {
   const userRef = React.useRef(user);
   React.useEffect(() => { userRef.current = user; }, [user]);
 
+  React.useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const response = await fetch('https://brandsnobs-backend-production.up.railway.app/api/trending-brands');
+        const result = await response.json();
+        if (result.success) setTrendingBrands(result.trending);
+      } catch (error) {
+        console.error('Error loading trending brands:', error);
+      }
+    };
+    fetchTrending();
+  }, []);
+
   const headerRef = React.useRef(null);
   React.useEffect(() => {
     let fixOffset = 0;
@@ -3889,6 +3903,24 @@ export default function App() {
           <div>
             {/* Stats bar */}
             {myBrands.length > 0 && (
+              <>
+              {trendingBrands.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-sm font-semibold text-neutral-700 mb-2">🔥 Trending Brands</h3>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                    {trendingBrands.map((brand) => (
+                      <button
+                        key={brand.name}
+                        onClick={() => setSearchQuery(brand.name)}
+                        className="flex-shrink-0 bg-white border border-neutral-200 rounded-full px-4 py-2 text-sm font-medium text-neutral-800 hover:border-neutral-400 whitespace-nowrap"
+                      >
+                        {brand.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
                 <button
                   onClick={() => setActiveTab('brands')}
@@ -3923,6 +3955,7 @@ export default function App() {
                   </p>
                 </button>
               </div>
+              </>
             )}
 
             {/* Gender filter */}

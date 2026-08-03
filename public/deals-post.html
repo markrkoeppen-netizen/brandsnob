@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title id="page-title">Deal Guide | BrandSnobs</title>
+    <meta id="page-description" name="description" content="A BrandSnobs deal guide." />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #fafafa; color: #171717; }
+      header { background: white; border-bottom: 1px solid #e5e5e5; padding: 1.25rem 1rem; }
+      .header-inner { max-width: 700px; margin: 0 auto; }
+      header a { text-decoration: none; color: #171717; font-weight: 700; font-size: 1.25rem; font-family: Georgia, serif; }
+      main { max-width: 700px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+      .back-link { display: inline-block; color: #525252; text-decoration: none; font-size: 0.9rem; margin-bottom: 1.5rem; }
+      .post-season { display: inline-block; background: #f5f5f5; color: #525252; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.25rem 0.6rem; border-radius: 999px; margin-bottom: 1rem; }
+      h1 { font-family: Georgia, serif; font-size: 2.1rem; line-height: 1.2; margin-bottom: 0.5rem; }
+      .post-date { color: #a3a3a3; font-size: 0.85rem; margin-bottom: 2rem; }
+      .post-content { line-height: 1.7; font-size: 1.05rem; }
+      .post-content p { margin-bottom: 1.25rem; }
+      .post-content h2 { font-family: Georgia, serif; font-size: 1.4rem; margin: 2rem 0 1rem; }
+      .post-content strong { font-weight: 600; }
+      .cta-banner { background: #171717; color: white; border-radius: 12px; padding: 1.5rem; text-align: center; margin-top: 3rem; }
+      .cta-banner a { display: inline-block; background: white; color: #171717; text-decoration: none; font-weight: 600; padding: 0.6rem 1.5rem; border-radius: 999px; margin-top: 0.75rem; }
+      .empty-state { text-align: center; color: #a3a3a3; padding: 3rem 1rem; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <a href="/">← BrandSnobs</a>
+      </div>
+    </header>
+    <main>
+      <a class="back-link" href="/deals">← All Deal Guides</a>
+      <div id="post-container">
+        <div class="empty-state">Loading...</div>
+      </div>
+    </main>
+
+    <script>
+      const API_BASE = 'https://brandsnobs-backend-production.up.railway.app';
+
+      function getSlugFromPath() {
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        return parts[parts.length - 1];
+      }
+
+      function formatDate(isoString) {
+        const date = new Date(isoString);
+        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      }
+
+      async function loadPost() {
+        const container = document.getElementById('post-container');
+        const slug = getSlugFromPath();
+
+        try {
+          const response = await fetch(`${API_BASE}/api/editorial-posts/${encodeURIComponent(slug)}`);
+          const result = await response.json();
+
+          if (!result.success) {
+            container.innerHTML = '<div class="empty-state">This guide could not be found.</div>';
+            return;
+          }
+
+          const post = result.post;
+          document.getElementById('page-title').textContent = post.title + ' | BrandSnobs';
+          document.getElementById('page-description').setAttribute('content', post.excerpt || post.title);
+
+          container.innerHTML = `
+            ${post.season ? `<span class="post-season">${post.season}</span>` : ''}
+            <h1>${post.title}</h1>
+            <div class="post-date">${formatDate(post.publishedAt)}</div>
+            <div class="post-content">${post.content}</div>
+            <div class="cta-banner">
+              <div>See all the live deals mentioned above in the BrandSnobs app.</div>
+              <a href="/">Browse Deals →</a>
+            </div>
+          `;
+        } catch (error) {
+          container.innerHTML = '<div class="empty-state">Could not load this guide right now — please try again shortly.</div>';
+        }
+      }
+
+      loadPost();
+    </script>
+  </body>
+</html>
