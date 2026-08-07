@@ -2608,6 +2608,8 @@ export default function App() {
   const [shareSending, setShareSending] = useState(false);
 
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [pendingWishlistDeal, setPendingWishlistDeal] = useState(null);
   const [showWishlistSignInPrompt, setShowWishlistSignInPrompt] = useState(false);
   const [email, setEmail] = useState('');
@@ -2798,6 +2800,31 @@ export default function App() {
     });
     localStorage.removeItem('shippingProfile');
     console.log('✅ Signed out');
+  };
+
+  const deleteAccount = async () => {
+    if (!user?.email) return;
+    setDeletingAccount(true);
+    try {
+      const response = await fetch('https://brandsnobs-backend-production.up.railway.app/api/delete-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email }),
+      });
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown server error');
+      }
+      setShowDeleteConfirm(false);
+      signOut();
+      setWishlists([]);
+      alert('Your account and all associated data have been permanently deleted.');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('Something went wrong deleting your account. Please try again.');
+    } finally {
+      setDeletingAccount(false);
+    }
   };
 
   useEffect(() => {
@@ -4491,6 +4518,21 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            {user && (
+              <div className="bg-white rounded-2xl border border-red-200 p-6 mt-6">
+                <h3 className="text-lg font-semibold text-red-700 mb-1">Delete Account</h3>
+                <p className="text-sm text-neutral-500 mb-4">
+                  Permanently deletes your account and all associated data — followed brands, wishlists, and shipping info. This cannot be undone.
+                </p>
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className="px-4 py-2 border border-red-300 text-red-700 rounded-lg text-sm font-medium hover:bg-red-50"
+                >
+                  Delete My Account
+                </button>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -4717,6 +4759,33 @@ export default function App() {
       )}
 
       {/* ── Sign-in modal ──────────────────────────────────── */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6">
+            <h3 className="text-xl font-bold text-neutral-900 mb-2">Delete your account?</h3>
+            <p className="text-sm text-neutral-600 mb-6">
+              This permanently deletes your account, followed brands, wishlists, and shipping info. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deletingAccount}
+                className="flex-1 px-4 py-2 border border-neutral-300 text-neutral-700 rounded-lg text-sm font-medium hover:bg-neutral-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deleteAccount}
+                disabled={deletingAccount}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingAccount ? 'Deleting...' : 'Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showSignIn && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6">
