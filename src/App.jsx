@@ -1922,7 +1922,7 @@ function ShareWishlistModal({
 
   const selectedWishlist = wishlists.find(w => w.id === shareWishlistId) || wishlists[0];
   const shareLink = selectedWishlist
-    ? `${window.location.origin}/wishlist/${selectedWishlist.shareId}`
+    ? `https://brandsnobs.com/wishlist/${selectedWishlist.shareId}`
     : '';
 
   const handleCopyLink = async () => {
@@ -3426,7 +3426,7 @@ export default function App() {
     ).join('\n\n');
 
     const totalValue = wishlistToShare.items.reduce((sum, item) => sum + item.salePrice, 0).toFixed(2);
-    const shareLink = `${window.location.origin}/wishlist/${wishlistToShare.shareId}`;
+    const shareLink = `https://brandsnobs.com/wishlist/${wishlistToShare.shareId}`;
 
     const messageBody = shareMessage
       ? `${shareMessage}\n\n=== ${wishlistToShare.name.toUpperCase()} ===\n\n${wishlistText}\n\nView full wishlist: ${shareLink}`
