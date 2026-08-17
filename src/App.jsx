@@ -3506,16 +3506,30 @@ export default function App() {
     setRecommendSubmitting(true);
     
     try {
-      const recommendationRef = collection(db, 'brand_recommendations');
-      await setDoc(doc(recommendationRef), {
-        brandName: recommendBrand.trim(),
-        submitterEmail: recommendEmail.trim() || 'Not provided',
-        userEmail: user?.email || 'Anonymous',
-        submittedAt: new Date().toISOString(),
-        status: 'pending'
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+      const recResponse = await fetch('https://brandsnobs-backend-production.up.railway.app/api/brand-recommendation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandName: recommendBrand.trim(),
+          submitterEmail: recommendEmail.trim() || null,
+          userEmail: user?.email || 'Anonymous',
+        }),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
+
+      if (!recResponse.ok) {
+        throw new Error(`Server responded with status ${recResponse.status}`);
+      }
+      const recResult = await recResponse.json();
+      if (!recResult.success) {
+        throw new Error(recResult.error || 'Unknown server error');
+      }
       
-      console.log('✅ Recommendation saved to Firestore');
+      console.log('✅ Recommendation saved via backend');
       
       try {
         const emailResponse = await fetch('/api/send-recommendation', {
