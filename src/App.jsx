@@ -3458,7 +3458,7 @@ export default function App() {
         shippingProfile.hatSize && `Hat: ${shippingProfile.hatSize}`,
       ].filter(Boolean);
 
-      const response = await fetch('/api/send-wishlist', {
+      const response = await fetch('https://brandsnobs.com/api/send-wishlist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3532,7 +3532,7 @@ export default function App() {
       console.log('✅ Recommendation saved via backend');
       
       try {
-        const emailResponse = await fetch('/api/send-recommendation', {
+        const emailResponse = await fetch('https://brandsnobs.com/api/send-recommendation', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
