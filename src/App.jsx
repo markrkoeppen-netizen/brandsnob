@@ -2993,13 +2993,31 @@ export default function App() {
     setRefreshing(false);
   };
 
+  const saveProfileToBackend = async (payload) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000);
+    try {
+      const response = await fetch('https://brandsnobs-backend-production.up.railway.app/api/save-profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email, ...payload }),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+      if (!response.ok) throw new Error(`Server responded with status ${response.status}`);
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error || 'Unknown server error');
+      return true;
+    } catch (error) {
+      clearTimeout(timeoutId);
+      throw error;
+    }
+  };
+
   const saveGenderPreferences = async () => {
     if (!user) return;
     try {
-      await setDoc(doc(db, 'users', user.email), {
-        genderPreferences: selectedGenders,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      await saveProfileToBackend({ genderPreferences: selectedGenders });
     } catch (error) {
       console.error('Error saving gender preferences:', error);
     }
@@ -3016,15 +3034,14 @@ export default function App() {
     
     try {
       setSyncStatus('syncing');
-      await setDoc(doc(db, 'users', user.email), {
+      await saveProfileToBackend({
         brands: myBrands,
         genderPreferences: selectedGenders,
         shoppingBag: shoppingBag,
         wishlists: wishlists,
         activeWishlistId: activeWishlistId,
         shippingProfile: shippingProfile,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
+      });
       setSyncStatus('synced');
       setTimeout(() => setSyncStatus('idle'), 2000);
     } catch (error) {
