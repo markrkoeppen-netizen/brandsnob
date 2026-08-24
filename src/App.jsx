@@ -3259,11 +3259,10 @@ export default function App() {
     
     if (user) {
       const timeoutId = setTimeout(() => {
-        setDoc(doc(db, 'users', user.email), {
+        saveProfileToBackend({
           wishlists: wishlists,
           activeWishlistId: activeWishlistId,
-          updatedAt: new Date().toISOString()
-        }, { merge: true });
+        }).catch(error => console.error('Error saving wishlists:', error));
       }, 2000);
       
       return () => clearTimeout(timeoutId);
