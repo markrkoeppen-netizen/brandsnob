@@ -362,7 +362,7 @@
       document.getElementById('tw-title').setAttribute('content', ogTitle);
       document.getElementById('tw-desc').setAttribute('content', ogDesc);
       // Notify the wishlist owner that someone viewed it
-      fetch('https://brandsnobs.com/api/notify-wishlist-view', {
+      fetch('/api/notify-wishlist-view', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ shareId, ownerEmail: owner, wishlistName: wishlist.name, wishlistEmoji: wishlist.emoji })
