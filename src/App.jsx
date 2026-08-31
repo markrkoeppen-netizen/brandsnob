@@ -3560,11 +3560,10 @@ export default function App() {
         if (emailResponse.ok) {
           console.log('✅ Recommendation email sent via Resend');
         } else {
-          const errBody = await emailResponse.text();
-          alert('DIAGNOSTIC: Email request reached the server but failed.\nStatus: ' + emailResponse.status + '\nBody: ' + errBody);
+          console.warn('⚠️ Email failed but record saved');
         }
       } catch (emailError) {
-        alert('DIAGNOSTIC: Email request itself failed before reaching the server.\nError name: ' + emailError.name + '\nMessage: ' + emailError.message);
+        console.error('⚠️ Email failed but record saved:', emailError);
       }
       
       setRecommendSuccess(true);
